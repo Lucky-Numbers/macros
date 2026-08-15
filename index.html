@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Macro Tracker</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Macros">
+<meta name="theme-color" content="#0d0d0d">
+<link rel="apple-touch-icon" href="https://rvbyxvwifzcnfrjsdgkh.supabase.co/functions/v1/app/icon.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<style>
+:root{
+  color-scheme:dark;
+  --page:#0d0d0d; --surface:#1a1a19; --surface2:#232322;
+  --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --border:rgba(255,255,255,.10);
+  --cal:#3987e5; --protein:#d95926; --carbs:#199e70; --fat:#c98500;
+  --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+  --low:#199e70; --moderate:#3987e5; --high:#e66767;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--page);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
+body{padding-bottom:calc(74px + env(safe-area-inset-bottom));}
+header{position:sticky;top:0;z-index:20;background:rgba(13,13,13,.92);backdrop-filter:blur(12px);
+  padding:calc(14px + env(safe-area-inset-top)) 18px 12px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);}
+header h1{font-size:19px;margin:0;font-weight:700;letter-spacing:-.01em}
+.datechip{font-size:12px;color:var(--ink2)}
+.daychip{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  padding:3px 9px;border-radius:99px;border:1px solid var(--border);margin-left:8px;vertical-align:1px}
+.daychip.low{color:var(--low)} .daychip.moderate{color:var(--moderate)} .daychip.high{color:var(--high)}
+main{padding:16px 16px 8px;max-width:520px;margin:0 auto}
+.page{display:none} .page.active{display:block}
+/* rings */
+.rings{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ring-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;
+  padding:14px 10px 12px;text-align:center;position:relative}
+.ringwrap{position:relative;width:112px;height:112px;margin:0 auto}
+.ringwrap svg{transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:var(--grid);stroke-width:9}
+.ring-prog{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dasharray .6s ease}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.rv{font-size:21px;font-weight:700;line-height:1}
+.rg{font-size:11px;color:var(--muted);margin-top:3px}
+.ring-label{margin-top:8px;font-size:13px;color:var(--ink2);font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:99px;display:inline-block}
+.ring-sub{font-size:11px;color:var(--muted);margin-top:2px;min-height:13px}
+.ring-sub.over{color:var(--serious);font-weight:600}
+/* add buttons */
+.addrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0 6px}
+.addbtn{background:var(--surface);border:1px solid var(--border);color:var(--ink);
+  border-radius:14px;padding:12px 4px;font-size:13px;font-weight:600;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:5px}
+.addbtn:active{background:var(--surface2)}
+.addbtn .ic{font-size:21px;line-height:1}
+/* meal list */
+h2{font-size:14px;color:var(--ink2);font-weight:700;margin:18px 2px 8px;letter-spacing:.02em}
+.meal{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:11px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.meal .mmain{flex:1;min-width:0}
+.meal .mname{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meal .mmac{font-size:12px;color:var(--muted);margin-top:3px}
+.meal .msrc{font-size:15px}
+.meal .mdel{background:none;border:none;color:var(--muted);font-size:17px;padding:6px;cursor:pointer}
+.empty{color:var(--muted);font-size:13.5px;text-align:center;padding:22px 10px}
+/* tabbar */
+nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:rgba(20,20,19,.95);
+  backdrop-filter:blur(14px);border-top:1px solid var(--border);
+  display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:none;color:var(--muted);font-size:11px;font-weight:600;
+  padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button .ic{font-size:20px;line-height:1}
+nav button.active{color:var(--ink)}
+/* sheet */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40;display:none}
+.overlay.show{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);
+  border-radius:20px 20px 0 0;border:1px solid var(--border);border-bottom:none;
+  padding:18px 18px calc(20px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;
+  transform:translateY(105%);transition:transform .25s ease;max-height:86vh;overflow-y:auto}
+.sheet.show{transform:translateY(0)}
+.sheet h3{margin:0 0 14px;font-size:17px}
+.field{margin-bottom:11px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
+.field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);
+  color:var(--ink);border-radius:11px;padding:11px 12px;font-size:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{width:100%;border:none;border-radius:13px;padding:14px;font-size:16px;font-weight:700;
+  cursor:pointer;margin-top:6px}
+.btn.primary{background:var(--ink);color:#111}
+.btn.ghost{background:none;color:var(--ink2);border:1px solid var(--border)}
+.btn:disabled{opacity:.5}
+.notes{font-size:12.5px;color:var(--muted);background:var(--surface2);border-radius:10px;
+  padding:9px 11px;margin-bottom:11px;display:none}
+.chips{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.chip{border:1px solid var(--border);background:var(--surface2);color:var(--ink2);
+  border-radius:99px;padding:7px 13px;font-size:13px;font-weight:600;cursor:pointer}
+.chip.sel{background:var(--ink);color:#111;border-color:var(--ink)}
+.autocal{background:none;border:1px solid var(--border);color:var(--ink2);border-radius:8px;
+  padding:4px 9px;font-size:11.5px;cursor:pointer;margin-left:8px;font-weight:600}
+/* barcode */
+#bcreader{width:100%;border-radius:14px;overflow:hidden;background:#000;min-height:240px}
+.bchint{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px}
+/* goals page */
+.goalrow{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:13px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.goalrow .gday{font-weight:700;font-size:14.5px;width:44px}
+.goalrow .gmac{flex:1;font-size:12px;color:var(--muted)}
+.goalrow .glabel{font-size:11px;font-weight:700;letter-spacing:.05em}
+.glabel.low{color:var(--low)} .glabel.moderate{color:var(--moderate)} .glabel.high{color:var(--high)} .glabel.custom{color:var(--ink2)}
+/* history */
+.statcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:16px;margin-bottom:12px;display:flex;gap:8px;text-align:center}
+.statcard>div{flex:1}
+.statcard .big{font-size:26px;font-weight:700}
+.statcard .lbl{font-size:11.5px;color:var(--muted);margin-top:3px}
+.dayrow{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:12px 14px;margin-bottom:8px}
+.dayrow .dtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.dayrow .ddate{font-weight:700;font-size:13.5px}
+.badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}
+.badge.done{color:var(--good);border:1px solid var(--good)}
+.badge.miss{color:var(--critical);border:1px solid var(--critical)}
+.badge.nolog{color:var(--muted);border:1px solid var(--border)}
+.badge.progress{color:var(--ink2);border:1px solid var(--border)}
+.dmacs{display:flex;gap:6px;flex-wrap:wrap}
+.dmac{font-size:11.5px;color:var(--ink2);background:var(--surface2);border-radius:8px;padding:4px 8px}
+.dmac .ok{color:var(--good);font-weight:700} .dmac .bad{color:var(--critical);font-weight:700}
+/* toast / loading */
+#toast{position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-90px);
+  background:var(--surface2);border:1px solid var(--border);color:var(--ink);padding:11px 18px;
+  border-radius:99px;font-size:13.5px;font-weight:600;z-index:100;transition:transform .3s ease;max-width:86vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#loading{position:fixed;inset:0;background:rgba(13,13,13,.85);z-index:90;display:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#loading.show{display:flex}
+.spinner{width:38px;height:38px;border:3px solid var(--grid);border-top-color:var(--ink);
+  border-radius:99px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading .lt{font-size:14px;color:var(--ink2);font-weight:600}
+.settingcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px}
+.settingcard p{font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 12px}
+.keystatus{font-size:13px;font-weight:600;margin-top:10px}
+.keystatus.ok{color:var(--good)} .keystatus.no{color:var(--warning)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Macros<span id="todayChip" class="daychip"></span></h1>
+  <div class="datechip" id="todayDate"></div>
+</header>
+<main>
+  <!-- TODAY -->
+  <section class="page active" id="page-today">
+    <div class="rings" id="rings"></div>
+    <div class="addrow">
+      <button class="addbtn" id="btnPhoto"><span class="ic">📷</span>Scan food</button>
+      <button class="addbtn" id="btnBarcode"><span class="ic"><svg width="22" height="20" viewBox="0 0 24 20" fill="currentColor"><rect x="1" y="2" width="2" height="16"/><rect x="5" y="2" width="1" height="16"/><rect x="8" y="2" width="3" height="16"/><rect x="13" y="2" width="1" height="16"/><rect x="16" y="2" width="2" height="16"/><rect x="20" y="2" width="1" height="16"/><rect x="22.5" y="2" width="1.5" height="16"/></svg></span>Barcode</button>
+      <button class="addbtn" id="btnManual"><span class="ic">✎</span>Manual</button>
+    </div>
+    <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
+    <h2>Today's meals</h2>
+    <div id="mealList"></div>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="page" id="page-history">
+    <div class="statcard">
+      <div><div class="big" id="statDone">–</div><div class="lbl">days completed</div></div>
+      <div><div class="big" id="statTotal">–</div><div class="lbl">days tracked</div></div>
+      <div><div class="big" id="statStreak">–</div><div class="lbl">current streak</div></div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin:0 2px 10px">A day counts as completed when carbs, protein, and fat each land within ±10g of that day's goal.</p>
+    <div id="historyList"></div>
+  </section>
+
+  <!-- GOALS -->
+  <section class="page" id="page-goals">
+    <p style="font-size:12.5px;color:var(--muted);margin:2px 2px 12px">Your goals repeat weekly. Tap a day to edit.</p>
+    <div id="goalList"></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="page" id="page-settings">
+    <div class="settingcard">
+      <h3 style="margin:0;font-size:15px">AI photo scanning</h3>
+      <p>Photo scanning uses Claude to estimate macros from a picture of your food. Paste your Anthropic API key once — it's stored securely on the server, never in the app.</p>
+      <div class="field"><input type="password" id="apiKeyInput" placeholder="sk-ant-..."></div>
+      <button class="btn primary" id="saveKeyBtn">Save key</button>
+      <div class="keystatus" id="keyStatus"></div>
+    </div>
+    <div class="settingcard">
+      <h3 style="margin:0;font-size:15px">Tips</h3>
+      <p>• Add this page to your Home Screen (Share → Add to Home Screen) to use it like an app.<br>
+      • Barcode scanning looks up products in the free OpenFoodFacts database.<br>
+      • AI estimates are per visible portion — you can edit anything before saving.</p>
+    </div>
+  </section>
+</main>
+
+<nav>
+  <button data-page="today" class="active"><span class="ic">◎</span>Today</button>
+  <button data-page="history"><span class="ic">✓</span>History</button>
+  <button data-page="goals"><span class="ic">⚑</span>Goals</button>
+  <button data-page="settings"><span class="ic">⚙︎</span>Settings</button>
+</nav>
+
+<!-- meal sheet -->
+<div class="overlay" id="overlay"></div>
+<div class="sheet" id="mealSheet">
+  <h3 id="sheetTitle">Add meal</h3>
+  <div class="notes" id="sheetNotes"></div>
+  <div class="field"><label>Meal name</label><input id="fName" placeholder="e.g. Chicken and rice"></div>
+  <div class="field" id="portionField" style="display:none">
+    <label id="portionLabel">Amount (g)</label><input id="fAmount" type="number" inputmode="decimal">
+  </div>
+  <div class="grid2">
+    <div class="field"><label>Calories <button class="autocal" id="autoCalBtn">auto</button></label><input id="fCal" type="number" inputmode="numeric"></div>
+    <div class="field"><label>Protein (g)</label><input id="fProtein" type="number" inputmode="decimal"></div>
+    <div class="field"><label>Carbs (g)</label><input id="fCarbs" type="number" inputmode="decimal"></div>
+    <div class="field"><label>Fat (g)</label><input id="fFat" type="number" inputmode="decimal"></div>
+  </div>
+  <button class="btn primary" id="saveMealBtn">Add to today</button>
+  <button class="btn ghost" id="cancelMealBtn">Cancel</button>
+</div>
+
+<!-- barcode sheet -->
+<div class="sheet" id="bcSheet">
+  <h3>Scan barcode</h3>
+  <div id="bcreader"></div>
+  <div class="bchint">Point your camera at the barcode</div>
+  <button class="btn ghost" id="bcCancel">Cancel</button>
+</div>
+
+<!-- goal edit sheet -->
+<div class="sheet" id="goalSheet">
+  <h3 id="goalSheetTitle">Edit goal</h3>
+  <div class="chips" id="presetChips">
+    <button class="chip" data-preset="low">Low</button>
+    <button class="chip" data-preset="moderate">Moderate</button>
+    <button class="chip" data-preset="high">High</button>
+    <button class="chip" data-preset="custom">Custom</button>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>Carbs (g)</label><input id="gCarbs" type="number" inputmode="numeric"></div>
+    <div class="field"><label>Protein (g)</label><input id="gProtein" type="number" inputmode="numeric"></div>
+    <div class="field"><label>Fat (g)</label><input id="gFat" type="number" inputmode="numeric"></div>
+    <div class="field"><label>Calories <button class="autocal" id="gAutoCal">auto</button></label><input id="gCal" type="number" inputmode="numeric"></div>
+  </div>
+  <button class="btn primary" id="saveGoalBtn">Save goal</button>
+  <button class="btn ghost" id="cancelGoalBtn">Cancel</button>
+</div>
+
+<div id="toast"></div>
+<div id="loading"><div class="spinner"></div><div class="lt" id="loadingText">Analyzing…</div></div>
+
+<script>
+const SB = 'https://rvbyxvwifzcnfrjsdgkh.supabase.co';
+const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2Ynl4dndpZnpjbmZyanNkZ2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MjA4NzIsImV4cCI6MjA5MTA5Njg3Mn0.3lEbeX3UXN9eooaiQ0ks8qRwPq6qjRNizOQWOis7BB0';
+const H = {'apikey': ANON, 'Authorization': 'Bearer ' + ANON, 'Content-Type': 'application/json'};
+const $ = id => document.getElementById(id);
+const MACROS = [
+  {key:'calories', label:'Calories', color:'var(--cal)', unit:''},
+  {key:'protein',  label:'Protein',  color:'var(--protein)', unit:'g'},
+  {key:'carbs',    label:'Carbs',    color:'var(--carbs)', unit:'g'},
+  {key:'fat',      label:'Fat',      color:'var(--fat)', unit:'g'},
+];
+const PRESETS = {
+  low:      {carbs:80,  protein:215, fat:60},
+  moderate: {carbs:165, protein:220, fat:55},
+  high:     {carbs:335, protein:235, fat:40},
+};
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const kcal = (c,p,f) => Math.round(4*(Number(c)||0) + 4*(Number(p)||0) + 9*(Number(f)||0));
+const todayStr = () => new Date().toLocaleDateString('en-CA');
+const fmtDay = ds => { const d = new Date(ds + 'T12:00:00');
+  return d.toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'}); };
+
+let goals = {};          // dow -> goal row
+let todayMeals = [];
+let sheetCtx = null;     // {source, per100/perServing info for barcode}
+let bcScanner = null;
+
+// ---------- helpers ----------
+async function rest(path, opts={}){
+  const r = await fetch(SB + '/rest/v1/' + path, {
+    method: opts.method || 'GET',
+    headers: {...H, ...(opts.headers||{})},
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  if(!r.ok){ throw new Error('Database error (' + r.status + ')'); }
+  const t = await r.text();
+  return t ? JSON.parse(t) : null;
+}
+async function fn(body){
+  const r = await fetch(SB + '/functions/v1/macro-ai', {method:'POST', headers:H, body:JSON.stringify(body)});
+  const d = await r.json().catch(()=>({error:'Server error'}));
+  if(!r.ok) throw new Error(d.error || 'Server error');
+  return d;
+}
+let toastTimer;
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'), 3200); }
+function loading(on, text){ $('loadingText').textContent = text||'Working…';
+  $('loading').classList.toggle('show', !!on); }
+function openSheet(el){ $('overlay').classList.add('show'); el.classList.add('show'); }
+function closeSheets(){ $('overlay').classList.remove('show');
+  document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('show'));
+  stopBarcode(); }
+$('overlay').addEventListener('click', closeSheets);
+
+// ---------- tabs ----------
+document.querySelectorAll('nav button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    $('page-' + b.dataset.page).classList.add('active');
+    if(b.dataset.page==='history') renderHistory();
+    if(b.dataset.page==='goals') renderGoals();
+    if(b.dataset.page==='settings') checkKey();
+  });
+});
+
+// ---------- today ----------
+function goalForDow(dow){ return goals[dow] || {calories:2000, carbs:150, protein:150, fat:60, label:'custom'}; }
+function todayGoal(){ return goalForDow(new Date().getDay()); }
+
+function renderRings(){
+  const g = todayGoal();
+  const totals = {calories:0, carbs:0, protein:0, fat:0};
+  todayMeals.forEach(m=>{ for(const k in totals) totals[k]+=Number(m[k])||0; });
+  const C = 2*Math.PI*48;
+  $('rings').innerHTML = MACROS.map(mc=>{
+    const val = Math.round(totals[mc.key]), goal = g[mc.key]||0;
+    const pct = goal>0 ? Math.min(1, val/goal) : 0;
+    const left = goal - val;
+    const sub = left>=0 ? `${Math.round(left)}${mc.unit} left`
+                        : `+${Math.round(-left)}${mc.unit} over`;
+    return `<div class="ring-card">
+      <div class="ringwrap">
+        <svg width="112" height="112" viewBox="0 0 112 112">
+          <circle class="ring-track" cx="56" cy="56" r="48"></circle>
+          <circle class="ring-prog" cx="56" cy="56" r="48" stroke="${mc.color}"
+            stroke-dasharray="${(pct*C).toFixed(1)} ${C.toFixed(1)}"></circle>
+        </svg>
+        <div class="ring-center"><div class="rv">${val}</div><div class="rg">/ ${goal}${mc.unit}</div></div>
+      </div>
+      <div class="ring-label"><span class="dot" style="background:${mc.color}"></span>${mc.label}</div>
+      <div class="ring-sub ${left<0?'over':''}">${sub}</div>
+    </div>`;
+  }).join('');
+  const chip = $('todayChip'); const lbl = (g.label||'custom');
+  chip.textContent = lbl.toUpperCase() + ' DAY'; chip.className = 'daychip ' + lbl;
+}
+const SRC_ICON = {photo:'📷', barcode:'🏷', manual:'✎'};
+function renderMeals(){
+  if(!todayMeals.length){ $('mealList').innerHTML = '<div class="empty">Nothing logged yet — scan your first meal.</div>'; return; }
+  $('mealList').innerHTML = todayMeals.map(m=>{
+    const t = new Date(m.created_at).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    return `<div class="meal">
+      <span class="msrc">${SRC_ICON[m.source]||'✎'}</span>
+      <div class="mmain">
+        <div class="mname">${escapeHtml(m.name)}</div>
+        <div class="mmac">${t} · ${Math.round(m.calories)} cal · C ${Math.round(m.carbs)}g · P ${Math.round(m.protein)}g · F ${Math.round(m.fat)}g</div>
+      </div>
+      <button class="mdel" data-id="${m.id}">✕</button>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.mdel').forEach(b=>b.addEventListener('click', async ()=>{
+    if(!confirm('Delete this meal?')) return;
+    try{ await rest('meals?id=eq.' + b.dataset.id, {method:'DELETE'}); await refreshToday(); }
+    catch(e){ toast(e.message); }
+  }));
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function refreshToday(){
+  todayMeals = await rest(`meals?day=eq.${todayStr()}&order=created_at.asc`) || [];
+  renderRings(); renderMeals();
+}
+
+// ---------- meal sheet ----------
+function openMealSheet({title, name='', calories='', carbs='', protein='', fat='', notes='', source='manual', portion=null}){
+  sheetCtx = {source, portion};
+  $('sheetTitle').textContent = title;
+  $('fName').value = name; $('fCal').value = calories; $('fCarbs').value = carbs;
+  $('fProtein').value = protein; $('fFat').value = fat;
+  const n = $('sheetNotes'); n.style.display = notes ? 'block':'none'; n.textContent = notes;
+  const pf = $('portionField');
+  if(portion){ pf.style.display='block'; $('portionLabel').textContent = portion.label;
+    $('fAmount').value = portion.amount; applyPortion(); }
+  else pf.style.display='none';
+  openSheet($('mealSheet'));
+}
+function applyPortion(){
+  const p = sheetCtx && sheetCtx.portion; if(!p) return;
+  const amt = Number($('fAmount').value)||0; const s = amt * p.scalePerUnit;
+  $('fCal').value = Math.round(p.base.calories*s);
+  $('fCarbs').value = Math.round(p.base.carbs*s*10)/10;
+  $('fProtein').value = Math.round(p.base.protein*s*10)/10;
+  $('fFat').value = Math.round(p.base.fat*s*10)/10;
+}
+$('fAmount').addEventListener('input', applyPortion);
+$('autoCalBtn').addEventListener('click', ()=>{ $('fCal').value = kcal($('fCarbs').value, $('fProtein').value, $('fFat').value); });
+$('cancelMealBtn').addEventListener('click', closeSheets);
+$('saveMealBtn').addEventListener('click', async ()=>{
+  const name = $('fName').value.trim() || 'Meal';
+  let cal = Number($('fCal').value);
+  const carbs = Number($('fCarbs').value)||0, protein = Number($('fProtein').value)||0, fat = Number($('fFat').value)||0;
+  if(!cal) cal = kcal(carbs, protein, fat);
+  $('saveMealBtn').disabled = true;
+  try{
+    // snapshot today's goal (first log of the day wins)
+    const g = todayGoal();
+    await rest('day_goals?on_conflict=day', {method:'POST',
+      headers:{'Prefer':'resolution=ignore-duplicates'},
+      body:{day:todayStr(), label:g.label, calories:g.calories, carbs:g.carbs, protein:g.protein, fat:g.fat}});
+    await rest('meals', {method:'POST', headers:{'Prefer':'return=minimal'},
+      body:{day:todayStr(), name, calories:cal, carbs, protein, fat, source:sheetCtx?.source||'manual'}});
+    closeSheets(); await refreshToday(); toast('Added ' + name);
+  }catch(e){ toast(e.message); }
+  $('saveMealBtn').disabled = false;
+});
+
+// ---------- manual ----------
+$('btnManual').addEventListener('click', ()=> openMealSheet({title:'Add meal manually', source:'manual'}));
+
+// ---------- photo scan ----------
+$('btnPhoto').addEventListener('click', ()=> $('photoInput').click());
+$('photoInput').addEventListener('change', async e=>{
+  const file = e.target.files[0]; e.target.value=''; if(!file) return;
+  loading(true, 'Analyzing your food…');
+  try{
+    const b64 = await resizeToB64(file, 1200);
+    const res = await fn({action:'scan_photo', image_base64:b64, media_type:'image/jpeg'});
+    loading(false);
+    openMealSheet({title:'Scanned meal', name:res.name, calories:res.calories, carbs:res.carbs,
+      protein:res.protein, fat:res.fat, source:'photo',
+      notes: (res.confidence ? ('AI estimate (' + res.confidence + ' confidence). ') : '') + (res.notes||'') + ' Edit anything before adding.'});
+  }catch(err){
+    loading(false);
+    if(String(err.message).includes('no_api_key')) toast('Add your Anthropic API key in Settings first');
+    else toast(err.message);
+  }
+});
+function resizeToB64(file, maxDim){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const scale = Math.min(1, maxDim/Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width*scale); cv.height = Math.round(img.height*scale);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      resolve(cv.toDataURL('image/jpeg', 0.82).split(',')[1]);
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = ()=>reject(new Error('Could not read image'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// ---------- barcode ----------
+$('btnBarcode').addEventListener('click', async ()=>{
+  if(typeof Html5Qrcode === 'undefined'){ toast('Barcode scanner failed to load — check connection'); return; }
+  openSheet($('bcSheet'));
+  try{
+    bcScanner = new Html5Qrcode('bcreader');
+    const fmts = [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E, Html5QrcodeSupportedFormats.CODE_128];
+    await bcScanner.start({facingMode:'environment'},
+      {fps:10, qrbox:{width:260, height:140}, formatsToSupport:fmts},
+      onBarcode, ()=>{});
+  }catch(e){ toast('Camera unavailable: ' + e); closeSheets(); }
+});
+$('bcCancel').addEventListener('click', closeSheets);
+function stopBarcode(){ if(bcScanner){ bcScanner.stop().catch(()=>{}); bcScanner=null; } }
+let bcBusy = false;
+async function onBarcode(code){
+  if(bcBusy) return; bcBusy = true;
+  stopBarcode(); closeSheets(); loading(true, 'Looking up product…');
+  try{
+    const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}?fields=product_name,brands,nutriments,serving_quantity,serving_size`);
+    const d = await r.json();
+    loading(false);
+    if(d.status !== 1 || !d.product){ toast('Product not found — try photo scan or manual entry'); bcBusy=false; return; }
+    const p = d.product, n = p.nutriments || {};
+    const name = [p.brands ? p.brands.split(',')[0] : '', p.product_name || 'Product'].filter(Boolean).join(' ');
+    const per100 = {calories:Number(n['energy-kcal_100g']), carbs:Number(n.carbohydrates_100g),
+      protein:Number(n.proteins_100g), fat:Number(n.fat_100g)};
+    const perServ = {calories:Number(n['energy-kcal_serving']), carbs:Number(n.carbohydrates_serving),
+      protein:Number(n.proteins_serving), fat:Number(n.fat_serving)};
+    if(!isNaN(per100.calories)){
+      const defaultG = Number(p.serving_quantity) || 100;
+      Object.keys(per100).forEach(k=>{ if(isNaN(per100[k])) per100[k]=0; });
+      openMealSheet({title:'Scanned product', name, source:'barcode',
+        notes: p.serving_size ? ('Serving size: ' + p.serving_size + '. Adjust grams to what you ate.') : 'Adjust grams to what you ate.',
+        portion:{label:'Amount eaten (g)', amount:defaultG, scalePerUnit:1/100, base:per100}});
+    } else if(!isNaN(perServ.calories)){
+      Object.keys(perServ).forEach(k=>{ if(isNaN(perServ[k])) perServ[k]=0; });
+      openMealSheet({title:'Scanned product', name, source:'barcode',
+        notes: p.serving_size ? ('One serving = ' + p.serving_size) : '',
+        portion:{label:'Servings eaten', amount:1, scalePerUnit:1, base:perServ}});
+    } else {
+      toast('No nutrition data for this product — enter manually');
+      openMealSheet({title:'Add meal', name, source:'barcode'});
+    }
+  }catch(e){ loading(false); toast('Lookup failed: ' + e.message); }
+  bcBusy = false;
+}
+
+// ---------- goals ----------
+const GOAL_ORDER = [1,2,3,4,5,6,0]; // Mon..Sun
+function renderGoals(){
+  $('goalList').innerHTML = GOAL_ORDER.map(dow=>{
+    const g = goalForDow(dow);
+    return `<div class="goalrow" data-dow="${dow}">
+      <div class="gday">${DAYS[dow].slice(0,3)}</div>
+      <div class="gmac">C ${g.carbs}g · P ${g.protein}g · F ${g.fat}g · ${g.calories} cal</div>
+      <div class="glabel ${g.label}">${(g.label||'custom').toUpperCase()}</div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.goalrow').forEach(r=>r.addEventListener('click', ()=>openGoalSheet(Number(r.dataset.dow))));
+}
+let goalDow = null;
+function openGoalSheet(dow){
+  goalDow = dow;
+  const g = goalForDow(dow);
+  $('goalSheetTitle').textContent = DAYS[dow] + ' goal';
+  $('gCarbs').value=g.carbs; $('gProtein').value=g.protein; $('gFat').value=g.fat; $('gCal').value=g.calories;
+  selPresetChip(g.label);
+  openSheet($('goalSheet'));
+}
+function selPresetChip(label){
+  document.querySelectorAll('#presetChips .chip').forEach(c=>c.classList.toggle('sel', c.dataset.preset===label));
+}
+document.querySelectorAll('#presetChips .chip').forEach(c=>c.addEventListener('click', ()=>{
+  const p = PRESETS[c.dataset.preset];
+  selPresetChip(c.dataset.preset);
+  if(p){ $('gCarbs').value=p.carbs; $('gProtein').value=p.protein; $('gFat').value=p.fat;
+    $('gCal').value = kcal(p.carbs, p.protein, p.fat); }
+}));
+['gCarbs','gProtein','gFat'].forEach(id=>$(id).addEventListener('input', ()=>selPresetChip('custom')));
+$('gAutoCal').addEventListener('click', ()=>{ $('gCal').value = kcal($('gCarbs').value, $('gProtein').value, $('gFat').value); });
+$('cancelGoalBtn').addEventListener('click', closeSheets);
+$('saveGoalBtn').addEventListener('click', async ()=>{
+  const sel = document.querySelector('#presetChips .chip.sel');
+  const body = {day_of_week:goalDow, label: sel ? sel.dataset.preset : 'custom',
+    carbs:Number($('gCarbs').value)||0, protein:Number($('gProtein').value)||0,
+    fat:Number($('gFat').value)||0, calories:Number($('gCal').value)||kcal($('gCarbs').value,$('gProtein').value,$('gFat').value)};
+  try{
+    await rest('macro_goals?on_conflict=day_of_week', {method:'POST',
+      headers:{'Prefer':'resolution=merge-duplicates'}, body});
+    goals[goalDow] = body;
+    closeSheets(); renderGoals(); renderRings(); toast(DAYS[goalDow] + ' goal saved');
+  }catch(e){ toast(e.message); }
+});
+
+// ---------- history ----------
+async function renderHistory(){
+  try{
+    const [meals, snaps] = await Promise.all([
+      rest('meals?select=day,calories,carbs,protein,fat&order=day.asc'),
+      rest('day_goals?select=*'),
+    ]);
+    const byDay = {};
+    (meals||[]).forEach(m=>{ (byDay[m.day] = byDay[m.day] || {calories:0,carbs:0,protein:0,fat:0, n:0});
+      ['calories','carbs','protein','fat'].forEach(k=>byDay[m.day][k]+=Number(m[k])||0); byDay[m.day].n++; });
+    const snapByDay = {}; (snaps||[]).forEach(s=>snapByDay[s.day]=s);
+    const today = todayStr();
+    const days = Object.keys(byDay).sort();
+    if(!days.length){ $('historyList').innerHTML='<div class="empty">No history yet — log your first day.</div>';
+      $('statDone').textContent='0'; $('statTotal').textContent='0'; $('statStreak').textContent='0'; return; }
+    // walk each calendar day from first logged day through yesterday
+    const rows = []; let done=0, total=0;
+    const start = new Date(days[0]+'T12:00:00');
+    for(let d = new Date(start); ; d.setDate(d.getDate()+1)){
+      const ds = d.toLocaleDateString('en-CA');
+      if(ds >= today) break;
+      const t = byDay[ds];
+      const goal = snapByDay[ds] || goalForDow(d.getDay());
+      if(!t){ rows.push({ds, status:'nolog', goal}); total++; continue; }
+      const checks = ['carbs','protein','fat'].map(k=>({k, ok: Math.abs(t[k]-goal[k]) <= 10, val:t[k], goal:goal[k]}));
+      const ok = checks.every(c=>c.ok);
+      rows.push({ds, status: ok?'done':'miss', checks, t, goal});
+      total++; if(ok) done++;
+    }
+    // current streak (consecutive completed days ending yesterday)
+    let streak=0;
+    for(let i=rows.length-1;i>=0;i--){ if(rows[i].status==='done') streak++; else break; }
+    $('statDone').textContent=done; $('statTotal').textContent=total; $('statStreak').textContent=streak;
+    rows.reverse();
+    const todayTotals = byDay[today];
+    let html = '';
+    if(todayTotals){
+      const goal = snapByDay[today] || todayGoal();
+      html += dayRowHtml({ds:today, status:'progress',
+        checks:['carbs','protein','fat'].map(k=>({k, ok:Math.abs(todayTotals[k]-goal[k])<=10, val:todayTotals[k], goal:goal[k]})),
+        t:todayTotals, goal});
+    }
+    html += rows.slice(0,60).map(dayRowHtml).join('');
+    $('historyList').innerHTML = html;
+  }catch(e){ toast(e.message); }
+}
+function dayRowHtml(r){
+  const badge = {done:'<span class="badge done">✓ Completed</span>', miss:'<span class="badge miss">✗ Missed</span>',
+    nolog:'<span class="badge nolog">No log</span>', progress:'<span class="badge progress">In progress</span>'}[r.status];
+  const label = r.ds===todayStr() ? 'Today' : fmtDay(r.ds);
+  let macs = '';
+  if(r.checks){
+    const nm = {carbs:'C', protein:'P', fat:'F'};
+    macs = '<div class="dmacs">' + r.checks.map(c=>
+      `<span class="dmac">${nm[c.k]} ${Math.round(c.val)}/${c.goal}g <span class="${c.ok?'ok':'bad'}">${c.ok?'✓':'✗'}</span></span>`
+    ).join('') + `<span class="dmac">${Math.round(r.t.calories)} cal</span></div>`;
+  } else if(r.goal){
+    macs = `<div class="dmacs"><span class="dmac">Goal was C ${r.goal.carbs} · P ${r.goal.protein} · F ${r.goal.fat}</span></div>`;
+  }
+  return `<div class="dayrow"><div class="dtop"><span class="ddate">${label}</span>${badge}</div>${macs}</div>`;
+}
+
+// ---------- settings ----------
+async function checkKey(){
+  const el = $('keyStatus');
+  try{ const d = await fn({action:'has_api_key'});
+    el.className = 'keystatus ' + (d.has_key?'ok':'no');
+    el.textContent = d.has_key ? '✓ Photo scanning is enabled' : '⚠ No API key yet — photo scanning is off';
+  }catch(e){ el.className='keystatus no'; el.textContent='Could not check key status'; }
+}
+$('saveKeyBtn').addEventListener('click', async ()=>{
+  const key = $('apiKeyInput').value.trim();
+  if(!key){ toast('Paste your API key first'); return; }
+  $('saveKeyBtn').disabled = true;
+  try{ await fn({action:'set_api_key', api_key:key});
+    $('apiKeyInput').value=''; toast('API key saved'); checkKey(); }
+  catch(e){ toast(e.message); }
+  $('saveKeyBtn').disabled = false;
+});
+
+// ---------- init ----------
+(async function init(){
+  $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+  try{
+    const rows = await rest('macro_goals?select=*');
+    (rows||[]).forEach(r=>goals[r.day_of_week]=r);
+    await refreshToday();
+  }catch(e){ toast('Could not load data: ' + e.message); }
+  // refresh when returning to the app (e.g. next morning)
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){
+    $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+    refreshToday(); }});
+})();
+</script>
+</body>
+</html>
