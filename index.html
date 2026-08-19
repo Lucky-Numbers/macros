@@ -361,6 +361,8 @@ nav button.active{color:var(--ink)}
   <h3>Scan barcode</h3>
   <div id="bcreader"></div>
   <div class="bchint">Point your camera at the barcode</div>
+  <input type="file" id="bcPhotoInput" accept="image/*" capture="environment" style="display:none">
+  <button class="btn ghost" id="bcPhotoBtn" style="margin-top:10px">📸 Photo mode (no permission prompt)</button>
   <button class="btn ghost" id="bcCancel">Cancel</button>
 </div>
 
@@ -729,6 +731,25 @@ $('btnBarcode').addEventListener('click', async ()=>{
   }catch(e){ toast('Camera unavailable: ' + e); closeSheets(); }
 });
 $('bcCancel').addEventListener('click', closeSheets);
+// photo mode: native camera shutter, decode from the still image — never triggers the iOS camera prompt
+$('bcPhotoBtn').addEventListener('click', ()=>{ stopBarcode(); $('bcPhotoInput').click(); });
+$('bcPhotoInput').addEventListener('change', async e=>{
+  const file = e.target.files[0]; e.target.value=''; if(!file) return;
+  loading(true, 'Reading barcode…');
+  try{
+    const fmts = [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E, Html5QrcodeSupportedFormats.CODE_128];
+    const h = new Html5Qrcode('bcreader', {formatsToSupport:fmts, verbose:false});
+    const res = await h.scanFileV2(file, false).catch(async ()=>({decodedText:(await h.scanFile(file,false))}));
+    loading(false);
+    const code = res.decodedText || res;
+    if(code) onBarcode(String(code));
+    else throw new Error('no code');
+  }catch(err){
+    loading(false);
+    toast("Couldn't read the barcode — get closer, fill the frame, and try again");
+  }
+});
 function stopBarcode(){ if(bcScanner){ bcScanner.stop().catch(()=>{}); bcScanner=null; } }
 let bcBusy = false;
 async function onBarcode(code){
