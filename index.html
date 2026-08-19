@@ -4,12 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Macro Tracker</title>
+<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Macros">
 <meta name="theme-color" content="#0d0d0d">
-<link rel="apple-touch-icon" href="https://rvbyxvwifzcnfrjsdgkh.supabase.co/functions/v1/app/icon.png">
+<link rel="apple-touch-icon" href="icon.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root{
@@ -168,6 +169,61 @@ nav button.active{color:var(--ink)}
   border-radius:11px;padding:10px 13px;font-size:17px;cursor:pointer;flex-shrink:0}
 .chatrow button#chatSend{background:var(--ink);color:#111;font-weight:700}
 #micBtn.rec{background:var(--critical);border-color:var(--critical)}
+/* editable estimate card in chat */
+.estcard{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px}
+.estcard input.ename{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);
+  border-radius:9px;padding:8px 10px;font-size:15px;font-weight:700;margin-bottom:8px}
+.estgrid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:9px}
+.estgrid label{display:block;font-size:10px;color:var(--muted);font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+.estgrid input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);
+  border-radius:9px;padding:8px 6px;font-size:15px;text-align:center}
+.estconf{font-size:11px;color:var(--muted);margin-bottom:9px}
+/* feed */
+.feedchips{display:flex;gap:8px;margin-bottom:12px}
+.feedcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;
+  margin-bottom:12px;cursor:pointer}
+.feedimg{width:100%;height:150px;object-fit:cover;display:block;background:var(--surface2)}
+.feedimg-fallback{width:100%;height:150px;display:flex;align-items:center;justify-content:center;
+  font-size:56px;background:linear-gradient(135deg,#232322,#2c2c2a)}
+.feedbody{padding:12px 14px 13px;position:relative}
+.feedtitle{font-size:15px;font-weight:700;padding-right:34px}
+.feedmacs{font-size:12px;color:var(--muted);margin-top:4px}
+.heart{position:absolute;top:10px;right:10px;background:none;border:none;font-size:20px;cursor:pointer;
+  color:var(--muted);padding:4px}
+.heart.on{color:var(--critical)}
+.feedload{text-align:center;color:var(--muted);font-size:13px;padding:26px 0}
+.refreshbtn{background:var(--surface);border:1px solid var(--border);color:var(--ink2);border-radius:99px;
+  padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-left:auto;display:block}
+.feedtop{display:flex;align-items:center;margin-bottom:12px;gap:8px}
+.feedctx{font-size:12px;color:var(--muted);flex:1}
+/* meal detail sheet */
+#mdImgWrap{border-radius:14px;overflow:hidden;margin-bottom:12px}
+#mdImgWrap img{width:100%;height:170px;object-fit:cover;display:block}
+#mdOverview{font-size:13.5px;color:var(--ink2);line-height:1.5;margin-bottom:10px}
+#mdMacs{font-size:13px;font-weight:600;margin-bottom:10px}
+#mdIngr{margin:0 0 14px;padding-left:18px;font-size:13.5px;color:var(--ink2);line-height:1.7}
+.mdbtns{display:flex;gap:10px}
+.mdbtns .btn{margin-top:0}
+/* calendar */
+.calhead{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 10px}
+.calhead .mname{font-size:15px;font-weight:700}
+.calhead button{background:var(--surface);border:1px solid var(--border);color:var(--ink);border-radius:10px;
+  padding:6px 14px;font-size:15px;cursor:pointer}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:14px}
+.caldow{text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;padding:2px 0}
+.calcell{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--border);cursor:pointer;color:var(--ink2)}
+.calcell.blank{background:none;border:none;cursor:default}
+.calcell.done{background:rgba(12,163,12,.18);border-color:var(--good);color:var(--good)}
+.calcell.miss{background:rgba(208,59,59,.15);border-color:var(--critical);color:var(--critical)}
+.calcell.nolog{opacity:.45}
+.calcell.today{outline:2px solid var(--ink);outline-offset:1px;color:var(--ink)}
+.calcell.future{opacity:.25;cursor:default}
+.ddmac{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;
+  padding:8px 0;border-bottom:1px solid var(--grid)}
+.ddmac .ok{color:var(--good);font-weight:700}.ddmac .bad{color:var(--critical);font-weight:700}
+.ddmeal{font-size:13px;color:var(--ink2);padding:7px 0;border-bottom:1px solid var(--grid)}
+.ddmeal b{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -190,6 +246,19 @@ nav button.active{color:var(--ink)}
     <div id="mealList"></div>
   </section>
 
+  <!-- FEED -->
+  <section class="page" id="page-feed">
+    <div class="feedtop">
+      <div class="feedctx" id="feedCtx"></div>
+      <button class="refreshbtn" id="feedRefresh">↻ Refresh</button>
+    </div>
+    <div class="feedchips">
+      <button class="chip sel" data-feed="foryou">For you</button>
+      <button class="chip" data-feed="favs">♥ Favorites</button>
+    </div>
+    <div id="feedList"></div>
+  </section>
+
   <!-- HISTORY -->
   <section class="page" id="page-history">
     <div class="statcard">
@@ -197,8 +266,13 @@ nav button.active{color:var(--ink)}
       <div><div class="big" id="statTotal">–</div><div class="lbl">days tracked</div></div>
       <div><div class="big" id="statStreak">–</div><div class="lbl">current streak</div></div>
     </div>
-    <p style="font-size:12px;color:var(--muted);margin:0 2px 10px">A day counts as completed when carbs, protein, and fat each land within ±10g of that day's goal.</p>
-    <div id="historyList"></div>
+    <div class="calhead">
+      <button id="calPrev">‹</button>
+      <div class="mname" id="calMonth"></div>
+      <button id="calNext">›</button>
+    </div>
+    <div class="calgrid" id="calGrid"></div>
+    <p style="font-size:11.5px;color:var(--muted);margin:0 2px 10px">A day is complete when: calories under goal · protein over goal · fat under goal · carbs over goal on a HIGH day, under on moderate/low. Tap a day for details.</p>
   </section>
 
   <!-- GOALS -->
@@ -217,6 +291,13 @@ nav button.active{color:var(--ink)}
       <div class="keystatus" id="keyStatus"></div>
     </div>
     <div class="settingcard">
+      <h3 style="margin:0;font-size:15px">Notifications</h3>
+      <p>Get a 9am heads-up on the day type (low / moderate / high), plus live warnings: fat or carbs getting close to the limit, and a 7pm nudge if protein is behind.</p>
+      <button class="btn primary" id="notifBtn">Enable notifications</button>
+      <div class="keystatus" id="notifStatus"></div>
+      <button class="btn ghost" id="notifTest" style="display:none">Send test notification</button>
+    </div>
+    <div class="settingcard">
       <h3 style="margin:0;font-size:15px">Tips</h3>
       <p>• Add this page to your Home Screen (Share → Add to Home Screen) to use it like an app.<br>
       • Barcode scanning looks up products in the free OpenFoodFacts database.<br>
@@ -227,6 +308,7 @@ nav button.active{color:var(--ink)}
 
 <nav>
   <button data-page="today" class="active"><span class="ic">◎</span>Today</button>
+  <button data-page="feed"><span class="ic">🍽</span>Feed</button>
   <button data-page="history"><span class="ic">✓</span>History</button>
   <button data-page="goals"><span class="ic">⚑</span>Goals</button>
   <button data-page="settings"><span class="ic">⚙︎</span>Settings</button>
@@ -255,12 +337,16 @@ nav button.active{color:var(--ink)}
 <div class="sheet" id="chatSheet">
   <h3 id="chatTitle">Describe your meal</h3>
   <div id="chatMsgs"></div>
-  <div class="estbar" id="estBar" style="display:none">
-    <div class="estinfo">
-      <div class="estname" id="estName"></div>
-      <div class="estmacs" id="estMacs"></div>
+  <div class="estcard" id="estBar" style="display:none">
+    <input class="ename" id="eName" placeholder="Meal name">
+    <div class="estgrid">
+      <div><label>Cal</label><input id="eCal" type="number" inputmode="numeric"></div>
+      <div><label>Carbs</label><input id="eCarbs" type="number" inputmode="numeric"></div>
+      <div><label>Protein</label><input id="eProtein" type="number" inputmode="numeric"></div>
+      <div><label>Fat</label><input id="eFat" type="number" inputmode="numeric"></div>
     </div>
-    <button class="estadd" id="estAdd">Add</button>
+    <div class="estconf" id="estConf"></div>
+    <button class="estadd" id="estAdd" style="width:100%">Add to today</button>
   </div>
   <div class="chatrow">
     <input id="chatInput" placeholder="e.g. Chipotle chicken bowl with guac" autocomplete="off">
@@ -295,6 +381,30 @@ nav button.active{color:var(--ink)}
   </div>
   <button class="btn primary" id="saveGoalBtn">Save goal</button>
   <button class="btn ghost" id="cancelGoalBtn">Cancel</button>
+</div>
+
+<!-- feed meal detail sheet -->
+<div class="sheet" id="mealDetailSheet">
+  <h3 id="mdTitle"></h3>
+  <div id="mdImgWrap"></div>
+  <div id="mdMacs"></div>
+  <div id="mdOverview"></div>
+  <h2 style="margin:0 0 6px">Ingredients</h2>
+  <ul id="mdIngr"></ul>
+  <div class="mdbtns">
+    <button class="btn ghost" id="mdFav" style="flex:1">♥ Save</button>
+    <button class="btn primary" id="mdAte" style="flex:2">I ate this</button>
+  </div>
+  <button class="btn ghost" id="mdClose">Close</button>
+</div>
+
+<!-- history day detail sheet -->
+<div class="sheet" id="dayDetailSheet">
+  <h3 id="ddTitle"></h3>
+  <div id="ddChecks"></div>
+  <h2 style="margin:14px 0 4px">Meals</h2>
+  <div id="ddMeals"></div>
+  <button class="btn ghost" id="ddClose" style="margin-top:14px">Close</button>
 </div>
 
 <div id="toast"></div>
@@ -364,7 +474,8 @@ document.querySelectorAll('nav button').forEach(b=>{
     $('page-' + b.dataset.page).classList.add('active');
     if(b.dataset.page==='history') renderHistory();
     if(b.dataset.page==='goals') renderGoals();
-    if(b.dataset.page==='settings') checkKey();
+    if(b.dataset.page==='settings'){ checkKey(); refreshNotifStatus(); }
+    if(b.dataset.page==='feed') openFeed();
   });
 });
 
@@ -492,9 +603,19 @@ function bubble(role, html){
 }
 function showEstimate(est){
   chat.estimate = est;
-  $('estBar').style.display = 'flex';
-  $('estName').textContent = est.name;
-  $('estMacs').textContent = `${est.calories} cal · C ${est.carbs}g · P ${est.protein}g · F ${est.fat}g · ${est.confidence} confidence`;
+  $('estBar').style.display = 'block';
+  $('eName').value = est.name; $('eCal').value = est.calories;
+  $('eCarbs').value = est.carbs; $('eProtein').value = est.protein; $('eFat').value = est.fat;
+  $('estConf').textContent = 'AI estimate · ' + (est.confidence||'medium') + ' confidence · edit anything or reply below to adjust';
+}
+function readEstimateCard(){
+  return {
+    name: $('eName').value.trim() || 'Meal',
+    calories: Number($('eCal').value)||0,
+    carbs: Number($('eCarbs').value)||0,
+    protein: Number($('eProtein').value)||0,
+    fat: Number($('eFat').value)||0,
+  };
 }
 async function chatCall(userContent, userBubbleHtml){
   if(chat.busy) return;
@@ -533,10 +654,12 @@ $('chatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendChatText
 $('chatCancel').addEventListener('click', closeSheets);
 $('estAdd').addEventListener('click', async ()=>{
   if(!chat.estimate) return;
+  const rec = readEstimateCard();
+  if(!rec.calories) rec.calories = kcal(rec.carbs, rec.protein, rec.fat);
   $('estAdd').disabled = true;
   try{
-    await saveMealRecord({...chat.estimate, source:chat.source});
-    closeSheets(); await refreshToday(); toast('Added ' + chat.estimate.name);
+    await saveMealRecord({...rec, source:chat.source});
+    closeSheets(); await refreshToday(); toast('Added ' + rec.name);
   }catch(e){ toast(e.message); }
   $('estAdd').disabled = false;
 });
@@ -686,67 +809,291 @@ $('saveGoalBtn').addEventListener('click', async ()=>{
   }catch(e){ toast(e.message); }
 });
 
-// ---------- history ----------
-async function renderHistory(){
-  try{
-    const [meals, snaps] = await Promise.all([
-      rest('meals?select=day,calories,carbs,protein,fat&order=day.asc'),
-      rest('day_goals?select=*'),
-    ]);
-    const byDay = {};
-    (meals||[]).forEach(m=>{ (byDay[m.day] = byDay[m.day] || {calories:0,carbs:0,protein:0,fat:0, n:0});
-      ['calories','carbs','protein','fat'].forEach(k=>byDay[m.day][k]+=Number(m[k])||0); byDay[m.day].n++; });
-    const snapByDay = {}; (snaps||[]).forEach(s=>snapByDay[s.day]=s);
-    const today = todayStr();
-    const days = Object.keys(byDay).sort();
-    if(!days.length){ $('historyList').innerHTML='<div class="empty">No history yet — log your first day.</div>';
-      $('statDone').textContent='0'; $('statTotal').textContent='0'; $('statStreak').textContent='0'; return; }
-    // walk each calendar day from first logged day through yesterday
-    const rows = []; let done=0, total=0;
-    const start = new Date(days[0]+'T12:00:00');
-    for(let d = new Date(start); ; d.setDate(d.getDate()+1)){
+// ---------- history (calendar) ----------
+// Completion rules: calories UNDER goal · protein OVER goal · fat UNDER goal ·
+// carbs OVER on a high day, UNDER on moderate/low/custom days.
+function dayChecks(t, goal){
+  const label = (goal.label||'custom').toLowerCase();
+  const carbsOver = label === 'high';
+  return [
+    {k:'calories', label:'Calories', unit:'', ok: t.calories <= goal.calories, rule:'under', val:t.calories, goal:goal.calories},
+    {k:'protein', label:'Protein', unit:'g', ok: t.protein >= goal.protein, rule:'over', val:t.protein, goal:goal.protein},
+    {k:'carbs', label:'Carbs', unit:'g', ok: carbsOver ? t.carbs >= goal.carbs : t.carbs <= goal.carbs,
+      rule: carbsOver?'over':'under', val:t.carbs, goal:goal.carbs},
+    {k:'fat', label:'Fat', unit:'g', ok: t.fat <= goal.fat, rule:'under', val:t.fat, goal:goal.fat},
+  ];
+}
+let histData = null;     // {byDay, mealsByDay, snapByDay}
+let calYear, calMonth;   // currently displayed month
+async function loadHistData(){
+  const [meals, snaps] = await Promise.all([
+    rest('meals?select=day,name,calories,carbs,protein,fat,source,created_at&order=created_at.asc'),
+    rest('day_goals?select=*'),
+  ]);
+  const byDay = {}, mealsByDay = {};
+  (meals||[]).forEach(m=>{
+    (byDay[m.day] = byDay[m.day] || {calories:0,carbs:0,protein:0,fat:0});
+    ['calories','carbs','protein','fat'].forEach(k=>byDay[m.day][k]+=Number(m[k])||0);
+    (mealsByDay[m.day] = mealsByDay[m.day] || []).push(m);
+  });
+  const snapByDay = {}; (snaps||[]).forEach(s=>snapByDay[s.day]=s);
+  histData = {byDay, mealsByDay, snapByDay};
+}
+function dayStatus(ds){
+  const today = todayStr();
+  if(ds > today) return 'future';
+  const t = histData.byDay[ds];
+  if(!t) return 'nolog';
+  const goal = histData.snapByDay[ds] || goalForDow(new Date(ds+'T12:00:00').getDay());
+  const ok = dayChecks(t, goal).every(c=>c.ok);
+  if(ds === today) return ok ? 'today done' : 'today';
+  return ok ? 'done' : 'miss';
+}
+function renderCalendar(){
+  const first = new Date(calYear, calMonth, 1);
+  $('calMonth').textContent = first.toLocaleDateString(undefined, {month:'long', year:'numeric'});
+  const dows = ['S','M','T','W','T','F','S'];
+  let html = dows.map(d=>`<div class="caldow">${d}</div>`).join('');
+  for(let i=0;i<first.getDay();i++) html += '<div class="calcell blank"></div>';
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  for(let d=1; d<=daysInMonth; d++){
+    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const st = dayStatus(ds);
+    const clickable = !st.includes('future') && st!=='nolog' ? `data-ds="${ds}"` : (histData.byDay[ds]?`data-ds="${ds}"`:'');
+    html += `<div class="calcell ${st}" ${clickable}>${d}</div>`;
+  }
+  $('calGrid').innerHTML = html;
+  document.querySelectorAll('.calcell[data-ds]').forEach(c=>
+    c.addEventListener('click', ()=>openDayDetail(c.dataset.ds)));
+}
+function renderStats(){
+  const today = todayStr();
+  const days = Object.keys(histData.byDay).sort();
+  let done=0, total=0, streak=0;
+  if(days.length){
+    const rows=[];
+    for(let d = new Date(days[0]+'T12:00:00'); ; d.setDate(d.getDate()+1)){
       const ds = d.toLocaleDateString('en-CA');
       if(ds >= today) break;
-      const t = byDay[ds];
-      const goal = snapByDay[ds] || goalForDow(d.getDay());
-      if(!t){ rows.push({ds, status:'nolog', goal}); total++; continue; }
-      const checks = ['carbs','protein','fat'].map(k=>({k, ok: Math.abs(t[k]-goal[k]) <= 10, val:t[k], goal:goal[k]}));
-      const ok = checks.every(c=>c.ok);
-      rows.push({ds, status: ok?'done':'miss', checks, t, goal});
-      total++; if(ok) done++;
+      total++;
+      const st = dayStatus(ds);
+      rows.push(st);
+      if(st==='done') done++;
     }
-    // current streak (consecutive completed days ending yesterday)
-    let streak=0;
-    for(let i=rows.length-1;i>=0;i--){ if(rows[i].status==='done') streak++; else break; }
-    $('statDone').textContent=done; $('statTotal').textContent=total; $('statStreak').textContent=streak;
-    rows.reverse();
-    const todayTotals = byDay[today];
-    let html = '';
-    if(todayTotals){
-      const goal = snapByDay[today] || todayGoal();
-      html += dayRowHtml({ds:today, status:'progress',
-        checks:['carbs','protein','fat'].map(k=>({k, ok:Math.abs(todayTotals[k]-goal[k])<=10, val:todayTotals[k], goal:goal[k]})),
-        t:todayTotals, goal});
-    }
-    html += rows.slice(0,60).map(dayRowHtml).join('');
-    $('historyList').innerHTML = html;
+    for(let i=rows.length-1;i>=0;i--){ if(rows[i]==='done') streak++; else break; }
+  }
+  $('statDone').textContent=done; $('statTotal').textContent=total; $('statStreak').textContent=streak;
+}
+async function renderHistory(){
+  try{
+    await loadHistData();
+    if(calYear===undefined){ const n=new Date(); calYear=n.getFullYear(); calMonth=n.getMonth(); }
+    renderStats(); renderCalendar();
   }catch(e){ toast(e.message); }
 }
-function dayRowHtml(r){
-  const badge = {done:'<span class="badge done">✓ Completed</span>', miss:'<span class="badge miss">✗ Missed</span>',
-    nolog:'<span class="badge nolog">No log</span>', progress:'<span class="badge progress">In progress</span>'}[r.status];
-  const label = r.ds===todayStr() ? 'Today' : fmtDay(r.ds);
-  let macs = '';
-  if(r.checks){
-    const nm = {carbs:'C', protein:'P', fat:'F'};
-    macs = '<div class="dmacs">' + r.checks.map(c=>
-      `<span class="dmac">${nm[c.k]} ${Math.round(c.val)}/${c.goal}g <span class="${c.ok?'ok':'bad'}">${c.ok?'✓':'✗'}</span></span>`
-    ).join('') + `<span class="dmac">${Math.round(r.t.calories)} cal</span></div>`;
-  } else if(r.goal){
-    macs = `<div class="dmacs"><span class="dmac">Goal was C ${r.goal.carbs} · P ${r.goal.protein} · F ${r.goal.fat}</span></div>`;
-  }
-  return `<div class="dayrow"><div class="dtop"><span class="ddate">${label}</span>${badge}</div>${macs}</div>`;
+$('calPrev').addEventListener('click', ()=>{ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); });
+$('calNext').addEventListener('click', ()=>{ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); });
+function openDayDetail(ds){
+  const t = histData.byDay[ds]; if(!t) return;
+  const goal = histData.snapByDay[ds] || goalForDow(new Date(ds+'T12:00:00').getDay());
+  const checks = dayChecks(t, goal);
+  const isToday = ds===todayStr();
+  const ok = checks.every(c=>c.ok);
+  $('ddTitle').innerHTML = (isToday?'Today':fmtDay(ds)) + ' · <span class="glabel ' + (goal.label||'custom') + '">' +
+    (goal.label||'custom').toUpperCase() + '</span> ' +
+    (isToday ? '<span class="badge progress">In progress</span>' : (ok?'<span class="badge done">✓ Completed</span>':'<span class="badge miss">✗ Missed</span>'));
+  $('ddChecks').innerHTML = checks.map(c=>
+    `<div class="ddmac"><span>${c.label} <span style="color:var(--muted);font-size:11px">(${c.rule})</span></span>
+     <span>${Math.round(c.val)} / ${c.goal}${c.unit} <span class="${c.ok?'ok':'bad'}">${c.ok?'✓':'✗'}</span></span></div>`).join('');
+  const ms = histData.mealsByDay[ds]||[];
+  $('ddMeals').innerHTML = ms.length ? ms.map(m=>
+    `<div class="ddmeal"><b>${SRC_ICON[m.source]||'✎'} ${escapeHtml(m.name)}</b><br>${Math.round(m.calories)} cal · C ${Math.round(m.carbs)}g · P ${Math.round(m.protein)}g · F ${Math.round(m.fat)}g</div>`).join('')
+    : '<div class="empty">No meals logged.</div>';
+  openSheet($('dayDetailSheet'));
 }
+$('ddClose').addEventListener('click', closeSheets);
+
+// ---------- feed ----------
+const feed = {meals:[], fetchedAt:0, key:'', mode:'foryou', favs:[], detail:null, recent:[]};
+try{ feed.recent = JSON.parse(localStorage.getItem('feedRecent')||'[]'); }catch(e){}
+function remainingMacros(){
+  const g = todayGoal();
+  const t = {calories:0,carbs:0,protein:0,fat:0};
+  todayMeals.forEach(m=>{ for(const k in t) t[k]+=Number(m[k])||0; });
+  return {calories:Math.max(0,Math.round(g.calories-t.calories)), carbs:Math.max(0,Math.round(g.carbs-t.carbs)),
+    protein:Math.max(0,Math.round(g.protein-t.protein)), fat:Math.max(0,Math.round(g.fat-t.fat))};
+}
+function mealImg(m, cls){
+  const url = 'https://image.pollinations.ai/prompt/' +
+    encodeURIComponent((m.image_hint||m.title) + ', appetizing food photography, natural light') +
+    '?width=560&height=320&nologo=true';
+  return `<img class="${cls}" loading="lazy" src="${url}" alt=""
+    onerror="this.outerHTML='<div class=&quot;feedimg-fallback&quot;>${m.emoji||'🍽'}</div>'">`;
+}
+async function openFeed(force){
+  const rem = remainingMacros(); const g = todayGoal();
+  $('feedCtx').textContent = (g.label||'custom').toUpperCase() + ' day · left: ' +
+    rem.calories + ' cal · C ' + rem.carbs + ' · P ' + rem.protein + ' · F ' + rem.fat;
+  if(feed.mode==='favs'){ renderFavs(); return; }
+  const key = JSON.stringify([rem, g.label]);
+  const stale = (Date.now()-feed.fetchedAt) > 15*60*1000;
+  if(!force && feed.meals.length && feed.key===key && !stale){ renderFeed(); return; }
+  $('feedList').innerHTML = '<div class="feedload">Cooking up ideas for your day…</div>';
+  try{
+    const favs = await rest('favorites?select=title&order=created_at.desc&limit=20');
+    const d = await fn({action:'recommend', label:g.label||'custom', remaining:rem,
+      hour:new Date().getHours(), exclude:feed.recent, favorites:(favs||[]).map(f=>f.title)});
+    feed.meals = d.meals||[]; feed.key = key; feed.fetchedAt = Date.now();
+    feed.recent = [...feed.meals.map(m=>m.title), ...feed.recent].slice(0, 30);
+    try{ localStorage.setItem('feedRecent', JSON.stringify(feed.recent)); }catch(e){}
+    renderFeed();
+  }catch(err){
+    if(String(err.message).includes('no_api_key'))
+      $('feedList').innerHTML = '<div class="empty">Add your Anthropic API key in Settings to get meal recommendations.</div>';
+    else $('feedList').innerHTML = '<div class="empty">' + escapeHtml(err.message) + '</div>';
+  }
+}
+async function loadFavTitles(){
+  try{ const favs = await rest('favorites?select=*&order=created_at.desc'); feed.favs = favs||[]; }
+  catch(e){ feed.favs = []; }
+}
+function isFav(title){ return feed.favs.some(f=>f.title===title); }
+async function renderFeed(){
+  await loadFavTitles();
+  if(!feed.meals.length){ $('feedList').innerHTML='<div class="empty">No ideas right now — try Refresh.</div>'; return; }
+  $('feedList').innerHTML = feed.meals.map((m,i)=>
+    `<div class="feedcard" data-i="${i}">
+      ${mealImg(m,'feedimg')}
+      <div class="feedbody">
+        <button class="heart ${isFav(m.title)?'on':''}" data-hi="${i}">${isFav(m.title)?'♥':'♡'}</button>
+        <div class="feedtitle">${m.emoji||''} ${escapeHtml(m.title)}</div>
+        <div class="feedmacs">${m.calories} cal · C ${m.carbs}g · P ${m.protein}g · F ${m.fat}g</div>
+      </div>
+    </div>`).join('');
+  document.querySelectorAll('.feedcard').forEach(c=>c.addEventListener('click', e=>{
+    if(e.target.closest('.heart')) return;
+    openMealDetail(feed.meals[Number(c.dataset.i)], false);
+  }));
+  document.querySelectorAll('.heart[data-hi]').forEach(h=>h.addEventListener('click', async e=>{
+    e.stopPropagation();
+    await toggleFav(feed.meals[Number(h.dataset.hi)]);
+    renderFeed();
+  }));
+}
+async function renderFavs(){
+  await loadFavTitles();
+  if(!feed.favs.length){ $('feedList').innerHTML='<div class="empty">No favorites yet — tap ♡ on a meal you like.</div>'; return; }
+  $('feedList').innerHTML = feed.favs.map((m,i)=>
+    `<div class="feedcard" data-fi="${i}">
+      ${mealImg(m,'feedimg')}
+      <div class="feedbody">
+        <button class="heart on" data-fh="${i}">♥</button>
+        <div class="feedtitle">${m.emoji||''} ${escapeHtml(m.title)}</div>
+        <div class="feedmacs">${m.calories} cal · C ${m.carbs}g · P ${m.protein}g · F ${m.fat}g</div>
+      </div>
+    </div>`).join('');
+  document.querySelectorAll('.feedcard[data-fi]').forEach(c=>c.addEventListener('click', e=>{
+    if(e.target.closest('.heart')) return;
+    const f = feed.favs[Number(c.dataset.fi)];
+    openMealDetail({...f, ingredients: f.ingredients||[]}, true);
+  }));
+  document.querySelectorAll('.heart[data-fh]').forEach(h=>h.addEventListener('click', async e=>{
+    e.stopPropagation();
+    await toggleFav(feed.favs[Number(h.dataset.fh)]);
+    renderFavs();
+  }));
+}
+async function toggleFav(m){
+  try{
+    if(isFav(m.title)){
+      await rest('favorites?title=eq.' + encodeURIComponent(m.title), {method:'DELETE'});
+      toast('Removed from favorites');
+    } else {
+      await rest('favorites?on_conflict=title', {method:'POST', headers:{'Prefer':'resolution=merge-duplicates'},
+        body:{title:m.title, emoji:m.emoji||'🍽', image_hint:m.image_hint||'', overview:m.overview||'',
+          ingredients:m.ingredients||[], calories:m.calories, carbs:m.carbs, protein:m.protein, fat:m.fat}});
+      toast('Saved to favorites ♥');
+    }
+    await loadFavTitles();
+  }catch(e){ toast(e.message); }
+}
+document.querySelectorAll('.feedchips .chip').forEach(c=>c.addEventListener('click', ()=>{
+  document.querySelectorAll('.feedchips .chip').forEach(x=>x.classList.toggle('sel', x===c));
+  feed.mode = c.dataset.feed;
+  openFeed();
+}));
+$('feedRefresh').addEventListener('click', ()=>{ if(feed.mode==='foryou') openFeed(true); else renderFavs(); });
+function openMealDetail(m, fromFavs){
+  feed.detail = m;
+  $('mdTitle').textContent = (m.emoji||'') + ' ' + m.title;
+  $('mdImgWrap').innerHTML = mealImg(m, '');
+  $('mdMacs').textContent = `${m.calories} cal · C ${m.carbs}g · P ${m.protein}g · F ${m.fat}g`;
+  $('mdOverview').textContent = m.overview||'';
+  $('mdIngr').innerHTML = (m.ingredients||[]).map(i=>'<li>'+escapeHtml(i)+'</li>').join('') || '<li>—</li>';
+  $('mdFav').textContent = isFav(m.title) ? '♥ Saved' : '♡ Save';
+  openSheet($('mealDetailSheet'));
+}
+$('mdClose').addEventListener('click', closeSheets);
+$('mdFav').addEventListener('click', async ()=>{
+  if(!feed.detail) return;
+  await toggleFav(feed.detail);
+  $('mdFav').textContent = isFav(feed.detail.title) ? '♥ Saved' : '♡ Save';
+});
+$('mdAte').addEventListener('click', async ()=>{
+  if(!feed.detail) return;
+  $('mdAte').disabled = true;
+  try{
+    await saveMealRecord({name:feed.detail.title, calories:feed.detail.calories, carbs:feed.detail.carbs,
+      protein:feed.detail.protein, fat:feed.detail.fat, source:'feed'});
+    closeSheets(); await refreshToday(); toast('Logged ' + feed.detail.title + ' 💪');
+  }catch(e){ toast(e.message); }
+  $('mdAte').disabled = false;
+});
+
+// ---------- push notifications ----------
+const VAPID_PUB = 'BJTMVMdr4qb1Chxc7JiZbTbmoOuvf3DtySl39OqcsFvdzNACNqC7TFdYWUa-qBmp2bjGhtsuYEywY9s01Sx3uuQ';
+function urlB64ToU8(s){
+  const pad = '='.repeat((4 - s.length % 4) % 4);
+  const b = atob((s + pad).replace(/-/g,'+').replace(/_/g,'/'));
+  return Uint8Array.from([...b].map(c=>c.charCodeAt(0)));
+}
+async function refreshNotifStatus(){
+  const el = $('notifStatus'), btn = $('notifBtn'), test = $('notifTest');
+  if(!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)){
+    el.className='keystatus no';
+    el.textContent = '⚠ Notifications need the app installed: open it from your Home Screen icon (re-add it if needed).';
+    btn.style.display='none'; test.style.display='none'; return;
+  }
+  btn.style.display='block';
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if(sub && Notification.permission==='granted'){
+      el.className='keystatus ok'; el.textContent='✓ Notifications are on';
+      btn.style.display='none'; test.style.display='block';
+    } else {
+      el.className='keystatus no'; el.textContent='Notifications are off';
+      test.style.display='none';
+    }
+  }catch(e){ el.className='keystatus no'; el.textContent='Notifications are off'; }
+}
+$('notifBtn').addEventListener('click', async ()=>{
+  try{
+    const perm = await Notification.requestPermission();
+    if(perm!=='granted'){ toast('Notifications were not allowed'); return; }
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:urlB64ToU8(VAPID_PUB)});
+    await rest('push_subs?on_conflict=endpoint', {method:'POST',
+      headers:{'Prefer':'resolution=merge-duplicates'},
+      body:{endpoint: sub.endpoint, sub: sub.toJSON()}});
+    toast('Notifications enabled 🎉');
+    refreshNotifStatus();
+  }catch(e){ toast('Could not enable: ' + e.message); }
+});
+$('notifTest').addEventListener('click', async ()=>{
+  try{ const r = await fn({action:'test_push'}); toast('Sent to ' + r.sent + ' device(s)'); }
+  catch(e){ toast(e.message); }
+});
 
 // ---------- settings ----------
 async function checkKey(){
@@ -768,6 +1115,7 @@ $('saveKeyBtn').addEventListener('click', async ()=>{
 
 // ---------- init ----------
 (async function init(){
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
   $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
   try{
     const rows = await rest('macro_goals?select=*');
