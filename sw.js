@@ -8,6 +8,7 @@ self.addEventListener('push', e => {
     body: d.body || '',
     icon: 'icon.png',
     badge: 'icon.png',
+    tag: d.tag || undefined,   // same tag replaces the previous banner instead of stacking
   }));
 });
 

@@ -455,8 +455,10 @@ async function fn(body){
   return d;
 }
 let toastTimer;
+function hideToast(){ $('toast').classList.remove('show'); clearTimeout(toastTimer); }
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'), 3200); }
+  clearTimeout(toastTimer); toastTimer=setTimeout(hideToast, 3200); }
+$('toast').addEventListener('click', hideToast);
 function loading(on, text){ $('loadingText').textContent = text||'Working…';
   $('loading').classList.toggle('show', !!on); }
 function openSheet(el){ $('overlay').classList.add('show'); el.classList.add('show'); }
@@ -1122,11 +1124,21 @@ $('saveKeyBtn').addEventListener('click', async ()=>{
     (rows||[]).forEach(r=>goals[r.day_of_week]=r);
     await refreshToday();
   }catch(e){ toast('Could not load data: ' + e.message); }
+  clearShownNotifs();
   // refresh when returning to the app (e.g. next morning)
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){
+    hideToast();
     $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
-    refreshToday(); }});
+    refreshToday();
+    clearShownNotifs(); }});
 })();
+// you're looking at the app, so clear delivered reminders from notification center
+async function clearShownNotifs(){
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    (await reg.getNotifications()).forEach(n=>n.close());
+  }catch(e){}
+}
 </script>
 </body>
 </html>
