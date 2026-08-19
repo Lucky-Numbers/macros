@@ -52,7 +52,7 @@ main{padding:16px 16px 8px;max-width:520px;margin:0 auto}
 .ring-sub{font-size:11px;color:var(--muted);margin-top:2px;min-height:13px}
 .ring-sub.over{color:var(--serious);font-weight:600}
 /* add buttons */
-.addrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0 6px}
+.addrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 6px}
 .addbtn{background:var(--surface);border:1px solid var(--border);color:var(--ink);
   border-radius:14px;padding:12px 4px;font-size:13px;font-weight:600;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:5px}
@@ -147,6 +147,27 @@ nav button.active{color:var(--ink)}
 .settingcard p{font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 12px}
 .keystatus{font-size:13px;font-weight:600;margin-top:10px}
 .keystatus.ok{color:var(--good)} .keystatus.no{color:var(--warning)}
+/* AI chat */
+#chatMsgs{max-height:38vh;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;padding:2px}
+.cm{max-width:85%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.4;white-space:pre-wrap}
+.cm.user{align-self:flex-end;background:var(--ink);color:#111;border-bottom-right-radius:4px}
+.cm.ai{align-self:flex-start;background:var(--surface2);color:var(--ink);border-bottom-left-radius:4px}
+.cm.typing{color:var(--muted);font-style:italic}
+.cm img{max-width:140px;border-radius:10px;display:block}
+.estbar{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:13px;padding:10px 12px;margin-bottom:10px}
+.estbar .estname{font-size:14px;font-weight:700}
+.estbar .estmacs{font-size:12px;color:var(--muted);margin-top:2px}
+.estbar .estinfo{flex:1;min-width:0}
+.estadd{background:var(--good);border:none;color:#fff;font-weight:700;font-size:14px;
+  border-radius:10px;padding:10px 16px;cursor:pointer;white-space:nowrap}
+.chatrow{display:flex;gap:8px;align-items:center}
+.chatrow input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--ink);
+  border-radius:11px;padding:11px 12px;font-size:16px;min-width:0}
+.chatrow button{background:var(--surface2);border:1px solid var(--border);color:var(--ink);
+  border-radius:11px;padding:10px 13px;font-size:17px;cursor:pointer;flex-shrink:0}
+.chatrow button#chatSend{background:var(--ink);color:#111;font-weight:700}
+#micBtn.rec{background:var(--critical);border-color:var(--critical)}
 </style>
 </head>
 <body>
@@ -161,6 +182,7 @@ nav button.active{color:var(--ink)}
     <div class="addrow">
       <button class="addbtn" id="btnPhoto"><span class="ic">📷</span>Scan food</button>
       <button class="addbtn" id="btnBarcode"><span class="ic"><svg width="22" height="20" viewBox="0 0 24 20" fill="currentColor"><rect x="1" y="2" width="2" height="16"/><rect x="5" y="2" width="1" height="16"/><rect x="8" y="2" width="3" height="16"/><rect x="13" y="2" width="1" height="16"/><rect x="16" y="2" width="2" height="16"/><rect x="20" y="2" width="1" height="16"/><rect x="22.5" y="2" width="1.5" height="16"/></svg></span>Barcode</button>
+      <button class="addbtn" id="btnDescribe"><span class="ic">💬</span>Describe</button>
       <button class="addbtn" id="btnManual"><span class="ic">✎</span>Manual</button>
     </div>
     <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
@@ -227,6 +249,25 @@ nav button.active{color:var(--ink)}
   </div>
   <button class="btn primary" id="saveMealBtn">Add to today</button>
   <button class="btn ghost" id="cancelMealBtn">Cancel</button>
+</div>
+
+<!-- AI chat sheet -->
+<div class="sheet" id="chatSheet">
+  <h3 id="chatTitle">Describe your meal</h3>
+  <div id="chatMsgs"></div>
+  <div class="estbar" id="estBar" style="display:none">
+    <div class="estinfo">
+      <div class="estname" id="estName"></div>
+      <div class="estmacs" id="estMacs"></div>
+    </div>
+    <button class="estadd" id="estAdd">Add</button>
+  </div>
+  <div class="chatrow">
+    <input id="chatInput" placeholder="e.g. Chipotle chicken bowl with guac" autocomplete="off">
+    <button id="micBtn" title="Dictate">🎤</button>
+    <button id="chatSend" title="Send">➤</button>
+  </div>
+  <button class="btn ghost" id="chatCancel">Close</button>
 </div>
 
 <!-- barcode sheet -->
@@ -358,7 +399,7 @@ function renderRings(){
   const chip = $('todayChip'); const lbl = (g.label||'custom');
   chip.textContent = lbl.toUpperCase() + ' DAY'; chip.className = 'daychip ' + lbl;
 }
-const SRC_ICON = {photo:'📷', barcode:'🏷', manual:'✎'};
+const SRC_ICON = {photo:'📷', barcode:'🏷', manual:'✎', ai:'💬'};
 function renderMeals(){
   if(!todayMeals.length){ $('mealList').innerHTML = '<div class="empty">Nothing logged yet — scan your first meal.</div>'; return; }
   $('mealList').innerHTML = todayMeals.map(m=>{
@@ -409,6 +450,16 @@ function applyPortion(){
 $('fAmount').addEventListener('input', applyPortion);
 $('autoCalBtn').addEventListener('click', ()=>{ $('fCal').value = kcal($('fCarbs').value, $('fProtein').value, $('fFat').value); });
 $('cancelMealBtn').addEventListener('click', closeSheets);
+async function saveMealRecord(rec){
+  // snapshot today's goal (first log of the day wins)
+  const g = todayGoal();
+  await rest('day_goals?on_conflict=day', {method:'POST',
+    headers:{'Prefer':'resolution=ignore-duplicates'},
+    body:{day:todayStr(), label:g.label, calories:g.calories, carbs:g.carbs, protein:g.protein, fat:g.fat}});
+  await rest('meals', {method:'POST', headers:{'Prefer':'return=minimal'},
+    body:{day:todayStr(), name:rec.name, calories:rec.calories, carbs:rec.carbs,
+      protein:rec.protein, fat:rec.fat, source:rec.source}});
+}
 $('saveMealBtn').addEventListener('click', async ()=>{
   const name = $('fName').value.trim() || 'Meal';
   let cal = Number($('fCal').value);
@@ -416,13 +467,7 @@ $('saveMealBtn').addEventListener('click', async ()=>{
   if(!cal) cal = kcal(carbs, protein, fat);
   $('saveMealBtn').disabled = true;
   try{
-    // snapshot today's goal (first log of the day wins)
-    const g = todayGoal();
-    await rest('day_goals?on_conflict=day', {method:'POST',
-      headers:{'Prefer':'resolution=ignore-duplicates'},
-      body:{day:todayStr(), label:g.label, calories:g.calories, carbs:g.carbs, protein:g.protein, fat:g.fat}});
-    await rest('meals', {method:'POST', headers:{'Prefer':'return=minimal'},
-      body:{day:todayStr(), name, calories:cal, carbs, protein, fat, source:sheetCtx?.source||'manual'}});
+    await saveMealRecord({name, calories:cal, carbs, protein, fat, source:sheetCtx?.source||'manual'});
     closeSheets(); await refreshToday(); toast('Added ' + name);
   }catch(e){ toast(e.message); }
   $('saveMealBtn').disabled = false;
@@ -431,23 +476,103 @@ $('saveMealBtn').addEventListener('click', async ()=>{
 // ---------- manual ----------
 $('btnManual').addEventListener('click', ()=> openMealSheet({title:'Add meal manually', source:'manual'}));
 
-// ---------- photo scan ----------
+// ---------- AI chat (describe / photo scan / adjust) ----------
+const chat = {messages:[], estimate:null, source:'ai', busy:false};
+function chatReset(source, title){
+  chat.messages = []; chat.estimate = null; chat.source = source; chat.busy = false;
+  $('chatTitle').textContent = title;
+  $('chatMsgs').innerHTML = ''; $('estBar').style.display = 'none'; $('chatInput').value = '';
+}
+function bubble(role, html){
+  const d = document.createElement('div');
+  d.className = 'cm ' + role; d.innerHTML = html;
+  $('chatMsgs').appendChild(d);
+  $('chatMsgs').scrollTop = $('chatMsgs').scrollHeight;
+  return d;
+}
+function showEstimate(est){
+  chat.estimate = est;
+  $('estBar').style.display = 'flex';
+  $('estName').textContent = est.name;
+  $('estMacs').textContent = `${est.calories} cal · C ${est.carbs}g · P ${est.protein}g · F ${est.fat}g · ${est.confidence} confidence`;
+}
+async function chatCall(userContent, userBubbleHtml){
+  if(chat.busy) return;
+  chat.busy = true;
+  if(userBubbleHtml) bubble('user', userBubbleHtml);
+  chat.messages.push({role:'user', content:userContent});
+  const t = bubble('ai typing', 'thinking…');
+  try{
+    const d = await fn({action:'chat', messages:chat.messages});
+    t.remove();
+    chat.messages.push({role:'assistant', content:[{type:'text', text:d.raw || d.reply}]});
+    bubble('ai', escapeHtml(d.reply || 'Here you go:'));
+    if(d.estimate) showEstimate(d.estimate);
+  }catch(err){
+    t.remove();
+    chat.messages.pop();
+    if(String(err.message).includes('no_api_key')){ bubble('ai', 'No API key yet — add your Anthropic API key in Settings first.'); }
+    else bubble('ai', 'Error: ' + escapeHtml(err.message));
+  }
+  chat.busy = false;
+}
+$('btnDescribe').addEventListener('click', ()=>{
+  chatReset('ai', 'Describe your meal');
+  bubble('ai', "What did you eat? Name a dish, a restaurant item, or list ingredients — I'll estimate the macros. You can correct me after.");
+  openSheet($('chatSheet'));
+  setTimeout(()=>$('chatInput').focus(), 300);
+});
+function sendChatText(){
+  const txt = $('chatInput').value.trim();
+  if(!txt || chat.busy) return;
+  $('chatInput').value = '';
+  chatCall([{type:'text', text:txt}], escapeHtml(txt));
+}
+$('chatSend').addEventListener('click', sendChatText);
+$('chatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendChatText(); });
+$('chatCancel').addEventListener('click', closeSheets);
+$('estAdd').addEventListener('click', async ()=>{
+  if(!chat.estimate) return;
+  $('estAdd').disabled = true;
+  try{
+    await saveMealRecord({...chat.estimate, source:chat.source});
+    closeSheets(); await refreshToday(); toast('Added ' + chat.estimate.name);
+  }catch(e){ toast(e.message); }
+  $('estAdd').disabled = false;
+});
+// voice input: on-device speech recognition when available, else keyboard dictation
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+$('micBtn').addEventListener('click', ()=>{
+  if(!SR){ $('chatInput').focus(); toast('Tap the mic on your keyboard to dictate'); return; }
+  if(rec){ rec.stop(); return; }
+  try{
+    rec = new SR();
+    rec.lang = 'en-US'; rec.interimResults = true;
+    $('micBtn').classList.add('rec');
+    rec.onresult = e=>{ $('chatInput').value = Array.from(e.results).map(r=>r[0].transcript).join(''); };
+    rec.onend = ()=>{ $('micBtn').classList.remove('rec'); rec = null;
+      if($('chatInput').value.trim()) sendChatText(); };
+    rec.onerror = ()=>{ $('micBtn').classList.remove('rec'); rec = null;
+      $('chatInput').focus(); toast('Mic unavailable — use the keyboard mic to dictate'); };
+    rec.start();
+  }catch(e){ $('micBtn').classList.remove('rec'); rec = null; $('chatInput').focus(); }
+});
+
+// ---------- photo scan (opens the same chat so you can adjust) ----------
 $('btnPhoto').addEventListener('click', ()=> $('photoInput').click());
 $('photoInput').addEventListener('change', async e=>{
   const file = e.target.files[0]; e.target.value=''; if(!file) return;
-  loading(true, 'Analyzing your food…');
+  chatReset('photo', 'Scanned meal');
+  openSheet($('chatSheet'));
   try{
     const b64 = await resizeToB64(file, 1200);
-    const res = await fn({action:'scan_photo', image_base64:b64, media_type:'image/jpeg'});
-    loading(false);
-    openMealSheet({title:'Scanned meal', name:res.name, calories:res.calories, carbs:res.carbs,
-      protein:res.protein, fat:res.fat, source:'photo',
-      notes: (res.confidence ? ('AI estimate (' + res.confidence + ' confidence). ') : '') + (res.notes||'') + ' Edit anything before adding.'});
-  }catch(err){
-    loading(false);
-    if(String(err.message).includes('no_api_key')) toast('Add your Anthropic API key in Settings first');
-    else toast(err.message);
-  }
+    chatCall(
+      [{type:'image', source:{type:'base64', media_type:'image/jpeg', data:b64}},
+       {type:'text', text:'Estimate the macros for this food photo.'}],
+      '<img src="data:image/jpeg;base64,' + b64 + '" alt="meal photo">'
+    );
+  }catch(err){ bubble('ai', 'Could not read that photo: ' + escapeHtml(err.message)); }
 });
 function resizeToB64(file, maxDim){
   return new Promise((resolve, reject)=>{
