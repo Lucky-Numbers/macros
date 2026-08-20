@@ -807,7 +807,7 @@ $('progressPhotoInput').addEventListener('change', async e=>{
     const up = await fetch(SB + '/storage/v1/object/photos/' + name, {
       method:'POST', headers:{'apikey':ANON, 'Authorization':'Bearer '+ANON, 'Content-Type':'image/jpeg'}, body: blob});
     if(!up.ok) throw new Error('Upload failed (' + up.status + ')');
-    await rest('progress_photos', {method:'POST', headers:{'Prefer':'return=minimal'},
+    await rest('prep_photos', {method:'POST', headers:{'Prefer':'return=minimal'},
       body:{day: todayStr(), path: name}});
     todayPhotoDone = true;
     loading(false); toast('Progress photo saved 📸');
@@ -817,13 +817,13 @@ $('progressPhotoInput').addEventListener('change', async e=>{
 $('addPhotoBtn').addEventListener('click', ()=>$('progressPhotoInput').click());
 async function loadTodayPhoto(){
   try{
-    const rows = await rest(`progress_photos?day=eq.${todayStr()}&select=id`);
+    const rows = await rest(`prep_photos?day=eq.${todayStr()}&select=id`);
     todayPhotoDone = !!(rows && rows.length);
   }catch(e){}
 }
 async function renderPhotos(){
   try{
-    const rows = await rest('progress_photos?select=*&order=day.desc&limit=60');
+    const rows = await rest('prep_photos?select=*&order=day.desc&limit=60');
     if(!rows || !rows.length){ $('photoGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">No photos yet — Sundays are photo day.</div>'; return; }
     $('photoGrid').innerHTML = rows.map(p=>{
       const url = SB + '/storage/v1/object/public/photos/' + encodeURIComponent(p.path);
@@ -1211,7 +1211,7 @@ async function loadHistData(){
     rest('meals?select=day,name,calories,carbs,protein,fat,source,created_at&order=created_at.asc'),
     rest('day_goals?select=*'),
     rest('daily_checks?select=day,item,done,note'),
-    rest('progress_photos?select=day'),
+    rest('prep_photos?select=day'),
   ]);
   const byDay = {}, mealsByDay = {};
   (meals||[]).forEach(m=>{
