@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Macro Tracker</title>
+<title>Lucky Numbers</title>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Macros">
+<meta name="apple-mobile-web-app-title" content="Lucky Numbers">
 <meta name="theme-color" content="#0d0d0d">
 <link rel="apple-touch-icon" href="icon.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
@@ -21,6 +21,7 @@
   --cal:#3987e5; --protein:#d95926; --carbs:#199e70; --fat:#c98500;
   --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
   --low:#199e70; --moderate:#3987e5; --high:#e66767;
+  --ph-cut1:#3987e5; --ph-reverse:#898781; --ph-bulk:#d95926; --ph-prep:#199e70; --ph-show:#c98500;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--page);color:var(--ink);
@@ -29,13 +30,63 @@ body{padding-bottom:calc(74px + env(safe-area-inset-bottom));}
 header{position:sticky;top:0;z-index:20;background:rgba(13,13,13,.92);backdrop-filter:blur(12px);
   padding:calc(14px + env(safe-area-inset-top)) 18px 12px;display:flex;align-items:center;justify-content:space-between;
   border-bottom:1px solid var(--border);}
-header h1{font-size:19px;margin:0;font-weight:700;letter-spacing:-.01em}
-.datechip{font-size:12px;color:var(--ink2)}
+header h1{font-size:19px;margin:0;font-weight:800;letter-spacing:-.01em}
+header h1 .lucky{color:var(--fat)}
+.datechip{font-size:12px;color:var(--ink2);text-align:right}
 .daychip{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
   padding:3px 9px;border-radius:99px;border:1px solid var(--border);margin-left:8px;vertical-align:1px}
 .daychip.low{color:var(--low)} .daychip.moderate{color:var(--moderate)} .daychip.high{color:var(--high)}
 main{padding:16px 16px 8px;max-width:520px;margin:0 auto}
 .page{display:none} .page.active{display:block}
+.cols{display:block}
+@media(min-width:960px){
+  main{max-width:1100px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  nav{max-width:1100px;margin:0 auto;border-radius:16px 16px 0 0}
+}
+/* hero */
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:14px}
+.herotitle{font-size:16px;font-weight:800}
+.herodays{font-size:12px;color:var(--muted);margin-top:2px}
+.phname{font-size:13px;font-weight:800;letter-spacing:.05em;margin-top:10px}
+.phsub{font-size:12px;color:var(--ink2);margin-top:3px;line-height:1.45}
+.planbar{display:flex;height:10px;border-radius:99px;overflow:hidden;margin-top:12px;gap:2px}
+.planbar .seg{position:relative;background:var(--grid)}
+.planbar .seg .fill{position:absolute;inset:0;width:0}
+.planlegend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.planlegend span{font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.planlegend i{width:8px;height:8px;border-radius:99px;display:inline-block}
+/* checklist */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 14px 12px;margin-bottom:14px}
+.card h2{margin:0 0 10px;font-size:14px;color:var(--ink2);font-weight:700;letter-spacing:.02em}
+.chk{display:flex;align-items:flex-start;gap:12px;padding:10px 2px;border-bottom:1px solid var(--grid)}
+.chk:last-child{border-bottom:none}
+.chkbox{width:26px;height:26px;border-radius:99px;border:2px solid var(--muted);background:none;cursor:pointer;
+  flex-shrink:0;font-size:15px;line-height:1;color:#111;margin-top:1px}
+.chk.done .chkbox{background:var(--good);border-color:var(--good)}
+.chkmain{flex:1;min-width:0}
+.chklabel{font-size:14.5px;font-weight:700}
+.chk.done .chklabel{color:var(--muted);text-decoration:line-through}
+.chksub{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.45}
+.chknote{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--ink);
+  border-radius:9px;padding:7px 10px;font-size:13px;margin-top:6px}
+.chkopt{font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:1px 7px;margin-left:6px;vertical-align:1px}
+.chkphotobtn{background:var(--surface2);border:1px solid var(--border);color:var(--ink);border-radius:9px;
+  padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px}
+.daydone{background:rgba(12,163,12,.12);border:1px solid var(--good);border-radius:12px;
+  padding:9px 12px;font-size:13px;font-weight:700;color:var(--good);text-align:center;margin-top:10px;display:none}
+.weekline{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+/* metrics row */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metric{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px}
+.metric label{display:block;font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.metric .mrow{display:flex;gap:6px}
+.metric input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);
+  border-radius:9px;padding:8px 10px;font-size:15px;min-width:0}
+.metric button{background:var(--ink);color:#111;border:none;border-radius:9px;padding:8px 12px;font-weight:700;cursor:pointer}
+#wchart{width:100%;height:110px;margin-top:10px}
+.wtrend{font-size:12px;margin-top:6px}
+.wtrend.ok{color:var(--good)} .wtrend.warn{color:var(--serious)}
 /* rings */
 .rings{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .ring-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;
@@ -52,15 +103,13 @@ main{padding:16px 16px 8px;max-width:520px;margin:0 auto}
 .dot{width:8px;height:8px;border-radius:99px;display:inline-block}
 .ring-sub{font-size:11px;color:var(--muted);margin-top:2px;min-height:13px}
 .ring-sub.over{color:var(--serious);font-weight:600}
-/* add buttons */
 .addrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 6px}
 .addbtn{background:var(--surface);border:1px solid var(--border);color:var(--ink);
   border-radius:14px;padding:12px 4px;font-size:13px;font-weight:600;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:5px}
 .addbtn:active{background:var(--surface2)}
 .addbtn .ic{font-size:21px;line-height:1}
-/* meal list */
-h2{font-size:14px;color:var(--ink2);font-weight:700;margin:18px 2px 8px;letter-spacing:.02em}
+h2.sect{font-size:14px;color:var(--ink2);font-weight:700;margin:18px 2px 8px;letter-spacing:.02em}
 .meal{background:var(--surface);border:1px solid var(--border);border-radius:14px;
   padding:11px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
 .meal .mmain{flex:1;min-width:0}
@@ -69,7 +118,6 @@ h2{font-size:14px;color:var(--ink2);font-weight:700;margin:18px 2px 8px;letter-s
 .meal .msrc{font-size:15px}
 .meal .mdel{background:none;border:none;color:var(--muted);font-size:17px;padding:6px;cursor:pointer}
 .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:22px 10px}
-/* tabbar */
 nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:rgba(20,20,19,.95);
   backdrop-filter:blur(14px);border-top:1px solid var(--border);
   display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
@@ -77,12 +125,11 @@ nav button{flex:1;background:none;border:none;color:var(--muted);font-size:11px;
   padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
 nav button .ic{font-size:20px;line-height:1}
 nav button.active{color:var(--ink)}
-/* sheet */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40;display:none}
 .overlay.show{display:block}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);
   border-radius:20px 20px 0 0;border:1px solid var(--border);border-bottom:none;
-  padding:18px 18px calc(20px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;
+  padding:18px 18px calc(20px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;
   transform:translateY(105%);transition:transform .25s ease;max-height:86vh;overflow-y:auto}
 .sheet.show{transform:translateY(0)}
 .sheet h3{margin:0 0 14px;font-size:17px}
@@ -104,72 +151,62 @@ nav button.active{color:var(--ink)}
 .chip.sel{background:var(--ink);color:#111;border-color:var(--ink)}
 .autocal{background:none;border:1px solid var(--border);color:var(--ink2);border-radius:8px;
   padding:4px 9px;font-size:11.5px;cursor:pointer;margin-left:8px;font-weight:600}
-/* barcode */
 #bcreader{width:100%;border-radius:14px;overflow:hidden;background:#000;min-height:240px}
 .bchint{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px}
-/* goals page */
 .goalrow{background:var(--surface);border:1px solid var(--border);border-radius:14px;
   padding:13px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer}
 .goalrow .gday{font-weight:700;font-size:14.5px;width:44px}
 .goalrow .gmac{flex:1;font-size:12px;color:var(--muted)}
 .goalrow .glabel{font-size:11px;font-weight:700;letter-spacing:.05em}
 .glabel.low{color:var(--low)} .glabel.moderate{color:var(--moderate)} .glabel.high{color:var(--high)} .glabel.custom{color:var(--ink2)}
-/* history */
 .statcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;
   padding:16px;margin-bottom:12px;display:flex;gap:8px;text-align:center}
 .statcard>div{flex:1}
 .statcard .big{font-size:26px;font-weight:700}
 .statcard .lbl{font-size:11.5px;color:var(--muted);margin-top:3px}
-.dayrow{background:var(--surface);border:1px solid var(--border);border-radius:14px;
-  padding:12px 14px;margin-bottom:8px}
-.dayrow .dtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
-.dayrow .ddate{font-weight:700;font-size:13.5px}
 .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}
 .badge.done{color:var(--good);border:1px solid var(--good)}
 .badge.miss{color:var(--critical);border:1px solid var(--critical)}
 .badge.nolog{color:var(--muted);border:1px solid var(--border)}
 .badge.progress{color:var(--ink2);border:1px solid var(--border)}
-.dmacs{display:flex;gap:6px;flex-wrap:wrap}
-.dmac{font-size:11.5px;color:var(--ink2);background:var(--surface2);border-radius:8px;padding:4px 8px}
-.dmac .ok{color:var(--good);font-weight:700} .dmac .bad{color:var(--critical);font-weight:700}
-/* toast / loading */
-#toast{position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-90px);
-  background:var(--surface2);border:1px solid var(--border);color:var(--ink);padding:11px 18px;
-  border-radius:99px;font-size:13.5px;font-weight:600;z-index:100;transition:transform .3s ease;max-width:86vw;text-align:center}
-#toast.show{transform:translateX(-50%) translateY(0)}
-#loading{position:fixed;inset:0;background:rgba(13,13,13,.85);z-index:90;display:none;
-  flex-direction:column;align-items:center;justify-content:center;gap:14px}
-#loading.show{display:flex}
-.spinner{width:38px;height:38px;border:3px solid var(--grid);border-top-color:var(--ink);
-  border-radius:99px;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-#loading .lt{font-size:14px;color:var(--ink2);font-weight:600}
-.settingcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px}
-.settingcard p{font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 12px}
-.keystatus{font-size:13px;font-weight:600;margin-top:10px}
-.keystatus.ok{color:var(--good)} .keystatus.no{color:var(--warning)}
-/* AI chat */
+.calhead{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 10px}
+.calhead .mname{font-size:15px;font-weight:700}
+.calhead button{background:var(--surface);border:1px solid var(--border);color:var(--ink);border-radius:10px;
+  padding:6px 14px;font-size:15px;cursor:pointer}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px}
+.caldow{text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;padding:2px 0}
+.calcell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--border);cursor:pointer;color:var(--ink2);gap:2px}
+.calcell .phdot{width:5px;height:5px;border-radius:99px}
+.calcell.blank{background:none;border:none;cursor:default}
+.calcell.done{background:rgba(12,163,12,.18);border-color:var(--good);color:var(--good)}
+.calcell.miss{background:rgba(208,59,59,.15);border-color:var(--critical);color:var(--critical)}
+.calcell.nolog{opacity:.45}
+.calcell.today{outline:2px solid var(--ink);outline-offset:1px;color:var(--ink)}
+.calcell.future{opacity:.3;cursor:default}
+.ddmac{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;
+  padding:8px 0;border-bottom:1px solid var(--grid)}
+.ddmac .ok{color:var(--good);font-weight:700}.ddmac .bad{color:var(--critical);font-weight:700}
+.ddmeal{font-size:13px;color:var(--ink2);padding:7px 0;border-bottom:1px solid var(--grid)}
+.ddmeal b{color:var(--ink)}
+.phaserow{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px}
+.phaserow .ptop{display:flex;justify-content:space-between;align-items:center}
+.phaserow .pname{font-weight:800;font-size:13.5px;letter-spacing:.03em}
+.phaserow .pdates{font-size:11.5px;color:var(--muted)}
+.phaserow .pdesc{font-size:12px;color:var(--ink2);margin-top:4px;line-height:1.45}
+.photogrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+@media(min-width:960px){.photogrid{grid-template-columns:repeat(6,1fr)}}
+.photocell{position:relative;border-radius:12px;overflow:hidden;background:var(--surface2);aspect-ratio:3/4;cursor:pointer}
+.photocell img{width:100%;height:100%;object-fit:cover;display:block}
+.photocell .pdate{position:absolute;bottom:0;left:0;right:0;font-size:10px;font-weight:700;
+  background:rgba(0,0,0,.55);padding:3px 6px}
+#micBtn.rec{background:var(--critical);border-color:var(--critical)}
 #chatMsgs{max-height:38vh;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;padding:2px}
 .cm{max-width:85%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.4;white-space:pre-wrap}
 .cm.user{align-self:flex-end;background:var(--ink);color:#111;border-bottom-right-radius:4px}
 .cm.ai{align-self:flex-start;background:var(--surface2);color:var(--ink);border-bottom-left-radius:4px}
 .cm.typing{color:var(--muted);font-style:italic}
 .cm img{max-width:140px;border-radius:10px;display:block}
-.estbar{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);
-  border-radius:13px;padding:10px 12px;margin-bottom:10px}
-.estbar .estname{font-size:14px;font-weight:700}
-.estbar .estmacs{font-size:12px;color:var(--muted);margin-top:2px}
-.estbar .estinfo{flex:1;min-width:0}
-.estadd{background:var(--good);border:none;color:#fff;font-weight:700;font-size:14px;
-  border-radius:10px;padding:10px 16px;cursor:pointer;white-space:nowrap}
-.chatrow{display:flex;gap:8px;align-items:center}
-.chatrow input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--ink);
-  border-radius:11px;padding:11px 12px;font-size:16px;min-width:0}
-.chatrow button{background:var(--surface2);border:1px solid var(--border);color:var(--ink);
-  border-radius:11px;padding:10px 13px;font-size:17px;cursor:pointer;flex-shrink:0}
-.chatrow button#chatSend{background:var(--ink);color:#111;font-weight:700}
-#micBtn.rec{background:var(--critical);border-color:var(--critical)}
-/* editable estimate card in chat */
 .estcard{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px}
 .estcard input.ename{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);
   border-radius:9px;padding:8px 10px;font-size:15px;font-weight:700;margin-bottom:8px}
@@ -178,8 +215,17 @@ nav button.active{color:var(--ink)}
 .estgrid input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);
   border-radius:9px;padding:8px 6px;font-size:15px;text-align:center}
 .estconf{font-size:11px;color:var(--muted);margin-bottom:9px}
-/* feed */
+.estadd{background:var(--good);border:none;color:#fff;font-weight:700;font-size:14px;
+  border-radius:10px;padding:10px 16px;cursor:pointer;white-space:nowrap}
+.chatrow{display:flex;gap:8px;align-items:center}
+.chatrow input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--ink);
+  border-radius:11px;padding:11px 12px;font-size:16px;min-width:0}
+.chatrow button{background:var(--surface2);border:1px solid var(--border);color:var(--ink);
+  border-radius:11px;padding:10px 13px;font-size:17px;cursor:pointer;flex-shrink:0}
+.chatrow button#chatSend{background:var(--ink);color:#111;font-weight:700}
 .feedchips{display:flex;gap:8px;margin-bottom:12px}
+.feedwrap{display:block}
+@media(min-width:960px){.feedwrap{display:grid;grid-template-columns:1fr 1fr;gap:14px}}
 .feedcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;
   margin-bottom:12px;cursor:pointer}
 .feedimg{width:100%;height:150px;object-fit:cover;display:block;background:var(--surface2)}
@@ -196,7 +242,6 @@ nav button.active{color:var(--ink)}
   padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-left:auto;display:block}
 .feedtop{display:flex;align-items:center;margin-bottom:12px;gap:8px}
 .feedctx{font-size:12px;color:var(--muted);flex:1}
-/* meal detail sheet */
 #mdImgWrap{border-radius:14px;overflow:hidden;margin-bottom:12px}
 #mdImgWrap img{width:100%;height:170px;object-fit:cover;display:block}
 #mdOverview{font-size:13.5px;color:var(--ink2);line-height:1.5;margin-bottom:10px}
@@ -204,46 +249,68 @@ nav button.active{color:var(--ink)}
 #mdIngr{margin:0 0 14px;padding-left:18px;font-size:13.5px;color:var(--ink2);line-height:1.7}
 .mdbtns{display:flex;gap:10px}
 .mdbtns .btn{margin-top:0}
-/* calendar */
-.calhead{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 10px}
-.calhead .mname{font-size:15px;font-weight:700}
-.calhead button{background:var(--surface);border:1px solid var(--border);color:var(--ink);border-radius:10px;
-  padding:6px 14px;font-size:15px;cursor:pointer}
-.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:14px}
-.caldow{text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;padding:2px 0}
-.calcell{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;
-  font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--border);cursor:pointer;color:var(--ink2)}
-.calcell.blank{background:none;border:none;cursor:default}
-.calcell.done{background:rgba(12,163,12,.18);border-color:var(--good);color:var(--good)}
-.calcell.miss{background:rgba(208,59,59,.15);border-color:var(--critical);color:var(--critical)}
-.calcell.nolog{opacity:.45}
-.calcell.today{outline:2px solid var(--ink);outline-offset:1px;color:var(--ink)}
-.calcell.future{opacity:.25;cursor:default}
-.ddmac{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;
-  padding:8px 0;border-bottom:1px solid var(--grid)}
-.ddmac .ok{color:var(--good);font-weight:700}.ddmac .bad{color:var(--critical);font-weight:700}
-.ddmeal{font-size:13px;color:var(--ink2);padding:7px 0;border-bottom:1px solid var(--grid)}
-.ddmeal b{color:var(--ink)}
+#toast{position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-90px);
+  background:var(--surface2);border:1px solid var(--border);color:var(--ink);padding:11px 18px;
+  border-radius:99px;font-size:13.5px;font-weight:600;z-index:100;transition:transform .3s ease;max-width:86vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#loading{position:fixed;inset:0;background:rgba(13,13,13,.85);z-index:90;display:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#loading.show{display:flex}
+.spinner{width:38px;height:38px;border:3px solid var(--grid);border-top-color:var(--ink);
+  border-radius:99px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading .lt{font-size:14px;color:var(--ink2);font-weight:600}
+.settingcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px}
+.settingcard p{font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 12px}
+.keystatus{font-size:13px;font-weight:600;margin-top:10px}
+.keystatus.ok{color:var(--good)} .keystatus.no{color:var(--warning)}
 </style>
 </head>
 <body>
 <header>
-  <h1>Macros<span id="todayChip" class="daychip"></span></h1>
+  <h1><span class="lucky">Lucky</span> Numbers<span id="todayChip" class="daychip"></span></h1>
   <div class="datechip" id="todayDate"></div>
 </header>
 <main>
   <!-- TODAY -->
   <section class="page active" id="page-today">
-    <div class="rings" id="rings"></div>
-    <div class="addrow">
-      <button class="addbtn" id="btnPhoto"><span class="ic">📷</span>Scan food</button>
-      <button class="addbtn" id="btnBarcode"><span class="ic"><svg width="22" height="20" viewBox="0 0 24 20" fill="currentColor"><rect x="1" y="2" width="2" height="16"/><rect x="5" y="2" width="1" height="16"/><rect x="8" y="2" width="3" height="16"/><rect x="13" y="2" width="1" height="16"/><rect x="16" y="2" width="2" height="16"/><rect x="20" y="2" width="1" height="16"/><rect x="22.5" y="2" width="1.5" height="16"/></svg></span>Barcode</button>
-      <button class="addbtn" id="btnDescribe"><span class="ic">💬</span>Describe</button>
-      <button class="addbtn" id="btnManual"><span class="ic">✎</span>Manual</button>
+    <div class="hero" id="planHero"></div>
+    <div class="cols">
+      <div>
+        <div class="card">
+          <h2>Today's checklist</h2>
+          <div id="checklist"></div>
+          <div class="daydone" id="dayDone">Day complete — all boxes green 💪</div>
+          <div class="weekline" id="weekLine"></div>
+        </div>
+        <div class="card">
+          <h2>Body</h2>
+          <div class="metrics">
+            <div class="metric"><label>Weight (lb)</label>
+              <div class="mrow"><input id="wInput" type="number" step="0.1" inputmode="decimal" placeholder="—">
+              <button id="wSave">✓</button></div></div>
+            <div class="metric"><label>Sleep (hrs)</label>
+              <div class="mrow"><input id="sInput" type="number" step="0.5" inputmode="decimal" placeholder="—">
+              <button id="sSave">✓</button></div></div>
+          </div>
+          <svg id="wchart" viewBox="0 0 340 110" preserveAspectRatio="none"></svg>
+          <div class="wtrend" id="wTrend"></div>
+        </div>
+      </div>
+      <div>
+        <div class="rings" id="rings"></div>
+        <div class="addrow">
+          <button class="addbtn" id="btnPhoto"><span class="ic">📷</span>Scan food</button>
+          <button class="addbtn" id="btnBarcode"><span class="ic"><svg width="22" height="20" viewBox="0 0 24 20" fill="currentColor"><rect x="1" y="2" width="2" height="16"/><rect x="5" y="2" width="1" height="16"/><rect x="8" y="2" width="3" height="16"/><rect x="13" y="2" width="1" height="16"/><rect x="16" y="2" width="2" height="16"/><rect x="20" y="2" width="1" height="16"/><rect x="22.5" y="2" width="1.5" height="16"/></svg></span>Barcode</button>
+          <button class="addbtn" id="btnDescribe"><span class="ic">💬</span>Describe</button>
+          <button class="addbtn" id="btnManual"><span class="ic">✎</span>Manual</button>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
+        <input type="file" id="progressPhotoInput" accept="image/*" capture="environment" style="display:none">
+        <h2 class="sect">Today's meals</h2>
+        <div id="mealList"></div>
+      </div>
     </div>
-    <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
-    <h2>Today's meals</h2>
-    <div id="mealList"></div>
   </section>
 
   <!-- FEED -->
@@ -256,15 +323,15 @@ nav button.active{color:var(--ink)}
       <button class="chip sel" data-feed="foryou">For you</button>
       <button class="chip" data-feed="favs">♥ Favorites</button>
     </div>
-    <div id="feedList"></div>
+    <div id="feedList" class="feedwrap"></div>
   </section>
 
-  <!-- HISTORY -->
-  <section class="page" id="page-history">
+  <!-- PLAN -->
+  <section class="page" id="page-plan">
     <div class="statcard">
-      <div><div class="big" id="statDone">–</div><div class="lbl">days completed</div></div>
+      <div><div class="big" id="statDone">–</div><div class="lbl">days complete</div></div>
       <div><div class="big" id="statTotal">–</div><div class="lbl">days tracked</div></div>
-      <div><div class="big" id="statStreak">–</div><div class="lbl">current streak</div></div>
+      <div><div class="big" id="statStreak">–</div><div class="lbl">streak</div></div>
     </div>
     <div class="calhead">
       <button id="calPrev">‹</button>
@@ -272,12 +339,16 @@ nav button.active{color:var(--ink)}
       <button id="calNext">›</button>
     </div>
     <div class="calgrid" id="calGrid"></div>
-    <p style="font-size:11.5px;color:var(--muted);margin:0 2px 10px">A day is complete when: calories under goal · protein over goal · fat under goal · carbs over goal on a HIGH day, under on moderate/low. Tap a day for details.</p>
+    <p style="font-size:11.5px;color:var(--muted);margin:0 2px 14px">Green = full checklist done. The colored dot under each date is the plan phase. Tap a day for details.</p>
+    <h2 class="sect">The road to April 17</h2>
+    <div id="phaseList"></div>
+    <h2 class="sect">Progress photos <button class="chkphotobtn" id="addPhotoBtn" style="margin:0 0 0 8px">+ Add</button></h2>
+    <div class="photogrid" id="photoGrid"></div>
   </section>
 
   <!-- GOALS -->
   <section class="page" id="page-goals">
-    <p style="font-size:12.5px;color:var(--muted);margin:2px 2px 12px">Your goals repeat weekly. Tap a day to edit.</p>
+    <p style="font-size:12.5px;color:var(--muted);margin:2px 2px 12px" id="goalsIntro"></p>
     <div id="goalList"></div>
   </section>
 
@@ -285,23 +356,21 @@ nav button.active{color:var(--ink)}
   <section class="page" id="page-settings">
     <div class="settingcard">
       <h3 style="margin:0;font-size:15px">AI photo scanning</h3>
-      <p>Photo scanning uses Claude to estimate macros from a picture of your food. Paste your Anthropic API key once — it's stored securely on the server, never in the app.</p>
+      <p>Uses Claude to estimate macros from photos and descriptions. Key is stored server-side.</p>
       <div class="field"><input type="password" id="apiKeyInput" placeholder="sk-ant-..."></div>
       <button class="btn primary" id="saveKeyBtn">Save key</button>
       <div class="keystatus" id="keyStatus"></div>
     </div>
     <div class="settingcard">
       <h3 style="margin:0;font-size:15px">Notifications</h3>
-      <p>Get a 9am heads-up on the day type (low / moderate / high), plus live warnings: fat or carbs getting close to the limit, and a 7pm nudge if protein is behind.</p>
+      <p>9am day-type briefing, live macro warnings, and the Sunday progress-photo reminder.</p>
       <button class="btn primary" id="notifBtn">Enable notifications</button>
       <div class="keystatus" id="notifStatus"></div>
       <button class="btn ghost" id="notifTest" style="display:none">Send test notification</button>
     </div>
     <div class="settingcard">
-      <h3 style="margin:0;font-size:15px">Tips</h3>
-      <p>• Add this page to your Home Screen (Share → Add to Home Screen) to use it like an app.<br>
-      • Barcode scanning looks up products in the free OpenFoodFacts database.<br>
-      • AI estimates are per visible portion — you can edit anything before saving.</p>
+      <h3 style="margin:0;font-size:15px">Lucky Numbers</h3>
+      <p>Your operating system for the Wasatch Warrior, April 17. Log honestly, check the boxes, and let the plan do the thinking.</p>
     </div>
   </section>
 </main>
@@ -309,7 +378,7 @@ nav button.active{color:var(--ink)}
 <nav>
   <button data-page="today" class="active"><span class="ic">◎</span>Today</button>
   <button data-page="feed"><span class="ic">🍽</span>Feed</button>
-  <button data-page="history"><span class="ic">✓</span>History</button>
+  <button data-page="plan"><span class="ic">🗓</span>Plan</button>
   <button data-page="goals"><span class="ic">⚑</span>Goals</button>
   <button data-page="settings"><span class="ic">⚙︎</span>Settings</button>
 </nav>
@@ -391,7 +460,7 @@ nav button.active{color:var(--ink)}
   <div id="mdImgWrap"></div>
   <div id="mdMacs"></div>
   <div id="mdOverview"></div>
-  <h2 style="margin:0 0 6px">Ingredients</h2>
+  <h2 class="sect" style="margin:0 0 6px">Ingredients</h2>
   <ul id="mdIngr"></ul>
   <div class="mdbtns">
     <button class="btn ghost" id="mdFav" style="flex:1">♥ Save</button>
@@ -400,22 +469,26 @@ nav button.active{color:var(--ink)}
   <button class="btn ghost" id="mdClose">Close</button>
 </div>
 
-<!-- history day detail sheet -->
+<!-- day detail sheet -->
 <div class="sheet" id="dayDetailSheet">
   <h3 id="ddTitle"></h3>
+  <div id="ddChecklist" style="margin-bottom:6px"></div>
   <div id="ddChecks"></div>
-  <h2 style="margin:14px 0 4px">Meals</h2>
+  <h2 class="sect" style="margin:14px 0 4px">Meals</h2>
   <div id="ddMeals"></div>
   <button class="btn ghost" id="ddClose" style="margin-top:14px">Close</button>
 </div>
 
 <div id="toast"></div>
-<div id="loading"><div class="spinner"></div><div class="lt" id="loadingText">Analyzing…</div></div>
+<div id="loading"><div class="spinner"></div><div class="lt" id="loadingText">Working…</div></div>
 
 <script>
 const SB = 'https://rvbyxvwifzcnfrjsdgkh.supabase.co';
 const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2Ynl4dndpZnpjbmZyanNkZ2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MjA4NzIsImV4cCI6MjA5MTA5Njg3Mn0.3lEbeX3UXN9eooaiQ0ks8qRwPq6qjRNizOQWOis7BB0';
 const H = {'apikey': ANON, 'Authorization': 'Bearer ' + ANON, 'Content-Type': 'application/json'};
+const VAPID_PUB = 'BJTMVMdr4qb1Chxc7JiZbTbmoOuvf3DtySl39OqcsFvdzNACNqC7TFdYWUa-qBmp2bjGhtsuYEywY9s01Sx3uuQ';
+const SHOW_DAY = '2027-04-17';
+const PLAN_START = '2026-08-20';
 const $ = id => document.getElementById(id);
 const MACROS = [
   {key:'calories', label:'Calories', color:'var(--cal)', unit:''},
@@ -424,20 +497,49 @@ const MACROS = [
   {key:'fat',      label:'Fat',      color:'var(--fat)', unit:'g'},
 ];
 const PRESETS = {
-  low:      {carbs:80,  protein:215, fat:60},
-  moderate: {carbs:165, protein:220, fat:55},
-  high:     {carbs:335, protein:235, fat:40},
+  low:      {carbs:100, protein:220, fat:60},
+  moderate: {carbs:190, protein:210, fat:55},
+  high:     {carbs:300, protein:200, fat:45},
 };
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const PH_COLORS = {cut1:'var(--ph-cut1)', reverse:'var(--ph-reverse)', bulk:'var(--ph-bulk)', prep:'var(--ph-prep)', show:'var(--ph-show)'};
+// weight projection anchors (piecewise linear)
+const W_ANCHORS = [['2026-08-20',185],['2026-10-01',176.5],['2026-10-08',177.5],['2027-01-08',189],['2027-04-17',176]];
 const kcal = (c,p,f) => Math.round(4*(Number(c)||0) + 4*(Number(p)||0) + 9*(Number(f)||0));
 const todayStr = () => new Date().toLocaleDateString('en-CA');
-const fmtDay = ds => { const d = new Date(ds + 'T12:00:00');
-  return d.toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'}); };
+const dowOf = ds => new Date(ds + 'T12:00:00').getDay();
+const fmtDay = ds => new Date(ds + 'T12:00:00').toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
+const addDays = (ds,n)=>{ const d=new Date(ds+'T12:00:00'); d.setDate(d.getDate()+n); return d.toLocaleDateString('en-CA'); };
 
-let goals = {};          // dow -> goal row
+let phases = [];           // ordered phase rows
+let phaseMacros = {};      // phase_id -> {dow: row}
 let todayMeals = [];
-let sheetCtx = null;     // {source, per100/perServing info for barcode}
+let todayChecks = {};      // item -> {done, note}
+let todayMetrics = {};     // {weight, sleep}
+let compounds = [];
+let sheetCtx = null;
 let bcScanner = null;
+
+function phaseForDate(ds){ return phases.find(p => ds >= p.start_date && ds <= p.end_date) || null; }
+function currentPhase(){ return phaseForDate(todayStr()); }
+function goalForDate(ds){
+  const ph = phaseForDate(ds);
+  if(ph && phaseMacros[ph.id]) return phaseMacros[ph.id][dowOf(ds)] ||
+    {label:'custom', calories:2000, carbs:150, protein:150, fat:60};
+  return {label:'custom', calories:2000, carbs:150, protein:150, fat:60};
+}
+function todayGoal(){ return goalForDate(todayStr()); }
+function projWeight(ds){
+  if(ds <= W_ANCHORS[0][0]) return W_ANCHORS[0][1];
+  for(let i=1;i<W_ANCHORS.length;i++){
+    if(ds <= W_ANCHORS[i][0]){
+      const [d0,w0]=W_ANCHORS[i-1], [d1,w1]=W_ANCHORS[i];
+      const t0=new Date(d0).getTime(), t1=new Date(d1).getTime(), t=new Date(ds).getTime();
+      return w0 + (w1-w0)*((t-t0)/(t1-t0));
+    }
+  }
+  return W_ANCHORS[W_ANCHORS.length-1][1];
+}
 
 // ---------- helpers ----------
 async function rest(path, opts={}){
@@ -468,6 +570,7 @@ function closeSheets(){ $('overlay').classList.remove('show');
   document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('show'));
   stopBarcode(); }
 $('overlay').addEventListener('click', closeSheets);
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // ---------- tabs ----------
 document.querySelectorAll('nav button').forEach(b=>{
@@ -476,17 +579,264 @@ document.querySelectorAll('nav button').forEach(b=>{
     document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     $('page-' + b.dataset.page).classList.add('active');
-    if(b.dataset.page==='history') renderHistory();
+    if(b.dataset.page==='plan') renderPlan();
     if(b.dataset.page==='goals') renderGoals();
     if(b.dataset.page==='settings'){ checkKey(); refreshNotifStatus(); }
     if(b.dataset.page==='feed') openFeed();
   });
 });
 
-// ---------- today ----------
-function goalForDow(dow){ return goals[dow] || {calories:2000, carbs:150, protein:150, fat:60, label:'custom'}; }
-function todayGoal(){ return goalForDow(new Date().getDay()); }
+// ---------- hero ----------
+function renderHero(){
+  const today = todayStr();
+  const ph = currentPhase();
+  const daysTo = Math.max(0, Math.round((new Date(SHOW_DAY+'T12:00:00') - new Date(today+'T12:00:00'))/86400000));
+  let phBlock = '';
+  if(ph){
+    const total = Math.round((new Date(ph.end_date+'T12:00:00') - new Date(ph.start_date+'T12:00:00'))/86400000)+1;
+    const done = Math.round((new Date(today+'T12:00:00') - new Date(ph.start_date+'T12:00:00'))/86400000)+1;
+    const wk = Math.ceil(done/7), wks = Math.ceil(total/7);
+    phBlock = `<div class="phname" style="color:${PH_COLORS[ph.id]||'var(--ink)'}">${escapeHtml(ph.name.toUpperCase())}
+        <span style="color:var(--muted);font-weight:600"> · week ${wk} of ${wks} · day ${done}/${total}</span></div>
+      <div class="phsub">${escapeHtml(ph.description)}</div>`;
+  }
+  const t0 = new Date(PLAN_START+'T12:00:00').getTime();
+  const bar = phases.map(p=>{
+    const s = new Date(p.start_date+'T12:00:00').getTime(), e = new Date(p.end_date+'T12:00:00').getTime()+86400000;
+    const w = (e-s);
+    const now = new Date(today+'T12:00:00').getTime();
+    const fillPct = now <= s ? 0 : now >= e ? 100 : Math.round(100*(now-s)/(e-s));
+    return `<div class="seg" style="flex-grow:${Math.max(1,Math.round(w/86400000))}">
+      <div class="fill" style="background:${PH_COLORS[p.id]||'#888'};width:${fillPct}%"></div></div>`;
+  }).join('');
+  const legend = phases.map(p=>`<span><i style="background:${PH_COLORS[p.id]||'#888'}"></i>${escapeHtml(p.name)}</span>`).join('');
+  $('planHero').innerHTML = `
+    <div class="herotitle">Road to Wasatch Warrior</div>
+    <div class="herodays">${daysTo} days to stage · April 17, 2027</div>
+    ${phBlock}
+    <div class="planbar">${bar}</div>
+    <div class="planlegend">${legend}</div>`;
+}
 
+// ---------- checklist ----------
+function compoundsToday(){
+  const ph = currentPhase(); const dw = String(dowOf(todayStr()));
+  return compounds.filter(c=>{
+    const dowOk = c.dows.split(',').map(s=>s.trim()).includes(dw);
+    const phOk = c.phases==='all' || !ph || c.phases.split(',').map(s=>s.trim()).includes(ph.id);
+    return dowOk && phOk;
+  });
+}
+function checkDefsFor(ds){
+  const dw = dowOf(ds);
+  const defs = [
+    {key:'macros', icon:'🎯', label:'Hit my macros', required:true},
+    {key:'workout', icon:'🏋️', label:'Workout', required:dw!==0, note:true},
+    {key:'cardio', icon:'🏃', label:'Cardio', required:dw!==0},
+    {key:'compounds', icon:'💉', label:'Compounds & ancillaries', required:true},
+  ];
+  if(dw===0) defs.push({key:'photo', icon:'📸', label:'Progress photo', required:true, photo:true});
+  return defs;
+}
+function isDayComplete(checks, ds, photoDone){
+  return checkDefsFor(ds).every(d=>{
+    if(!d.required) return true;
+    if(d.photo) return photoDone;
+    return checks[d.key] && checks[d.key].done;
+  });
+}
+let todayPhotoDone = false;
+function renderChecklist(){
+  const ds = todayStr();
+  const g = todayGoal();
+  const t = {calories:0,carbs:0,protein:0,fat:0};
+  todayMeals.forEach(m=>{ for(const k in t) t[k]+=Number(m[k])||0; });
+  const cToday = compoundsToday();
+  const compText = cToday.length
+    ? cToday.map(c=>c.name + (c.dose? ' ' + c.dose : '')).join(' · ')
+    : 'No compounds configured yet — tell Claude your list and it appears here.';
+  const html = checkDefsFor(ds).map(d=>{
+    const st = todayChecks[d.key] || {done:false, note:''};
+    const done = d.photo ? todayPhotoDone : st.done;
+    let sub = '';
+    if(d.key==='macros') sub = `<div class="chksub">${Math.round(t.calories)}/${g.calories} cal · C ${Math.round(t.carbs)}/${g.carbs} · P ${Math.round(t.protein)}/${g.protein} · F ${Math.round(t.fat)}/${g.fat}</div>`;
+    if(d.key==='compounds') sub = `<div class="chksub">${escapeHtml(compText)}</div>`;
+    let extra = '';
+    if(d.note) extra = `<input class="chknote" id="workoutNote" placeholder="What did you hit? e.g. Push — chest/shoulders/tris" value="${escapeHtml(st.note||'')}">`;
+    if(d.photo && !done) extra = `<button class="chkphotobtn" id="chkPhotoBtn">📸 Take this week's photo</button>`;
+    const opt = d.required ? '' : '<span class="chkopt">optional</span>';
+    return `<div class="chk ${done?'done':''}" data-key="${d.key}">
+      <button class="chkbox" data-key="${d.key}" ${d.photo?'data-photo="1"':''}>${done?'✓':''}</button>
+      <div class="chkmain"><div class="chklabel">${d.icon} ${d.label}${opt}</div>${sub}${extra}</div>
+    </div>`;
+  }).join('');
+  $('checklist').innerHTML = html;
+  document.querySelectorAll('.chkbox').forEach(b=>b.addEventListener('click', async ()=>{
+    if(b.dataset.photo){ $('progressPhotoInput').click(); return; }
+    const key = b.dataset.key;
+    const cur = todayChecks[key] || {done:false, note:''};
+    const next = !cur.done;
+    todayChecks[key] = {...cur, done: next};
+    renderChecklist();
+    try{
+      await rest('daily_checks?on_conflict=day,item', {method:'POST',
+        headers:{'Prefer':'resolution=merge-duplicates'},
+        body:{day: todayStr(), item:key, done: next, note: cur.note||'', updated_at: new Date().toISOString()}});
+    }catch(e){ toast(e.message); }
+  }));
+  const wn = $('workoutNote');
+  if(wn){ wn.addEventListener('change', async ()=>{
+    const cur = todayChecks['workout'] || {done:false, note:''};
+    todayChecks['workout'] = {...cur, note: wn.value};
+    try{
+      await rest('daily_checks?on_conflict=day,item', {method:'POST',
+        headers:{'Prefer':'resolution=merge-duplicates'},
+        body:{day: todayStr(), item:'workout', done: cur.done, note: wn.value, updated_at: new Date().toISOString()}});
+    }catch(e){ toast(e.message); }
+  }); }
+  const pb = $('chkPhotoBtn');
+  if(pb) pb.addEventListener('click', ()=>$('progressPhotoInput').click());
+  $('dayDone').style.display = isDayComplete(todayChecks, ds, todayPhotoDone) ? 'block' : 'none';
+  renderWeekLine();
+}
+async function renderWeekLine(){
+  try{
+    const ds = todayStr(); const dw = dowOf(ds);
+    const monday = addDays(ds, -( (dw+6) % 7 ));
+    const rows = await rest(`daily_checks?day=gte.${monday}&day=lte.${ds}&select=day,item,done,note`);
+    const byDay = {};
+    (rows||[]).forEach(r=>{ (byDay[r.day]=byDay[r.day]||{})[r.item]=r; });
+    let complete = 0; const workouts = [];
+    for(let d=monday; d<=ds; d=addDays(d,1)){
+      const c = byDay[d]||{};
+      const photoOk = dowOf(d)!==0 ? true : false; // photos load separately; today's covered above
+      if(checkDefsFor(d).every(x=>!x.required || (x.photo ? photoOk : (c[x.key]&&c[x.key].done)))) complete++;
+      if(c.workout && c.workout.done) workouts.push(c.workout.note || '✓');
+    }
+    $('weekLine').innerHTML = `This week: <b style="color:var(--ink)">${complete} day${complete===1?'':'s'} fully complete</b> · Workouts: ` +
+      (workouts.length ? workouts.map(escapeHtml).join(' · ') : '<span style="color:var(--serious)">none yet</span>');
+  }catch(e){ /* quiet */ }
+}
+
+// ---------- weight & sleep ----------
+async function loadTodayMetrics(){
+  try{
+    const rows = await rest(`day_metrics?day=eq.${todayStr()}`);
+    todayMetrics = (rows && rows[0]) || {};
+    if(todayMetrics.weight) $('wInput').value = todayMetrics.weight;
+    if(todayMetrics.sleep) $('sInput').value = todayMetrics.sleep;
+  }catch(e){}
+}
+async function saveMetric(field, val){
+  const body = {day: todayStr(), updated_at: new Date().toISOString()};
+  body[field] = val;
+  await rest('day_metrics?on_conflict=day', {method:'POST',
+    headers:{'Prefer':'resolution=merge-duplicates'}, body});
+}
+$('wSave').addEventListener('click', async ()=>{
+  const v = Number($('wInput').value); if(!v){ toast('Enter a weight'); return; }
+  try{ await saveMetric('weight', v); toast('Weight logged'); renderWeightChart(); }catch(e){ toast(e.message); }
+});
+$('sSave').addEventListener('click', async ()=>{
+  const v = Number($('sInput').value); if(!v){ toast('Enter hours'); return; }
+  try{ await saveMetric('sleep', v); toast('Sleep logged'); }catch(e){ toast(e.message); }
+});
+async function renderWeightChart(){
+  try{
+    const rows = await rest('day_metrics?select=day,weight&weight=not.is.null&order=day.asc');
+    const data = (rows||[]).slice(-45);
+    const svg = $('wchart');
+    if(!data.length){ svg.innerHTML = '<text x="10" y="60" fill="#898781" font-size="12">Log your first weigh-in to start the trend.</text>'; $('wTrend').textContent=''; return; }
+    const start = data[0].day, end = todayStr();
+    const span = Math.max(1, (new Date(end) - new Date(start))/86400000);
+    const all = data.map(r=>Number(r.weight));
+    const projStart = projWeight(start), projEnd = projWeight(end);
+    const lo = Math.min(...all, projStart, projEnd) - 1, hi = Math.max(...all, projStart, projEnd) + 1;
+    const X = ds => 6 + 328 * ((new Date(ds) - new Date(start))/86400000) / span;
+    const Y = w => 6 + 98 * (1 - (w - lo)/(hi - lo));
+    // projection line
+    let proj = '';
+    for(let i=0;i<=20;i++){
+      const ds = addDays(start, Math.round(span*i/20));
+      proj += (i?'L':'M') + X(ds).toFixed(1) + ',' + Y(projWeight(ds)).toFixed(1);
+    }
+    // actual line
+    let act = data.map((r,i)=>(i?'L':'M') + X(r.day).toFixed(1) + ',' + Y(Number(r.weight)).toFixed(1)).join('');
+    const last = data[data.length-1];
+    svg.innerHTML = `
+      <path d="${proj}" fill="none" stroke="#52514e" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <path d="${act}" fill="none" stroke="#3987e5" stroke-width="2"/>
+      <circle cx="${X(last.day)}" cy="${Y(Number(last.weight))}" r="3.5" fill="#3987e5"/>`;
+    // 7-day avg vs projection
+    const last7 = data.slice(-7).map(r=>Number(r.weight));
+    const avg = last7.reduce((a,b)=>a+b,0)/last7.length;
+    const diff = avg - projWeight(last.day);
+    const el = $('wTrend');
+    const mode = (currentPhase()||{}).mode || 'cut';
+    const ahead = mode==='cut' ? diff <= 0.5 : diff >= -0.5;
+    el.className = 'wtrend ' + (ahead ? 'ok':'warn');
+    el.textContent = `7-day avg ${avg.toFixed(1)} lb · plan says ${projWeight(last.day).toFixed(1)} · ` +
+      (Math.abs(diff) <= 0.7 ? 'right on plan ✓' :
+        diff > 0 ? `${diff.toFixed(1)} lb over plan${mode==='cut' ? ' — tighten up' : ' — fine in a bulk'}` :
+                   `${(-diff).toFixed(1)} lb under plan${mode==='cut' ? ' — ahead of schedule' : ' — eat more'}`);
+  }catch(e){}
+}
+
+// ---------- progress photos ----------
+function resizeToBlob(file, maxDim){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const scale = Math.min(1, maxDim/Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width*scale); cv.height = Math.round(img.height*scale);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      cv.toBlob(b=>b?resolve(b):reject(new Error('encode failed')), 'image/jpeg', 0.85);
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = ()=>reject(new Error('Could not read image'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+$('progressPhotoInput').addEventListener('change', async e=>{
+  const file = e.target.files[0]; e.target.value=''; if(!file) return;
+  loading(true, 'Saving progress photo…');
+  try{
+    const blob = await resizeToBlob(file, 1400);
+    const name = todayStr() + '-' + Date.now() + '.jpg';
+    const up = await fetch(SB + '/storage/v1/object/photos/' + name, {
+      method:'POST', headers:{'apikey':ANON, 'Authorization':'Bearer '+ANON, 'Content-Type':'image/jpeg'}, body: blob});
+    if(!up.ok) throw new Error('Upload failed (' + up.status + ')');
+    await rest('progress_photos', {method:'POST', headers:{'Prefer':'return=minimal'},
+      body:{day: todayStr(), path: name}});
+    todayPhotoDone = true;
+    loading(false); toast('Progress photo saved 📸');
+    renderChecklist();
+  }catch(err){ loading(false); toast(err.message); }
+});
+$('addPhotoBtn').addEventListener('click', ()=>$('progressPhotoInput').click());
+async function loadTodayPhoto(){
+  try{
+    const rows = await rest(`progress_photos?day=eq.${todayStr()}&select=id`);
+    todayPhotoDone = !!(rows && rows.length);
+  }catch(e){}
+}
+async function renderPhotos(){
+  try{
+    const rows = await rest('progress_photos?select=*&order=day.desc&limit=60');
+    if(!rows || !rows.length){ $('photoGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">No photos yet — Sundays are photo day.</div>'; return; }
+    $('photoGrid').innerHTML = rows.map(p=>{
+      const url = SB + '/storage/v1/object/public/photos/' + encodeURIComponent(p.path);
+      return `<div class="photocell" data-url="${url}">
+        <img loading="lazy" src="${url}" alt="">
+        <div class="pdate">${fmtDay(p.day)}</div>
+      </div>`;
+    }).join('');
+    document.querySelectorAll('.photocell').forEach(c=>c.addEventListener('click', ()=>window.open(c.dataset.url, '_blank')));
+  }catch(e){}
+}
+
+// ---------- rings & meals ----------
 function renderRings(){
   const g = todayGoal();
   const totals = {calories:0, carbs:0, protein:0, fat:0};
@@ -512,9 +862,11 @@ function renderRings(){
     </div>`;
   }).join('');
   const chip = $('todayChip'); const lbl = (g.label||'custom');
-  chip.textContent = lbl.toUpperCase() + ' DAY'; chip.className = 'daychip ' + lbl;
+  const ph = currentPhase();
+  chip.textContent = lbl.toUpperCase() + (ph ? ' · ' + ph.name.toUpperCase() : '');
+  chip.className = 'daychip ' + lbl;
 }
-const SRC_ICON = {photo:'📷', barcode:'🏷', manual:'✎', ai:'💬'};
+const SRC_ICON = {photo:'📷', barcode:'🏷', manual:'✎', ai:'💬', feed:'🍽'};
 function renderMeals(){
   if(!todayMeals.length){ $('mealList').innerHTML = '<div class="empty">Nothing logged yet — scan your first meal.</div>'; return; }
   $('mealList').innerHTML = todayMeals.map(m=>{
@@ -534,11 +886,9 @@ function renderMeals(){
     catch(e){ toast(e.message); }
   }));
 }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
 async function refreshToday(){
   todayMeals = await rest(`meals?day=eq.${todayStr()}&order=created_at.asc`) || [];
-  renderRings(); renderMeals();
+  renderRings(); renderMeals(); renderChecklist();
 }
 
 // ---------- meal sheet ----------
@@ -566,7 +916,6 @@ $('fAmount').addEventListener('input', applyPortion);
 $('autoCalBtn').addEventListener('click', ()=>{ $('fCal').value = kcal($('fCarbs').value, $('fProtein').value, $('fFat').value); });
 $('cancelMealBtn').addEventListener('click', closeSheets);
 async function saveMealRecord(rec){
-  // snapshot today's goal (first log of the day wins)
   const g = todayGoal();
   await rest('day_goals?on_conflict=day', {method:'POST',
     headers:{'Prefer':'resolution=ignore-duplicates'},
@@ -587,11 +936,9 @@ $('saveMealBtn').addEventListener('click', async ()=>{
   }catch(e){ toast(e.message); }
   $('saveMealBtn').disabled = false;
 });
-
-// ---------- manual ----------
 $('btnManual').addEventListener('click', ()=> openMealSheet({title:'Add meal manually', source:'manual'}));
 
-// ---------- AI chat (describe / photo scan / adjust) ----------
+// ---------- AI chat ----------
 const chat = {messages:[], estimate:null, source:'ai', busy:false};
 function chatReset(source, title){
   chat.messages = []; chat.estimate = null; chat.source = source; chat.busy = false;
@@ -667,7 +1014,6 @@ $('estAdd').addEventListener('click', async ()=>{
   }catch(e){ toast(e.message); }
   $('estAdd').disabled = false;
 });
-// voice input: on-device speech recognition when available, else keyboard dictation
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let rec = null;
 $('micBtn').addEventListener('click', ()=>{
@@ -685,8 +1031,6 @@ $('micBtn').addEventListener('click', ()=>{
     rec.start();
   }catch(e){ $('micBtn').classList.remove('rec'); rec = null; $('chatInput').focus(); }
 });
-
-// ---------- photo scan (opens the same chat so you can adjust) ----------
 $('btnPhoto').addEventListener('click', ()=> $('photoInput').click());
 $('photoInput').addEventListener('change', async e=>{
   const file = e.target.files[0]; e.target.value=''; if(!file) return;
@@ -731,7 +1075,6 @@ $('btnBarcode').addEventListener('click', async ()=>{
   }catch(e){ toast('Camera unavailable: ' + e); closeSheets(); }
 });
 $('bcCancel').addEventListener('click', closeSheets);
-// photo mode: native camera shutter, decode from the still image — never triggers the iOS camera prompt
 $('bcPhotoBtn').addEventListener('click', ()=>{ stopBarcode(); $('bcPhotoInput').click(); });
 $('bcPhotoInput').addEventListener('change', async e=>{
   const file = e.target.files[0]; e.target.value=''; if(!file) return;
@@ -785,11 +1128,16 @@ async function onBarcode(code){
   bcBusy = false;
 }
 
-// ---------- goals ----------
-const GOAL_ORDER = [1,2,3,4,5,6,0]; // Mon..Sun
+// ---------- goals (current phase template) ----------
+const GOAL_ORDER = [1,2,3,4,5,6,0];
 function renderGoals(){
+  const ph = currentPhase();
+  $('goalsIntro').textContent = ph
+    ? `These are the weekly targets for your current phase — ${ph.name}. They repeat weekly until the phase ends, then the next phase's numbers take over automatically. Tap a day to edit.`
+    : 'Weekly targets. Tap a day to edit.';
+  const pm = ph ? (phaseMacros[ph.id]||{}) : {};
   $('goalList').innerHTML = GOAL_ORDER.map(dow=>{
-    const g = goalForDow(dow);
+    const g = pm[dow] || {label:'custom',carbs:0,protein:0,fat:0,calories:0};
     return `<div class="goalrow" data-dow="${dow}">
       <div class="gday">${DAYS[dow].slice(0,3)}</div>
       <div class="gmac">C ${g.carbs}g · P ${g.protein}g · F ${g.fat}g · ${g.calories} cal</div>
@@ -801,8 +1149,9 @@ function renderGoals(){
 let goalDow = null;
 function openGoalSheet(dow){
   goalDow = dow;
-  const g = goalForDow(dow);
-  $('goalSheetTitle').textContent = DAYS[dow] + ' goal';
+  const ph = currentPhase(); if(!ph){ toast('No active phase'); return; }
+  const g = (phaseMacros[ph.id]||{})[dow] || {label:'custom',carbs:0,protein:0,fat:0,calories:0};
+  $('goalSheetTitle').textContent = DAYS[dow] + ' · ' + ph.name;
   $('gCarbs').value=g.carbs; $('gProtein').value=g.protein; $('gFat').value=g.fat; $('gCal').value=g.calories;
   selPresetChip(g.label);
   openSheet($('goalSheet'));
@@ -820,23 +1169,32 @@ document.querySelectorAll('#presetChips .chip').forEach(c=>c.addEventListener('c
 $('gAutoCal').addEventListener('click', ()=>{ $('gCal').value = kcal($('gCarbs').value, $('gProtein').value, $('gFat').value); });
 $('cancelGoalBtn').addEventListener('click', closeSheets);
 $('saveGoalBtn').addEventListener('click', async ()=>{
+  const ph = currentPhase(); if(!ph) return;
   const sel = document.querySelector('#presetChips .chip.sel');
-  const body = {day_of_week:goalDow, label: sel ? sel.dataset.preset : 'custom',
+  const body = {phase_id: ph.id, day_of_week:goalDow, label: sel ? sel.dataset.preset : 'custom',
     carbs:Number($('gCarbs').value)||0, protein:Number($('gProtein').value)||0,
     fat:Number($('gFat').value)||0, calories:Number($('gCal').value)||kcal($('gCarbs').value,$('gProtein').value,$('gFat').value)};
   try{
-    await rest('macro_goals?on_conflict=day_of_week', {method:'POST',
+    await rest('phase_macros?on_conflict=phase_id,day_of_week', {method:'POST',
       headers:{'Prefer':'resolution=merge-duplicates'}, body});
-    goals[goalDow] = body;
-    closeSheets(); renderGoals(); renderRings(); toast(DAYS[goalDow] + ' goal saved');
+    (phaseMacros[ph.id] = phaseMacros[ph.id] || {})[goalDow] = body;
+    closeSheets(); renderGoals(); renderRings(); renderChecklist(); toast(DAYS[goalDow] + ' goal saved');
   }catch(e){ toast(e.message); }
 });
 
-// ---------- history (calendar) ----------
-// Completion rules: calories UNDER goal · protein OVER goal · fat UNDER goal ·
-// carbs OVER on a high day, UNDER on moderate/low/custom days.
-function dayChecks(t, goal){
+// ---------- plan page (calendar + phases + photos) ----------
+// Completion rules by mode: cut → cal under, protein over, fat under, carbs by label.
+// bulk → cal & carbs & protein over (hit the fuel), fat under.
+function dayChecksMacro(t, goal, mode){
   const label = (goal.label||'custom').toLowerCase();
+  if(mode === 'bulk'){
+    return [
+      {k:'calories', label:'Calories', unit:'', ok: t.calories >= goal.calories - 100, rule:'hit', val:t.calories, goal:goal.calories},
+      {k:'protein', label:'Protein', unit:'g', ok: t.protein >= goal.protein, rule:'over', val:t.protein, goal:goal.protein},
+      {k:'carbs', label:'Carbs', unit:'g', ok: t.carbs >= goal.carbs - 25, rule:'hit', val:t.carbs, goal:goal.carbs},
+      {k:'fat', label:'Fat', unit:'g', ok: t.fat <= goal.fat + 10, rule:'under', val:t.fat, goal:goal.fat},
+    ];
+  }
   const carbsOver = label === 'high';
   return [
     {k:'calories', label:'Calories', unit:'', ok: t.calories <= goal.calories, rule:'under', val:t.calories, goal:goal.calories},
@@ -846,12 +1204,14 @@ function dayChecks(t, goal){
     {k:'fat', label:'Fat', unit:'g', ok: t.fat <= goal.fat, rule:'under', val:t.fat, goal:goal.fat},
   ];
 }
-let histData = null;     // {byDay, mealsByDay, snapByDay}
-let calYear, calMonth;   // currently displayed month
+let histData = null;
+let calYear, calMonth;
 async function loadHistData(){
-  const [meals, snaps] = await Promise.all([
+  const [meals, snaps, checks, photos] = await Promise.all([
     rest('meals?select=day,name,calories,carbs,protein,fat,source,created_at&order=created_at.asc'),
     rest('day_goals?select=*'),
+    rest('daily_checks?select=day,item,done,note'),
+    rest('progress_photos?select=day'),
   ]);
   const byDay = {}, mealsByDay = {};
   (meals||[]).forEach(m=>{
@@ -860,15 +1220,32 @@ async function loadHistData(){
     (mealsByDay[m.day] = mealsByDay[m.day] || []).push(m);
   });
   const snapByDay = {}; (snaps||[]).forEach(s=>snapByDay[s.day]=s);
-  histData = {byDay, mealsByDay, snapByDay};
+  const checksByDay = {}; (checks||[]).forEach(c=>{ (checksByDay[c.day]=checksByDay[c.day]||{})[c.item]=c; });
+  const photoDays = new Set((photos||[]).map(p=>p.day));
+  histData = {byDay, mealsByDay, snapByDay, checksByDay, photoDays};
+}
+function histGoal(ds){
+  return histData.snapByDay[ds] || goalForDate(ds);
 }
 function dayStatus(ds){
   const today = todayStr();
   if(ds > today) return 'future';
-  const t = histData.byDay[ds];
-  if(!t) return 'nolog';
-  const goal = histData.snapByDay[ds] || goalForDow(new Date(ds+'T12:00:00').getDay());
-  const ok = dayChecks(t, goal).every(c=>c.ok);
+  const hasMeals = !!histData.byDay[ds];
+  const hasChecks = !!histData.checksByDay[ds];
+  if(!hasMeals && !hasChecks) return 'nolog';
+  let ok;
+  if(ds >= PLAN_START){
+    const c = histData.checksByDay[ds] || {};
+    ok = checkDefsFor(ds).every(d=>{
+      if(!d.required) return true;
+      if(d.photo) return histData.photoDays.has(ds);
+      return c[d.key] && c[d.key].done;
+    });
+  } else {
+    if(!hasMeals) return 'nolog';
+    const mode = (phaseForDate(ds)||{}).mode || 'cut';
+    ok = dayChecksMacro(histData.byDay[ds], histGoal(ds), mode).every(x=>x.ok);
+  }
   if(ds === today) return ok ? 'today done' : 'today';
   return ok ? 'done' : 'miss';
 }
@@ -882,8 +1259,10 @@ function renderCalendar(){
   for(let d=1; d<=daysInMonth; d++){
     const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const st = dayStatus(ds);
-    const clickable = !st.includes('future') && st!=='nolog' ? `data-ds="${ds}"` : (histData.byDay[ds]?`data-ds="${ds}"`:'');
-    html += `<div class="calcell ${st}" ${clickable}>${d}</div>`;
+    const ph = phaseForDate(ds);
+    const dot = ph ? `<span class="phdot" style="background:${PH_COLORS[ph.id]||'#555'}"></span>` : '<span class="phdot"></span>';
+    const clickable = (histData.byDay[ds] || histData.checksByDay[ds]) ? `data-ds="${ds}"` : '';
+    html += `<div class="calcell ${st}" ${clickable}><span>${d}</span>${dot}</div>`;
   }
   $('calGrid').innerHTML = html;
   document.querySelectorAll('.calcell[data-ds]').forEach(c=>
@@ -891,15 +1270,14 @@ function renderCalendar(){
 }
 function renderStats(){
   const today = todayStr();
-  const days = Object.keys(histData.byDay).sort();
+  const allDays = new Set([...Object.keys(histData.byDay), ...Object.keys(histData.checksByDay)]);
+  const days = [...allDays].sort();
   let done=0, total=0, streak=0;
   if(days.length){
     const rows=[];
-    for(let d = new Date(days[0]+'T12:00:00'); ; d.setDate(d.getDate()+1)){
-      const ds = d.toLocaleDateString('en-CA');
-      if(ds >= today) break;
+    for(let d = days[0]; d < today; d = addDays(d,1)){
       total++;
-      const st = dayStatus(ds);
+      const st = dayStatus(d);
       rows.push(st);
       if(st==='done') done++;
     }
@@ -907,27 +1285,50 @@ function renderStats(){
   }
   $('statDone').textContent=done; $('statTotal').textContent=total; $('statStreak').textContent=streak;
 }
-async function renderHistory(){
+function renderPhaseList(){
+  const today = todayStr();
+  $('phaseList').innerHTML = phases.map(p=>{
+    const active = today >= p.start_date && today <= p.end_date;
+    const past = today > p.end_date;
+    const fmt = ds => new Date(ds+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'});
+    return `<div class="phaserow" style="${active?'border-color:'+(PH_COLORS[p.id]||'#888'):''};${past?'opacity:.55':''}">
+      <div class="ptop">
+        <span class="pname" style="color:${PH_COLORS[p.id]||'var(--ink)'}">${escapeHtml(p.name.toUpperCase())}${active?' · NOW':''}${past?' ✓':''}</span>
+        <span class="pdates">${fmt(p.start_date)} – ${fmt(p.end_date)}</span>
+      </div>
+      <div class="pdesc">${escapeHtml(p.description)}</div>
+    </div>`;
+  }).join('');
+}
+async function renderPlan(){
   try{
     await loadHistData();
     if(calYear===undefined){ const n=new Date(); calYear=n.getFullYear(); calMonth=n.getMonth(); }
-    renderStats(); renderCalendar();
+    renderStats(); renderCalendar(); renderPhaseList(); renderPhotos();
   }catch(e){ toast(e.message); }
 }
 $('calPrev').addEventListener('click', ()=>{ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); });
 $('calNext').addEventListener('click', ()=>{ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); });
 function openDayDetail(ds){
-  const t = histData.byDay[ds]; if(!t) return;
-  const goal = histData.snapByDay[ds] || goalForDow(new Date(ds+'T12:00:00').getDay());
-  const checks = dayChecks(t, goal);
+  const t = histData.byDay[ds] || {calories:0,carbs:0,protein:0,fat:0};
+  const goal = histGoal(ds);
+  const mode = (phaseForDate(ds)||{}).mode || 'cut';
+  const checks = dayChecksMacro(t, goal, mode);
   const isToday = ds===todayStr();
-  const ok = checks.every(c=>c.ok);
+  const st = dayStatus(ds);
+  const ok = st.includes('done');
   $('ddTitle').innerHTML = (isToday?'Today':fmtDay(ds)) + ' · <span class="glabel ' + (goal.label||'custom') + '">' +
     (goal.label||'custom').toUpperCase() + '</span> ' +
-    (isToday ? '<span class="badge progress">In progress</span>' : (ok?'<span class="badge done">✓ Completed</span>':'<span class="badge miss">✗ Missed</span>'));
-  $('ddChecks').innerHTML = checks.map(c=>
-    `<div class="ddmac"><span>${c.label} <span style="color:var(--muted);font-size:11px">(${c.rule})</span></span>
-     <span>${Math.round(c.val)} / ${c.goal}${c.unit} <span class="${c.ok?'ok':'bad'}">${c.ok?'✓':'✗'}</span></span></div>`).join('');
+    (isToday ? '<span class="badge progress">In progress</span>' : (ok?'<span class="badge done">✓ Complete</span>':'<span class="badge miss">✗ Incomplete</span>'));
+  const c = histData.checksByDay[ds] || {};
+  $('ddChecklist').innerHTML = ds >= PLAN_START ? checkDefsFor(ds).map(d=>{
+    const done = d.photo ? histData.photoDays.has(ds) : (c[d.key] && c[d.key].done);
+    const note = c[d.key] && c[d.key].note ? ' — ' + escapeHtml(c[d.key].note) : '';
+    return `<div style="font-size:13px;padding:3px 0"><span class="${done?'':''}" style="color:${done?'var(--good)':'var(--critical)'}">${done?'✓':'✗'}</span> ${d.icon} ${d.label}${note}${d.required?'':' <span class="chkopt">optional</span>'}</div>`;
+  }).join('') : '';
+  $('ddChecks').innerHTML = checks.map(x=>
+    `<div class="ddmac"><span>${x.label} <span style="color:var(--muted);font-size:11px">(${x.rule})</span></span>
+     <span>${Math.round(x.val)} / ${x.goal}${x.unit} <span class="${x.ok?'ok':'bad'}">${x.ok?'✓':'✗'}</span></span></div>`).join('');
   const ms = histData.mealsByDay[ds]||[];
   $('ddMeals').innerHTML = ms.length ? ms.map(m=>
     `<div class="ddmeal"><b>${SRC_ICON[m.source]||'✎'} ${escapeHtml(m.name)}</b><br>${Math.round(m.calories)} cal · C ${Math.round(m.carbs)}g · P ${Math.round(m.protein)}g · F ${Math.round(m.fat)}g</div>`).join('')
@@ -955,7 +1356,8 @@ function mealImg(m, cls){
 }
 async function openFeed(force){
   const rem = remainingMacros(); const g = todayGoal();
-  $('feedCtx').textContent = (g.label||'custom').toUpperCase() + ' day · left: ' +
+  const ph = currentPhase();
+  $('feedCtx').textContent = (g.label||'custom').toUpperCase() + ' day' + (ph? ' · '+ph.name : '') + ' · left: ' +
     rem.calories + ' cal · C ' + rem.carbs + ' · P ' + rem.protein + ' · F ' + rem.fat;
   if(feed.mode==='favs'){ renderFavs(); return; }
   const key = JSON.stringify([rem, g.label]);
@@ -964,7 +1366,7 @@ async function openFeed(force){
   $('feedList').innerHTML = '<div class="feedload">Cooking up ideas for your day…</div>';
   try{
     const favs = await rest('favorites?select=title&order=created_at.desc&limit=20');
-    const d = await fn({action:'recommend', label:g.label||'custom', remaining:rem,
+    const d = await fn({action:'recommend', label:g.label||'custom', mode:(ph||{}).mode||'cut', remaining:rem,
       hour:new Date().getHours(), exclude:feed.recent, favorites:(favs||[]).map(f=>f.title)});
     feed.meals = d.meals||[]; feed.key = key; feed.fetchedAt = Date.now();
     feed.recent = [...feed.meals.map(m=>m.title), ...feed.recent].slice(0, 30);
@@ -1074,7 +1476,6 @@ $('mdAte').addEventListener('click', async ()=>{
 });
 
 // ---------- push notifications ----------
-const VAPID_PUB = 'BJTMVMdr4qb1Chxc7JiZbTbmoOuvf3DtySl39OqcsFvdzNACNqC7TFdYWUa-qBmp2bjGhtsuYEywY9s01Sx3uuQ';
 function urlB64ToU8(s){
   const pad = '='.repeat((4 - s.length % 4) % 4);
   const b = atob((s + pad).replace(/-/g,'+').replace(/_/g,'/'));
@@ -1117,6 +1518,12 @@ $('notifTest').addEventListener('click', async ()=>{
   try{ const r = await fn({action:'test_push'}); toast('Sent to ' + r.sent + ' device(s)'); }
   catch(e){ toast(e.message); }
 });
+async function clearShownNotifs(){
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    (await reg.getNotifications()).forEach(n=>n.close());
+  }catch(e){}
+}
 
 // ---------- settings ----------
 async function checkKey(){
@@ -1141,25 +1548,27 @@ $('saveKeyBtn').addEventListener('click', async ()=>{
   if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
   $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
   try{
-    const rows = await rest('macro_goals?select=*');
-    (rows||[]).forEach(r=>goals[r.day_of_week]=r);
+    const [phRows, pmRows, cRows, chkRows] = await Promise.all([
+      rest('phases?select=*&order=sort'),
+      rest('phase_macros?select=*'),
+      rest('compound_items?select=*&order=sort'),
+      rest(`daily_checks?day=eq.${todayStr()}`),
+    ]);
+    phases = phRows||[];
+    (pmRows||[]).forEach(r=>{ (phaseMacros[r.phase_id] = phaseMacros[r.phase_id] || {})[r.day_of_week] = r; });
+    compounds = cRows||[];
+    (chkRows||[]).forEach(r=>{ todayChecks[r.item] = {done:r.done, note:r.note}; });
+    renderHero();
+    await Promise.all([loadTodayMetrics(), loadTodayPhoto()]);
     await refreshToday();
+    renderWeightChart();
   }catch(e){ toast('Could not load data: ' + e.message); }
   clearShownNotifs();
-  // refresh when returning to the app (e.g. next morning)
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){
     hideToast();
     $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
-    refreshToday();
-    clearShownNotifs(); }});
+    renderHero(); refreshToday(); clearShownNotifs(); }});
 })();
-// you're looking at the app, so clear delivered reminders from notification center
-async function clearShownNotifs(){
-  try{
-    const reg = await navigator.serviceWorker.ready;
-    (await reg.getNotifications()).forEach(n=>n.close());
-  }catch(e){}
-}
 </script>
 </body>
 </html>
