@@ -55,6 +55,10 @@ main{padding:16px 16px 8px;max-width:520px;margin:0 auto}
 .herotitle{font-size:17px;font-weight:800;font-family:'Playfair Display',serif;letter-spacing:.02em}
 .herodays{font-size:12px;color:var(--muted);margin-top:2px}
 .phname{font-size:13px;font-weight:800;letter-spacing:.05em;margin-top:10px}
+.herorow{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.herocount{text-align:center;flex-shrink:0}
+.hcnum{font-family:'Playfair Display',serif;font-size:48px;font-weight:800;line-height:.95;color:var(--brandlight)}
+.hclbl{font-size:10.5px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
 .phsub{font-size:12px;color:var(--ink2);margin-top:3px;line-height:1.45}
 .planbar{display:flex;height:10px;border-radius:99px;overflow:hidden;margin-top:12px;gap:2px}
 .planbar .seg{position:relative;background:var(--grid)}
@@ -351,11 +355,11 @@ nav button.active{color:var(--brandlight)}
       <button id="calNext">›</button>
     </div>
     <div class="calgrid" id="calGrid"></div>
-    <p style="font-size:11.5px;color:var(--muted);margin:0 2px 14px">Green = full checklist done. The colored dot under each date is the plan phase. Tap a day for details.</p>
-    <h2 class="sect">The road to April 17</h2>
-    <div id="phaseList"></div>
-    <h2 class="sect">Progress photos <button class="chkphotobtn" id="addPhotoBtn" style="margin:0 0 0 8px">+ Add</button></h2>
-    <div class="photogrid" id="photoGrid"></div>
+    <div class="card" style="margin-top:6px">
+      <h2>Progress photos</h2>
+      <button class="btn primary" id="addPhotoBtn">📸 Take progress photo</button>
+      <div class="photogrid" id="photoGrid"></div>
+    </div>
   </section>
 
   <!-- GOALS -->
@@ -606,16 +610,13 @@ function renderHero(){
   const today = todayStr();
   const ph = currentPhase();
   const daysTo = Math.max(0, Math.round((new Date(SHOW_DAY+'T12:00:00') - new Date(today+'T12:00:00'))/86400000));
-  let phBlock = '';
+  let phLine = '';
   if(ph){
     const total = Math.round((new Date(ph.end_date+'T12:00:00') - new Date(ph.start_date+'T12:00:00'))/86400000)+1;
     const done = Math.round((new Date(today+'T12:00:00') - new Date(ph.start_date+'T12:00:00'))/86400000)+1;
-    const wk = Math.ceil(done/7), wks = Math.ceil(total/7);
-    phBlock = `<div class="phname" style="color:${PH_COLORS[ph.id]||'var(--ink)'}">${escapeHtml(ph.name.toUpperCase())}
-        <span style="color:var(--muted);font-weight:600"> · week ${wk} of ${wks} · day ${done}/${total}</span></div>
-      <div class="phsub">${escapeHtml(ph.description)}</div>`;
+    phLine = `<div class="phname" style="color:${PH_COLORS[ph.id]||'var(--ink)'}">${escapeHtml(ph.name.toUpperCase())}
+      <span style="color:var(--muted);font-weight:600"> · day ${done}/${total}</span></div>`;
   }
-  const t0 = new Date(PLAN_START+'T12:00:00').getTime();
   const bar = phases.map(p=>{
     const s = new Date(p.start_date+'T12:00:00').getTime(), e = new Date(p.end_date+'T12:00:00').getTime()+86400000;
     const w = (e-s);
@@ -624,13 +625,15 @@ function renderHero(){
     return `<div class="seg" style="flex-grow:${Math.max(1,Math.round(w/86400000))}">
       <div class="fill" style="background:${PH_COLORS[p.id]||'#888'};width:${fillPct}%"></div></div>`;
   }).join('');
-  const legend = phases.map(p=>`<span><i style="background:${PH_COLORS[p.id]||'#888'}"></i>${escapeHtml(p.name)}</span>`).join('');
   $('planHero').innerHTML = `
-    <div class="herotitle">Road to Wasatch Warrior</div>
-    <div class="herodays">${daysTo} days to stage · April 17, 2027</div>
-    ${phBlock}
-    <div class="planbar">${bar}</div>
-    <div class="planlegend">${legend}</div>`;
+    <div class="herorow">
+      <div style="min-width:0">
+        <div class="herotitle">Road to Wasatch Warrior</div>
+        ${phLine}
+      </div>
+      <div class="herocount"><div class="hcnum">${daysTo}</div><div class="hclbl">days</div></div>
+    </div>
+    <div class="planbar">${bar}</div>`;
 }
 
 // ---------- checklist ----------
@@ -678,9 +681,12 @@ function renderChecklist(){
   const compText = cToday.length
     ? cToday.map(c=>c.name + (c.dose? ' ' + c.dose : '')).join(' · ')
     : 'No compounds configured yet — tell Claude your list and it appears here.';
-  const html = checkDefsFor(ds).map(d=>{
+  // unchecked first; checked sink to the bottom (still green)
+  const ordered = checkDefsFor(ds).map(d=>({d,
+    done: d.photo ? todayPhotoDone : !!(todayChecks[d.key] && todayChecks[d.key].done)}));
+  ordered.sort((a,b)=>(a.done?1:0)-(b.done?1:0));
+  const html = ordered.map(({d, done})=>{
     const st = todayChecks[d.key] || {done:false, note:''};
-    const done = d.photo ? todayPhotoDone : st.done;
     let sub = '';
     if(d.key==='macros') sub = `<div class="chksub">${Math.round(t.calories)}/${g.calories} cal · C ${Math.round(t.carbs)}/${g.carbs} · P ${Math.round(t.protein)}/${g.protein} · F ${Math.round(t.fat)}/${g.fat}</div>`;
     if(d.key==='compounds') sub = `<div class="chksub">${escapeHtml(compText)}</div>`;
@@ -1331,7 +1337,7 @@ async function renderPlan(){
   try{
     await loadHistData();
     if(calYear===undefined){ const n=new Date(); calYear=n.getFullYear(); calMonth=n.getMonth(); }
-    renderStats(); renderCalendar(); renderPhaseList(); renderPhotos();
+    renderStats(); renderCalendar(); renderPhotos();
   }catch(e){ toast(e.message); }
 }
 $('calPrev').addEventListener('click', ()=>{ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); });
