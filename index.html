@@ -517,7 +517,7 @@ const PRESETS = {
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const PH_COLORS = {cut1:'var(--ph-cut1)', reverse:'var(--ph-reverse)', bulk:'var(--ph-bulk)', prep:'var(--ph-prep)', show:'var(--ph-show)'};
 // weight projection anchors (piecewise linear)
-const W_ANCHORS = [['2026-08-20',185],['2026-10-01',176.5],['2026-10-08',177.5],['2027-01-08',189],['2027-04-17',176]];
+const W_ANCHORS = [['2026-08-22',177],['2026-09-16',173.5],['2026-09-23',174.5],['2027-01-08',186],['2027-04-17',175]];
 const kcal = (c,p,f) => Math.round(4*(Number(c)||0) + 4*(Number(p)||0) + 9*(Number(f)||0));
 const todayStr = () => new Date().toLocaleDateString('en-CA');
 const dowOf = ds => new Date(ds + 'T12:00:00').getDay();
