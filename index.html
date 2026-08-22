@@ -306,6 +306,10 @@ nav button.active{color:var(--brandlight)}
         <div class="wtrend" id="wTrend"></div>
       </div>
     </div>
+    <div class="card" id="doneCard" style="display:none">
+      <h2>Completed today</h2>
+      <div id="doneList"></div>
+    </div>
     <input type="file" id="progressPhotoInput" accept="image/*" capture="environment" style="display:none">
   </section>
 
@@ -684,8 +688,7 @@ function renderChecklist(){
   // unchecked first; checked sink to the bottom (still green)
   const ordered = checkDefsFor(ds).map(d=>({d,
     done: d.photo ? todayPhotoDone : !!(todayChecks[d.key] && todayChecks[d.key].done)}));
-  ordered.sort((a,b)=>(a.done?1:0)-(b.done?1:0));
-  const html = ordered.map(({d, done})=>{
+  const itemHtml = ({d, done})=>{
     const st = todayChecks[d.key] || {done:false, note:''};
     let sub = '';
     if(d.key==='macros') sub = `<div class="chksub">${Math.round(t.calories)}/${g.calories} cal · C ${Math.round(t.carbs)}/${g.carbs} · P ${Math.round(t.protein)}/${g.protein} · F ${Math.round(t.fat)}/${g.fat}</div>`;
@@ -698,8 +701,12 @@ function renderChecklist(){
       <button class="chkbox" data-key="${d.key}" ${d.photo?'data-photo="1"':''}>${done?'✓':''}</button>
       <div class="chkmain"><div class="chklabel">${d.icon} ${d.label}${opt}</div>${sub}${extra}</div>
     </div>`;
-  }).join('');
-  $('checklist').innerHTML = html;
+  };
+  const pending = ordered.filter(x=>!x.done), doneItems = ordered.filter(x=>x.done);
+  $('checklist').innerHTML = pending.map(itemHtml).join('') ||
+    '<div class="empty" style="padding:10px 0">Everything done for today 💪</div>';
+  $('doneList').innerHTML = doneItems.map(itemHtml).join('');
+  $('doneCard').style.display = doneItems.length ? 'block' : 'none';
   document.querySelectorAll('.chkbox').forEach(b=>b.addEventListener('click', async ()=>{
     if(b.dataset.photo){ $('progressPhotoInput').click(); return; }
     const key = b.dataset.key;
