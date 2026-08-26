@@ -94,7 +94,16 @@ main{padding:16px 16px 8px;max-width:520px;margin:0 auto}
 .metric input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);
   border-radius:9px;padding:8px 10px;font-size:15px;min-width:0}
 .metric button{background:var(--ink);color:#111;border:none;border-radius:9px;padding:8px 12px;font-weight:700;cursor:pointer}
-#wchart{width:100%;height:110px;margin-top:10px}
+#wchart{width:100%;height:140px;margin-top:10px}
+#sleepAvgRow{display:flex;align-items:baseline;gap:10px;margin:2px 0 10px}
+#sleepAvgNum{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--brandlight)}
+#sleepAvgLbl{font-size:12px;color:var(--muted);font-weight:600}
+.sleepbars{display:flex;gap:8px;align-items:flex-end;height:64px}
+.sleepbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
+.sleepbar .bar{width:100%;max-width:34px;border-radius:6px 6px 2px 2px;min-height:3px}
+.sleepbar .bl{font-size:9.5px;color:var(--muted);font-weight:700}
+.sleepbar .bh{font-size:10px;color:var(--ink2);font-weight:600}
+.sleepnote{font-size:12px;color:var(--muted);margin-top:8px}
 .wtrend{font-size:12px;margin-top:6px}
 .wtrend.ok{color:var(--good)} .wtrend.warn{color:var(--serious)}
 /* rings */
@@ -302,8 +311,14 @@ nav button.active{color:var(--brandlight)}
             <div class="mrow"><input id="sInput" type="number" step="0.5" inputmode="decimal" placeholder="—">
             <button id="sSave">✓</button></div></div>
         </div>
-        <svg id="wchart" viewBox="0 0 340 110" preserveAspectRatio="none"></svg>
+        <svg id="wchart" viewBox="0 0 340 140" preserveAspectRatio="none"></svg>
         <div class="wtrend" id="wTrend"></div>
+      </div>
+      <div class="card">
+        <h2>Sleep</h2>
+        <div id="sleepAvgRow"><span id="sleepAvgNum">—</span><span id="sleepAvgLbl">7-day rolling avg</span></div>
+        <div class="sleepbars" id="sleepBars"></div>
+        <div class="sleepnote" id="sleepNote"></div>
       </div>
     </div>
     <div class="card" id="doneCard" style="display:none">
@@ -579,11 +594,16 @@ async function fn(body){
   if(!r.ok) throw new Error(d.error || 'Server error');
   return d;
 }
-let toastTimer;
+let toastTimer, toastShownAt = 0;
 function hideToast(){ $('toast').classList.remove('show'); clearTimeout(toastTimer); }
-function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show');
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); toastShownAt = Date.now();
   clearTimeout(toastTimer); toastTimer=setTimeout(hideToast, 3200); }
 $('toast').addEventListener('click', hideToast);
+// iOS throttles timers when the app is backgrounded, which left stale toasts stuck on screen.
+// Watchdog sweep + hide on return-to-foreground make dismissal bulletproof.
+setInterval(()=>{ if($('toast').classList.contains('show') && Date.now() - toastShownAt > 3500) hideToast(); }, 1000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') hideToast(); });
+window.addEventListener('pageshow', hideToast);
 function loading(on, text){ $('loadingText').textContent = text||'Working…';
   $('loading').classList.toggle('show', !!on); }
 function openSheet(el){ $('overlay').classList.add('show'); el.classList.add('show'); }
@@ -604,7 +624,7 @@ document.querySelectorAll('nav button').forEach(b=>{
     if(b.dataset.page==='goals') renderGoals();
     if(b.dataset.page==='settings'){ checkKey(); refreshNotifStatus(); }
     if(b.dataset.page==='feed') openFeed();
-    if(b.dataset.page==='dash'){ renderHero(); renderChecklist(); renderWeightChart(); }
+    if(b.dataset.page==='dash'){ renderHero(); renderChecklist(); renderWeightChart(); renderSleepCard(); }
     if(b.dataset.page==='macros') refreshToday();
   });
 });
@@ -775,7 +795,7 @@ $('wSave').addEventListener('click', async ()=>{
 });
 $('sSave').addEventListener('click', async ()=>{
   const v = Number($('sInput').value); if(!v){ toast('Enter hours'); return; }
-  try{ await saveMetric('sleep', v); toast('Sleep logged'); }catch(e){ toast(e.message); }
+  try{ await saveMetric('sleep', v); toast('Sleep logged'); renderSleepCard(); }catch(e){ toast(e.message); }
 });
 async function renderWeightChart(){
   try{
@@ -787,9 +807,24 @@ async function renderWeightChart(){
     const span = Math.max(1, (new Date(end) - new Date(start))/86400000);
     const all = data.map(r=>Number(r.weight));
     const projStart = projWeight(start), projEnd = projWeight(end);
-    const lo = Math.min(...all, projStart, projEnd) - 1, hi = Math.max(...all, projStart, projEnd) + 1;
-    const X = ds => 6 + 328 * ((new Date(ds) - new Date(start))/86400000) / span;
-    const Y = w => 6 + 98 * (1 - (w - lo)/(hi - lo));
+    const lo = Math.floor(Math.min(...all, projStart, projEnd) - 1), hi = Math.ceil(Math.max(...all, projStart, projEnd) + 1);
+    // plot area with room for axis labels: x 32..334, y 6..114
+    const X = ds => 32 + 302 * ((new Date(ds) - new Date(start))/86400000) / span;
+    const Y = w => 6 + 108 * (1 - (w - lo)/(hi - lo));
+    // y axis: ~4 gridlines at whole-pound steps
+    const step = Math.max(1, Math.round((hi - lo)/4));
+    let grid = '', ylabels = '';
+    for(let w = lo; w <= hi; w += step){
+      const y = Y(w).toFixed(1);
+      grid += `<line x1="32" y1="${y}" x2="334" y2="${y}" stroke="#2c2c3a" stroke-width="1"/>`;
+      ylabels += `<text x="28" y="${(Y(w)+3).toFixed(1)}" fill="#898781" font-size="9" text-anchor="end">${w}</text>`;
+    }
+    // x axis: date labels at start / middle / end
+    const fmtD = ds => { const d = new Date(ds+'T12:00:00'); return (d.getMonth()+1)+'/'+d.getDate(); };
+    const mid = addDays(start, Math.round(span/2));
+    let xlabels = `<text x="32" y="127" fill="#898781" font-size="9" text-anchor="start">${fmtD(start)}</text>` +
+      `<text x="183" y="127" fill="#898781" font-size="9" text-anchor="middle">${fmtD(mid)}</text>` +
+      `<text x="334" y="127" fill="#898781" font-size="9" text-anchor="end">${fmtD(end)}</text>`;
     // projection line
     let proj = '';
     for(let i=0;i<=20;i++){
@@ -799,7 +834,9 @@ async function renderWeightChart(){
     // actual line
     let act = data.map((r,i)=>(i?'L':'M') + X(r.day).toFixed(1) + ',' + Y(Number(r.weight)).toFixed(1)).join('');
     const last = data[data.length-1];
-    svg.innerHTML = `
+    svg.innerHTML = grid + ylabels + xlabels + `
+      <line x1="32" y1="6" x2="32" y2="114" stroke="#383848" stroke-width="1"/>
+      <line x1="32" y1="114" x2="334" y2="114" stroke="#383848" stroke-width="1"/>
       <path d="${proj}" fill="none" stroke="#52514e" stroke-width="1.5" stroke-dasharray="4 4"/>
       <path d="${act}" fill="none" stroke="#3987e5" stroke-width="2"/>
       <circle cx="${X(last.day)}" cy="${Y(Number(last.weight))}" r="3.5" fill="#3987e5"/>`;
@@ -815,6 +852,38 @@ async function renderWeightChart(){
       (Math.abs(diff) <= 0.7 ? 'right on plan ✓' :
         diff > 0 ? `${diff.toFixed(1)} lb over plan${mode==='cut' ? ' — tighten up' : ' — fine in a bulk'}` :
                    `${(-diff).toFixed(1)} lb under plan${mode==='cut' ? ' — ahead of schedule' : ' — eat more'}`);
+  }catch(e){}
+}
+async function renderSleepCard(){
+  try{
+    // last 7 calendar days ending today; average over the nights actually logged
+    const from = addDays(todayStr(), -6);
+    const rows = await rest(`day_metrics?select=day,sleep&sleep=not.is.null&day=gte.${from}&order=day.asc`);
+    const byDay = {}; (rows||[]).forEach(r=>byDay[r.day]=Number(r.sleep));
+    const logged = Object.values(byDay);
+    if(!logged.length){
+      $('sleepAvgNum').textContent = '—';
+      $('sleepBars').innerHTML = '';
+      $('sleepNote').textContent = 'Log your hours each morning to start the rolling average.';
+      return;
+    }
+    const avg = logged.reduce((a,b)=>a+b,0)/logged.length;
+    $('sleepAvgNum').textContent = avg.toFixed(1) + ' hrs';
+    const DL = ['S','M','T','W','T','F','S'];
+    const maxH = Math.max(9, ...logged);
+    let bars = '';
+    for(let d = from; d <= todayStr(); d = addDays(d,1)){
+      const h = byDay[d];
+      const col = h===undefined ? 'var(--border)' : h >= 7 ? 'var(--good)' : h >= 6 ? '#fab219' : '#ec835a';
+      const pct = h===undefined ? 4 : Math.max(6, Math.round(100*h/maxH));
+      bars += `<div class="sleepbar"><span class="bh">${h===undefined?'':h}</span>
+        <span class="bar" style="height:${pct}%;background:${col};opacity:${h===undefined?.4:.9}"></span>
+        <span class="bl">${DL[dowOf(d)]}</span></div>`;
+    }
+    $('sleepBars').innerHTML = bars;
+    $('sleepNote').textContent = logged.length < 7
+      ? `${logged.length} of 7 nights logged — average firms up as you log each morning.`
+      : (avg >= 7 ? 'Solid recovery week 😴' : 'Averaging under 7 — growth happens in bed.');
   }catch(e){}
 }
 
@@ -1263,6 +1332,29 @@ async function loadHistData(){
 function histGoal(ds){
   return histData.snapByDay[ds] || goalForDate(ds);
 }
+// 0..1 score for how close the day's macros came to the plan.
+// Each macro contributes 1 when its rule is satisfied, decaying to 0 at 30% off target.
+function macroCloseness(ds){
+  const t = histData.byDay[ds]; if(!t) return null;
+  const goal = histGoal(ds);
+  const mode = (phaseForDate(ds)||{}).mode || 'cut';
+  const checks = dayChecksMacro(t, goal, mode);
+  let s = 0;
+  checks.forEach(x=>{
+    if(x.ok){ s += 1; return; }
+    const miss = Math.abs(Number(x.val) - Number(x.goal)) / Math.max(1, Number(x.goal));
+    s += Math.max(0, 1 - miss / 0.30);
+  });
+  return s / checks.length;
+}
+// green → light green → yellow → orange → red
+function scoreColor(s){
+  if(s >= 0.97) return '#0ca30c';
+  if(s >= 0.85) return '#7fce3f';
+  if(s >= 0.70) return '#fab219';
+  if(s >= 0.50) return '#ec835a';
+  return '#d03b3b';
+}
 function dayStatus(ds){
   const today = todayStr();
   if(ds > today) return 'future';
@@ -1298,11 +1390,20 @@ function renderCalendar(){
     const ph = phaseForDate(ds);
     const phc = ph ? (PH_COLORS[ph.id]||'#555') : null;
     const dot = phc ? `<span class="phdot" style="background:${phc}"></span>` : '<span class="phdot"></span>';
-    // tinted box: phase color washes the cell unless a completion color (done/miss) owns it
-    const tint = (phc && st!=='done' && st!=='miss' && !st.includes('today done'))
-      ? `style="background:color-mix(in srgb, ${phc} 16%, var(--surface));border-color:color-mix(in srgb, ${phc} 35%, var(--border))"` : '';
+    // Past days with logged meals get a closeness gradient (green→red) by how near
+    // the macros landed to plan. Today stays outlined/in-progress; no-log days stay dim.
+    let tint = '';
+    const isPast = ds < todayStr();
+    const score = isPast && st!=='nolog' ? macroCloseness(ds) : null;
+    if(score !== null){
+      const sc = scoreColor(score);
+      tint = `style="background:color-mix(in srgb, ${sc} 20%, var(--surface));border-color:color-mix(in srgb, ${sc} 55%, var(--border));color:${sc}"`;
+    } else if(phc && st!=='done' && st!=='miss' && !st.includes('today done')){
+      tint = `style="background:color-mix(in srgb, ${phc} 16%, var(--surface));border-color:color-mix(in srgb, ${phc} 35%, var(--border))"`;
+    }
+    const gradedCls = score !== null ? st.replace(/\b(done|miss)\b/g,'').trim() : st;
     const clickable = (histData.byDay[ds] || histData.checksByDay[ds]) ? `data-ds="${ds}"` : '';
-    html += `<div class="calcell ${st}" ${tint} ${clickable}><span>${d}</span>${dot}</div>`;
+    html += `<div class="calcell ${gradedCls}" ${tint} ${clickable}><span>${d}</span>${dot}</div>`;
   }
   $('calGrid').innerHTML = html;
   document.querySelectorAll('.calcell[data-ds]').forEach(c=>
@@ -1601,7 +1702,7 @@ $('saveKeyBtn').addEventListener('click', async ()=>{
     renderHero();
     await Promise.all([loadTodayMetrics(), loadTodayPhoto()]);
     await refreshToday();
-    renderWeightChart();
+    renderWeightChart(); renderSleepCard();
   }catch(e){ toast('Could not load data: ' + e.message); }
   clearShownNotifs();
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){
