@@ -73,8 +73,9 @@ h2.sect{margin:20px 4px 10px}
 .phname{font-size:12px;font-weight:800;letter-spacing:.09em;margin-top:8px}
 .herorow{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .herocount{text-align:center;flex-shrink:0}
-.hcnum{font-family:'Playfair Display',serif;font-size:50px;font-weight:800;line-height:.95;color:var(--brandlight)}
-.hclbl{font-size:10px;color:var(--muted);letter-spacing:.22em;text-transform:uppercase;margin-top:2px}
+.herocount{margin-top:-6px}
+.hcnum{font-family:'Playfair Display',serif;font-size:48px;font-weight:800;line-height:1.08;color:var(--brandlight)}
+.hclbl{font-size:10px;color:var(--muted);letter-spacing:.22em;text-transform:uppercase;margin-top:7px}
 .planbar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin-top:14px;gap:2px}
 .planbar .seg{position:relative;background:rgba(255,255,255,.08)}
 .planbar .seg .fill{position:absolute;inset:0;width:0}
@@ -153,7 +154,9 @@ h2.sect{margin:20px 4px 10px}
   padding:12px 13px;margin-bottom:9px;display:flex;align-items:center;gap:11px;box-shadow:var(--shadow)}
 .meal .mmain{flex:1;min-width:0}
 .meal .mname{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.meal .mmac{font-size:11.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+.meal .mmac{font-size:11.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums;display:none}
+.meal.open .mmac{display:block}
+.meal{cursor:pointer}
 .meal .msrc{font-size:15px}
 .meal .mdel{background:none;border:none;color:var(--muted);font-size:16px;padding:6px;cursor:pointer}
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:24px 10px}
@@ -320,7 +323,6 @@ nav button.active{color:var(--brandlight)}
         <h2>Checklist</h2>
         <div id="checklist"></div>
         <div class="daydone" id="dayDone">Day complete 💪</div>
-        <div class="weekline" id="weekLine"></div>
       </div>
       <div class="card">
         <h2>Body</h2>
@@ -674,7 +676,7 @@ function checkDefsFor(ds){
     {key:'macros', icon:'🎯', label:'Macros', required:true},
     {key:'workout', icon:'🏋️', label:'Workout', required:dw!==0, note:true},
     {key:'cardio', icon:'🏃', label:'Cardio', required:dw!==0},
-    {key:'compounds', icon:'💉', label:'Compounds', required:true},
+    {key:'compounds', icon:'💉', label:'Compounds and Ancillaries', required:true},
   ];
   if(dw===5) defs.push({key:'photo', icon:'📸', label:'Progress photo', required:true, photo:true});
   return defs;
@@ -692,18 +694,12 @@ function renderChecklist(){
   const g = todayGoal();
   const t = {calories:0,carbs:0,protein:0,fat:0};
   todayMeals.forEach(m=>{ for(const k in t) t[k]+=Number(m[k])||0; });
-  const cToday = compoundsToday();
-  const compText = cToday.length
-    ? cToday.map(c=>c.name + (c.dose? ' ' + c.dose : '')).join(' · ')
-    : 'No compounds configured';
   // unchecked first; checked sink to the bottom (still green)
   const ordered = checkDefsFor(ds).map(d=>({d,
     done: d.photo ? todayPhotoDone : !!(todayChecks[d.key] && todayChecks[d.key].done)}));
   const itemHtml = ({d, done})=>{
     const st = todayChecks[d.key] || {done:false, note:''};
-    let sub = '';
-    if(d.key==='macros') sub = `<div class="chksub">${Math.round(t.calories)}/${g.calories} cal · C ${Math.round(t.carbs)}/${g.carbs} · P ${Math.round(t.protein)}/${g.protein} · F ${Math.round(t.fat)}/${g.fat}</div>`;
-    if(d.key==='compounds') sub = `<div class="chksub">${escapeHtml(compText)}</div>`;
+    const sub = '';
     let extra = '';
     if(d.note) extra = `<input class="chknote" id="workoutNote" placeholder="What did you hit?" value="${escapeHtml(st.note||'')}">`;
     if(d.photo && !done) extra = `<button class="chkphotobtn" id="chkPhotoBtn">📸 Take photo</button>`;
@@ -744,25 +740,6 @@ function renderChecklist(){
   const pb = $('chkPhotoBtn');
   if(pb) pb.addEventListener('click', ()=>$('progressPhotoInput').click());
   $('dayDone').style.display = isDayComplete(todayChecks, ds, todayPhotoDone) ? 'block' : 'none';
-  renderWeekLine();
-}
-async function renderWeekLine(){
-  try{
-    const ds = todayStr(); const dw = dowOf(ds);
-    const monday = addDays(ds, -( (dw+6) % 7 ));
-    const rows = await rest(`daily_checks?day=gte.${monday}&day=lte.${ds}&select=day,item,done,note`);
-    const byDay = {};
-    (rows||[]).forEach(r=>{ (byDay[r.day]=byDay[r.day]||{})[r.item]=r; });
-    let complete = 0; const workouts = [];
-    for(let d=monday; d<=ds; d=addDays(d,1)){
-      const c = byDay[d]||{};
-      const photoOk = dowOf(d)!==5 ? true : (d===todayStr() ? todayPhotoDone : false);
-      if(checkDefsFor(d).every(x=>!x.required || (x.photo ? photoOk : (c[x.key]&&c[x.key].done)))) complete++;
-      if(c.workout && c.workout.done) workouts.push(c.workout.note || '✓');
-    }
-    $('weekLine').innerHTML = `<b style="color:var(--ink)">${complete}</b> complete this week` +
-      (workouts.length ? ' · ' + workouts.map(escapeHtml).join(' · ') : '');
-  }catch(e){ /* quiet */ }
 }
 
 // ---------- weight & sleep ----------
@@ -770,8 +747,6 @@ async function loadTodayMetrics(){
   try{
     const rows = await rest(`day_metrics?day=eq.${todayStr()}`);
     todayMetrics = (rows && rows[0]) || {};
-    if(todayMetrics.weight) $('wInput').value = todayMetrics.weight;
-    if(todayMetrics.sleep) $('sInput').value = todayMetrics.sleep;
   }catch(e){}
 }
 async function saveMetric(field, val){
@@ -782,11 +757,11 @@ async function saveMetric(field, val){
 }
 $('wSave').addEventListener('click', async ()=>{
   const v = Number($('wInput').value); if(!v){ toast('Enter a weight'); return; }
-  try{ await saveMetric('weight', v); toast('Weight logged'); renderWeightChart(); }catch(e){ toast(e.message); }
+  try{ await saveMetric('weight', v); $('wInput').value=''; toast('Weight logged'); renderWeightChart(); }catch(e){ toast(e.message); }
 });
 $('sSave').addEventListener('click', async ()=>{
   const v = Number($('sInput').value); if(!v){ toast('Enter hours'); return; }
-  try{ await saveMetric('sleep', v); toast('Sleep logged'); renderSleepCard(); }catch(e){ toast(e.message); }
+  try{ await saveMetric('sleep', v); $('sInput').value=''; toast('Sleep logged'); renderSleepCard(); }catch(e){ toast(e.message); }
 });
 async function renderWeightChart(){
   try{
@@ -839,8 +814,8 @@ async function renderWeightChart(){
     const mode = (currentPhase()||{}).mode || 'cut';
     const ahead = mode==='cut' ? diff <= 0.5 : diff >= -0.5;
     el.className = 'wtrend ' + (ahead ? 'ok':'warn');
-    el.textContent = `${avg.toFixed(1)} avg · plan ${projWeight(last.day).toFixed(1)} · ` +
-      (Math.abs(diff) <= 0.7 ? 'on plan ✓' :
+    el.textContent = `Avg: ${avg.toFixed(1)} · Plan: ${projWeight(last.day).toFixed(1)} · ` +
+      (Math.abs(diff) <= 0.7 ? 'On plan ✓' :
         diff > 0 ? `+${diff.toFixed(1)} lb` : `−${(-diff).toFixed(1)} lb ahead`);
   }catch(e){}
 }
@@ -972,6 +947,11 @@ function renderMeals(){
       <button class="mdel" data-id="${m.id}">✕</button>
     </div>`;
   }).join('');
+  // details stay hidden until the card is tapped
+  document.querySelectorAll('.meal').forEach(c=>c.addEventListener('click', e=>{
+    if(e.target.closest('.mdel')) return;
+    c.classList.toggle('open');
+  }));
   document.querySelectorAll('.mdel').forEach(b=>b.addEventListener('click', async ()=>{
     if(!confirm('Delete this meal?')) return;
     try{ await rest('meals?id=eq.' + b.dataset.id, {method:'DELETE'}); await refreshToday(); }
