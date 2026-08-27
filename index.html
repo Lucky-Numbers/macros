@@ -194,6 +194,9 @@ nav button.active{color:var(--brandlight)}
   padding:6px 14px;font-size:15px;cursor:pointer}
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px}
 .caldow{text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;padding:2px 0}
+.callegend{display:flex;flex-wrap:wrap;gap:10px 14px;margin:10px 2px 2px;font-size:10.5px;color:var(--muted);font-weight:600}
+.callegend span{display:flex;align-items:center;gap:5px}
+.callegend i{width:10px;height:10px;border-radius:3px;display:inline-block}
 .calcell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;
   font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--border);cursor:pointer;color:var(--ink2);gap:2px}
 .calcell .phdot{width:7px;height:7px;border-radius:99px}
@@ -374,6 +377,14 @@ nav button.active{color:var(--brandlight)}
       <button id="calNext">›</button>
     </div>
     <div class="calgrid" id="calGrid"></div>
+    <div class="callegend">
+      <span><i style="background:#0ca30c"></i>on plan</span>
+      <span><i style="background:#7fce3f"></i>close</span>
+      <span><i style="background:#fab219"></i>a bit over</span>
+      <span><i style="background:#ec835a"></i>over</span>
+      <span><i style="background:#d03b3b"></i>way over</span>
+      <span><i style="background:#6d9ee8"></i>under-fueled</span>
+    </div>
     <div class="card" style="margin-top:6px">
       <h2>Progress photos</h2>
       <button class="btn primary" id="addPhotoBtn">📸 Take progress photo</button>
@@ -1333,24 +1344,31 @@ function histGoal(ds){
   return histData.snapByDay[ds] || goalForDate(ds);
 }
 // 0..1 score for how close the day's macros came to the plan.
-// Each macro contributes 1 when its rule is satisfied, decaying to 0 at 30% off target.
+// GRACE gives a 7% no-penalty band on every rule; beyond that the score
+// decays to 0 at 30% off target. Also tracks which DIRECTION the misses
+// went — eating past a limit (over) vs leaving fuel on the table (under).
+const GRADE_START = '2026-08-17';  // 8/15–8/16 were only partially tracked while the app was being built
+const GRACE = 0.07;
 function macroCloseness(ds){
   const t = histData.byDay[ds]; if(!t) return null;
   const goal = histGoal(ds);
   const mode = (phaseForDate(ds)||{}).mode || 'cut';
   const checks = dayChecksMacro(t, goal, mode);
-  let s = 0;
+  let s = 0, over = 0, under = 0;
   checks.forEach(x=>{
-    if(x.ok){ s += 1; return; }
-    const miss = Math.abs(Number(x.val) - Number(x.goal)) / Math.max(1, Number(x.goal));
+    const g = Math.max(1, Number(x.goal));
+    const miss = x.ok ? 0 : Math.max(0, Math.abs(Number(x.val) - g)/g - GRACE);
     s += Math.max(0, 1 - miss / 0.30);
+    if(miss > 0){ if(Number(x.val) > g) over += miss; else under += miss; }
   });
-  return s / checks.length;
+  return {score: s / checks.length, over, under};
 }
-// green → light green → yellow → orange → red
-function scoreColor(s){
+// green → light green, then splits by direction:
+// over-target days ramp yellow → orange → red; under-fueled days go slate blue.
+function scoreColor(s, underfueled){
   if(s >= 0.97) return '#0ca30c';
   if(s >= 0.85) return '#7fce3f';
+  if(underfueled) return s >= 0.60 ? '#6d9ee8' : '#3f6fc4';
   if(s >= 0.70) return '#fab219';
   if(s >= 0.50) return '#ec835a';
   return '#d03b3b';
@@ -1390,18 +1408,25 @@ function renderCalendar(){
     const ph = phaseForDate(ds);
     const phc = ph ? (PH_COLORS[ph.id]||'#555') : null;
     const dot = phc ? `<span class="phdot" style="background:${phc}"></span>` : '<span class="phdot"></span>';
-    // Past days with logged meals get a closeness gradient (green→red) by how near
-    // the macros landed to plan. Today stays outlined/in-progress; no-log days stay dim.
+    // Past days with logged meals get a closeness gradient by how near the macros
+    // landed to plan: green when on it, yellow→red when over targets, slate blue
+    // when the misses came from under-eating. Today stays outlined/in-progress;
+    // no-log days and the partially-tracked days before GRADE_START stay neutral.
     let tint = '';
     const isPast = ds < todayStr();
-    const score = isPast && st!=='nolog' ? macroCloseness(ds) : null;
-    if(score !== null){
-      const sc = scoreColor(score);
+    const phTint = phc ? `style="background:color-mix(in srgb, ${phc} 16%, var(--surface));border-color:color-mix(in srgb, ${phc} 35%, var(--border))"` : '';
+    const mc = (isPast && ds >= GRADE_START && st!=='nolog') ? macroCloseness(ds) : null;
+    let gradedCls = st;
+    if(mc){
+      const sc = scoreColor(mc.score, mc.under > mc.over);
       tint = `style="background:color-mix(in srgb, ${sc} 20%, var(--surface));border-color:color-mix(in srgb, ${sc} 55%, var(--border));color:${sc}"`;
+      gradedCls = st.replace(/\b(done|miss)\b/g,'').trim();
+    } else if(isPast && ds < GRADE_START){
+      gradedCls = st.replace(/\b(done|miss)\b/g,'').trim();
+      tint = phTint;
     } else if(phc && st!=='done' && st!=='miss' && !st.includes('today done')){
-      tint = `style="background:color-mix(in srgb, ${phc} 16%, var(--surface));border-color:color-mix(in srgb, ${phc} 35%, var(--border))"`;
+      tint = phTint;
     }
-    const gradedCls = score !== null ? st.replace(/\b(done|miss)\b/g,'').trim() : st;
     const clickable = (histData.byDay[ds] || histData.checksByDay[ds]) ? `data-ds="${ds}"` : '';
     html += `<div class="calcell ${gradedCls}" ${tint} ${clickable}><span>${d}</span>${dot}</div>`;
   }
