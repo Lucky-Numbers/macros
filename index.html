@@ -18,272 +18,290 @@
 <style>
 :root{
   color-scheme:dark;
-  --page:#0a0a14; --surface:#12121f; --surface2:#1a1a2e;
-  --ink:#e9edf5; --ink2:#c0c8d8; --muted:#8a93a8;
-  --grid:#232338; --border:rgba(120,170,255,.14);
+  --page:#0a0d18; --surface:#131829; --surface2:#1b2138; --field:#0e1322;
+  --ink:#eef1f8; --ink2:#c3cadb; --muted:#7e88a0;
+  --grid:#242b46; --line:rgba(255,255,255,.06); --border:rgba(255,255,255,.07);
   --brand:#00bfff; --brand2:#0099cc; --brandlight:#7fd4ff;
   --cal:#3987e5; --protein:#d95926; --carbs:#199e70; --fat:#c98500;
   --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
-  --low:#199e70; --moderate:#3987e5; --high:#e66767;
+  --low:#26c08d; --moderate:#5aa2f0; --high:#e66767;
   --ph-cut1:#3987e5; --ph-reverse:#898781; --ph-bulk:#d95926; --ph-prep:#199e70; --ph-show:#c98500;
+  --shadow:0 8px 28px rgba(0,0,0,.38);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
 html,body{margin:0;padding:0;background:var(--page);color:var(--ink);
-  font-family:'Inter',system-ui,-apple-system,"Segoe UI",sans-serif;}
-body{padding-bottom:calc(74px + env(safe-area-inset-bottom));
-  background:linear-gradient(135deg,#0a0a0a 0%,#12121f 55%,#1a1a2e 100%);min-height:100vh;}
-header{position:sticky;top:0;z-index:20;background:rgba(10,10,20,.9);backdrop-filter:blur(12px);
-  padding:calc(14px + env(safe-area-inset-top)) 18px 12px;display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid var(--border);}
-header h1{font-size:18px;margin:0;font-weight:800;letter-spacing:.05em;
+  font-family:'Inter',system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:-.01em}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom));min-height:100vh;
+  background:radial-gradient(130% 55% at 50% 0%, #151b32 0%, #0c1020 52%, #080a13 100%) fixed;
+  overscroll-behavior-y:none}
+button{font-family:inherit;letter-spacing:inherit}
+button:active{opacity:.85}
+
+/* ---------- header ---------- */
+header{position:sticky;top:0;z-index:20;background:rgba(9,11,20,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  padding:calc(12px + env(safe-area-inset-top)) 20px 10px;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:17px;margin:0;font-weight:800;letter-spacing:.06em;
   font-family:'Playfair Display',serif;text-transform:uppercase}
 header h1 .lucky{color:var(--brand)}
-.datechip{font-size:12px;color:var(--ink2);text-align:right}
-.daychip{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
-  padding:3px 9px;border-radius:99px;border:1px solid var(--border);margin-left:8px;vertical-align:1px}
+.datechip{font-size:12px;color:var(--muted);font-weight:600}
+.daychip{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.08em;
+  padding:3px 9px;border-radius:99px;background:var(--surface2);margin-left:9px;vertical-align:2px}
 .daychip.low{color:var(--low)} .daychip.moderate{color:var(--moderate)} .daychip.high{color:var(--high)}
-main{padding:16px 16px 8px;max-width:520px;margin:0 auto}
-.page{display:none} .page.active{display:block}
+
+main{padding:14px 16px 8px;max-width:520px;margin:0 auto}
+.page{display:none} .page.active{display:block;animation:pagein .22s ease}
+@keyframes pagein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .cols{display:block}
 @media(min-width:960px){
   main{max-width:1100px}
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
-  nav{max-width:1100px;margin:0 auto;border-radius:16px 16px 0 0}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  nav{max-width:1100px;margin:0 auto;border-radius:22px 22px 0 0}
 }
-/* hero */
-.hero{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:14px}
+
+/* ---------- cards ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;
+  padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card h2, h2.sect{margin:0 0 12px;font-size:11px;color:var(--muted);font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase}
+h2.sect{margin:20px 4px 10px}
+
+/* ---------- hero ---------- */
+.hero{background:linear-gradient(160deg, #16204a 0%, #121732 55%, #131829 100%);
+  border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
 .herotitle{font-size:17px;font-weight:800;font-family:'Playfair Display',serif;letter-spacing:.02em}
-.herodays{font-size:12px;color:var(--muted);margin-top:2px}
-.phname{font-size:13px;font-weight:800;letter-spacing:.05em;margin-top:10px}
+.phname{font-size:12px;font-weight:800;letter-spacing:.09em;margin-top:8px}
 .herorow{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .herocount{text-align:center;flex-shrink:0}
-.hcnum{font-family:'Playfair Display',serif;font-size:48px;font-weight:800;line-height:.95;color:var(--brandlight)}
-.hclbl{font-size:10.5px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
-.phsub{font-size:12px;color:var(--ink2);margin-top:3px;line-height:1.45}
-.planbar{display:flex;height:10px;border-radius:99px;overflow:hidden;margin-top:12px;gap:2px}
-.planbar .seg{position:relative;background:var(--grid)}
+.hcnum{font-family:'Playfair Display',serif;font-size:50px;font-weight:800;line-height:.95;color:var(--brandlight)}
+.hclbl{font-size:10px;color:var(--muted);letter-spacing:.22em;text-transform:uppercase;margin-top:2px}
+.planbar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin-top:14px;gap:2px}
+.planbar .seg{position:relative;background:rgba(255,255,255,.08)}
 .planbar .seg .fill{position:absolute;inset:0;width:0}
-.planlegend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-.planlegend span{font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:4px}
-.planlegend i{width:8px;height:8px;border-radius:99px;display:inline-block}
-/* checklist */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 14px 12px;margin-bottom:14px}
-.card h2{margin:0 0 10px;font-size:14px;color:var(--ink2);font-weight:700;letter-spacing:.02em}
-.chk{display:flex;align-items:flex-start;gap:12px;padding:10px 2px;border-bottom:1px solid var(--grid)}
-.chk:last-child{border-bottom:none}
-.chkbox{width:26px;height:26px;border-radius:99px;border:2px solid var(--muted);background:none;cursor:pointer;
-  flex-shrink:0;font-size:15px;line-height:1;color:#111;margin-top:1px}
+
+/* ---------- checklist ---------- */
+.chk{display:flex;align-items:flex-start;gap:13px;padding:12px 2px;border-bottom:1px solid var(--line)}
+.chk:last-child{border-bottom:none;padding-bottom:6px}
+.chkbox{width:27px;height:27px;border-radius:99px;border:1.7px solid var(--muted);background:none;cursor:pointer;
+  flex-shrink:0;font-size:14px;line-height:1;color:#fff;margin-top:1px;transition:background .15s,border-color .15s,transform .12s}
+.chkbox:active{transform:scale(.9)}
 .chk.done .chkbox{background:var(--good);border-color:var(--good)}
 .chkmain{flex:1;min-width:0}
-.chklabel{font-size:14.5px;font-weight:700}
-.chk.done .chklabel{color:var(--muted);text-decoration:line-through}
-.chksub{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.45}
-.chknote{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--ink);
-  border-radius:9px;padding:7px 10px;font-size:13px;margin-top:6px}
-.chkopt{font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:1px 7px;margin-left:6px;vertical-align:1px}
-.chkphotobtn{background:var(--surface2);border:1px solid var(--border);color:var(--ink);border-radius:9px;
-  padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px}
-.daydone{background:rgba(12,163,12,.12);border:1px solid var(--good);border-radius:12px;
-  padding:9px 12px;font-size:13px;font-weight:700;color:var(--good);text-align:center;margin-top:10px;display:none}
-.weekline{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
-/* metrics row */
+.chklabel{font-size:15px;font-weight:600}
+.chk.done .chklabel{color:var(--muted)}
+.chksub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5;font-variant-numeric:tabular-nums}
+.chknote{width:100%;background:var(--field);border:1px solid var(--line);color:var(--ink);
+  border-radius:11px;padding:8px 11px;font-size:13px;margin-top:7px}
+.chknote:focus{outline:none;border-color:var(--brand)}
+.chkopt{font-size:9.5px;color:var(--muted);background:var(--surface2);border-radius:99px;padding:2px 7px;margin-left:6px;vertical-align:1px;font-weight:700;letter-spacing:.05em}
+.chkphotobtn{background:var(--surface2);border:none;color:var(--ink);border-radius:11px;
+  padding:9px 13px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
+.daydone{background:rgba(12,163,12,.14);border-radius:13px;
+  padding:10px 12px;font-size:13px;font-weight:700;color:var(--good);text-align:center;margin-top:12px;display:none}
+.weekline{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5}
+.weekline b{font-weight:700}
+
+/* ---------- body metrics ---------- */
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.metric{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px}
-.metric label{display:block;font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.metric{background:var(--surface2);border-radius:14px;padding:11px 12px}
+.metric label{display:block;font-size:9.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
 .metric .mrow{display:flex;gap:6px}
-.metric input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);
-  border-radius:9px;padding:8px 10px;font-size:15px;min-width:0}
-.metric button{background:var(--ink);color:#111;border:none;border-radius:9px;padding:8px 12px;font-weight:700;cursor:pointer}
-#wchart{width:100%;height:140px;margin-top:10px}
-#sleepAvgRow{display:flex;align-items:baseline;gap:10px;margin:2px 0 10px}
-#sleepAvgNum{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--brandlight)}
-#sleepAvgLbl{font-size:12px;color:var(--muted);font-weight:600}
+.metric input{width:100%;background:var(--field);border:1px solid var(--line);color:var(--ink);
+  border-radius:10px;padding:8px 10px;font-size:16px;min-width:0;font-weight:600}
+.metric input:focus{outline:none;border-color:var(--brand)}
+.metric button{background:var(--brand);color:#001018;border:none;border-radius:10px;padding:8px 13px;font-weight:800;cursor:pointer;font-size:14px}
+#wchart{width:100%;height:140px;margin-top:12px}
+.wtrend{font-size:12px;margin-top:6px;font-weight:600}
+.wtrend.ok{color:var(--good)} .wtrend.warn{color:var(--serious)}
+
+/* ---------- sleep ---------- */
+#sleepAvgRow{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+#sleepAvgNum{font-family:'Playfair Display',serif;font-size:34px;font-weight:800;color:var(--brandlight)}
+#sleepAvgLbl{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.03em}
 .sleepbars{display:flex;gap:8px;align-items:flex-end;height:64px}
 .sleepbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
-.sleepbar .bar{width:100%;max-width:34px;border-radius:6px 6px 2px 2px;min-height:3px}
+.sleepbar .bar{width:100%;max-width:34px;border-radius:6px 6px 3px 3px;min-height:3px}
 .sleepbar .bl{font-size:9.5px;color:var(--muted);font-weight:700}
-.sleepbar .bh{font-size:10px;color:var(--ink2);font-weight:600}
-.sleepnote{font-size:12px;color:var(--muted);margin-top:8px}
-.wtrend{font-size:12px;margin-top:6px}
-.wtrend.ok{color:var(--good)} .wtrend.warn{color:var(--serious)}
-/* rings */
+.sleepbar .bh{font-size:10px;color:var(--ink2);font-weight:600;font-variant-numeric:tabular-nums}
+.sleepnote{font-size:12px;color:var(--muted);margin-top:10px}
+
+/* ---------- rings ---------- */
 .rings{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.ring-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;
-  padding:14px 10px 12px;text-align:center;position:relative}
+.ring-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;
+  padding:15px 10px 13px;text-align:center;box-shadow:var(--shadow)}
 .ringwrap{position:relative;width:112px;height:112px;margin:0 auto}
 .ringwrap svg{transform:rotate(-90deg)}
-.ring-track{fill:none;stroke:var(--grid);stroke-width:9}
+.ring-track{fill:none;stroke:rgba(255,255,255,.08);stroke-width:9}
 .ring-prog{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dasharray .6s ease}
 .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.rv{font-size:21px;font-weight:700;line-height:1}
-.rg{font-size:11px;color:var(--muted);margin-top:3px}
-.ring-label{margin-top:8px;font-size:13px;color:var(--ink2);font-weight:600;
+.rv{font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.rg{font-size:10.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+.ring-label{margin-top:9px;font-size:12.5px;color:var(--ink2);font-weight:700;
   display:flex;align-items:center;justify-content:center;gap:6px}
-.dot{width:8px;height:8px;border-radius:99px;display:inline-block}
-.ring-sub{font-size:11px;color:var(--muted);margin-top:2px;min-height:13px}
-.ring-sub.over{color:var(--serious);font-weight:600}
-.addrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 6px}
-.addbtn{background:var(--surface);border:1px solid var(--border);color:var(--ink);
-  border-radius:14px;padding:12px 4px;font-size:13px;font-weight:600;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;gap:5px}
-.addbtn:active{background:var(--surface2)}
-.addbtn .ic{font-size:21px;line-height:1}
-h2.sect{font-size:14px;color:var(--ink2);font-weight:700;margin:18px 2px 8px;letter-spacing:.02em}
-.meal{background:var(--surface);border:1px solid var(--border);border-radius:14px;
-  padding:11px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.dot{width:7px;height:7px;border-radius:99px;display:inline-block}
+.ring-sub{font-size:11px;color:var(--muted);margin-top:2px;min-height:13px;font-variant-numeric:tabular-nums}
+.ring-sub.over{color:var(--serious);font-weight:700}
+
+/* ---------- add row & meals ---------- */
+.addrow{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:16px 0 4px}
+.addbtn{background:var(--surface);border:1px solid var(--line);color:var(--ink2);
+  border-radius:16px;padding:13px 2px 11px;font-size:11px;font-weight:600;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .12s;box-shadow:var(--shadow)}
+.addbtn:active{transform:scale(.94);background:var(--surface2)}
+.addbtn .ic{font-size:20px;line-height:1}
+.meal{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:12px 13px;margin-bottom:9px;display:flex;align-items:center;gap:11px;box-shadow:var(--shadow)}
 .meal .mmain{flex:1;min-width:0}
 .meal .mname{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.meal .mmac{font-size:12px;color:var(--muted);margin-top:3px}
+.meal .mmac{font-size:11.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
 .meal .msrc{font-size:15px}
-.meal .mdel{background:none;border:none;color:var(--muted);font-size:17px;padding:6px;cursor:pointer}
-.empty{color:var(--muted);font-size:13.5px;text-align:center;padding:22px 10px}
-nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:rgba(20,20,19,.95);
-  backdrop-filter:blur(14px);border-top:1px solid var(--border);
-  display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
-nav button{flex:1;background:none;border:none;color:var(--muted);font-size:11px;font-weight:600;
-  padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
-nav button .ic{font-size:20px;line-height:1}
+.meal .mdel{background:none;border:none;color:var(--muted);font-size:16px;padding:6px;cursor:pointer}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:24px 10px}
+
+/* ---------- tab bar ---------- */
+nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:rgba(10,13,24,.78);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--line);
+  display:flex;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:none;color:var(--muted);font-size:10px;font-weight:600;
+  padding:5px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;
+  transition:color .15s, transform .12s;user-select:none;-webkit-user-select:none}
+nav button svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav button:active{transform:scale(.92)}
 nav button.active{color:var(--brandlight)}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40;display:none}
+
+/* ---------- sheets ---------- */
+.overlay{position:fixed;inset:0;background:rgba(4,6,12,.6);z-index:40;display:none;
+  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
 .overlay.show{display:block}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);
-  border-radius:20px 20px 0 0;border:1px solid var(--border);border-bottom:none;
-  padding:18px 18px calc(20px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;
-  transform:translateY(105%);transition:transform .25s ease;max-height:86vh;overflow-y:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface2);
+  border-radius:26px 26px 0 0;
+  padding:10px 18px calc(22px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;
+  transform:translateY(105%);transition:transform .28s cubic-bezier(.32,.72,.25,1);max-height:88vh;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;box-shadow:0 -12px 44px rgba(0,0,0,.5)}
+.sheet::before{content:'';display:block;width:38px;height:4px;border-radius:99px;
+  background:rgba(255,255,255,.18);margin:2px auto 16px}
 .sheet.show{transform:translateY(0)}
-.sheet h3{margin:0 0 14px;font-size:17px}
+.sheet h3{margin:0 0 14px;font-size:17px;font-weight:700}
 .field{margin-bottom:11px}
-.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
-.field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);
-  color:var(--ink);border-radius:11px;padding:11px 12px;font-size:16px}
+.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;letter-spacing:.04em}
+.field input,.field select{width:100%;background:var(--field);border:1px solid var(--line);
+  color:var(--ink);border-radius:12px;padding:12px;font-size:16px}
+.field input:focus{outline:none;border-color:var(--brand)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.btn{width:100%;border:none;border-radius:13px;padding:14px;font-size:16px;font-weight:700;
-  cursor:pointer;margin-top:6px}
-.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#001018}
-.btn.ghost{background:none;color:var(--ink2);border:1px solid var(--border)}
+.btn{width:100%;border:none;border-radius:15px;padding:15px;font-size:16px;font-weight:700;
+  cursor:pointer;margin-top:6px;transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#001018;
+  box-shadow:0 4px 18px rgba(0,191,255,.25)}
+.btn.ghost{background:rgba(255,255,255,.06);color:var(--ink2)}
 .btn:disabled{opacity:.5}
-.notes{font-size:12.5px;color:var(--muted);background:var(--surface2);border-radius:10px;
-  padding:9px 11px;margin-bottom:11px;display:none}
+.notes{font-size:12.5px;color:var(--muted);background:var(--field);border-radius:11px;
+  padding:10px 12px;margin-bottom:11px;display:none}
 .chips{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.chip{border:1px solid var(--border);background:var(--surface2);color:var(--ink2);
-  border-radius:99px;padding:7px 13px;font-size:13px;font-weight:600;cursor:pointer}
-.chip.sel{background:var(--brand);color:#001018;border-color:var(--brand)}
-.autocal{background:none;border:1px solid var(--border);color:var(--ink2);border-radius:8px;
-  padding:4px 9px;font-size:11.5px;cursor:pointer;margin-left:8px;font-weight:600}
-#bcreader{width:100%;border-radius:14px;overflow:hidden;background:#000;min-height:240px}
+.chip{border:none;background:rgba(255,255,255,.07);color:var(--ink2);
+  border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer}
+.chip.sel{background:var(--brand);color:#001018}
+.autocal{background:var(--surface);border:none;color:var(--brandlight);border-radius:8px;
+  padding:4px 9px;font-size:11px;cursor:pointer;margin-left:8px;font-weight:700}
+#bcreader{width:100%;border-radius:16px;overflow:hidden;background:#000;min-height:240px}
 .bchint{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px}
-.goalrow{background:var(--surface);border:1px solid var(--border);border-radius:14px;
-  padding:13px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer}
-.goalrow .gday{font-weight:700;font-size:14.5px;width:44px}
-.goalrow .gmac{flex:1;font-size:12px;color:var(--muted)}
-.goalrow .glabel{font-size:11px;font-weight:700;letter-spacing:.05em}
+
+/* ---------- goals ---------- */
+.goalrow{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:14px 15px;margin-bottom:9px;display:flex;align-items:center;gap:10px;cursor:pointer;
+  box-shadow:var(--shadow);transition:transform .12s}
+.goalrow:active{transform:scale(.98)}
+.goalrow .gday{font-weight:800;font-size:14.5px;width:44px}
+.goalrow .gmac{flex:1;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.goalrow .glabel{font-size:10px;font-weight:800;letter-spacing:.08em}
 .glabel.low{color:var(--low)} .glabel.moderate{color:var(--moderate)} .glabel.high{color:var(--high)} .glabel.custom{color:var(--ink2)}
-.statcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;
-  padding:16px;margin-bottom:12px;display:flex;gap:8px;text-align:center}
+
+/* ---------- plan / calendar ---------- */
+.statcard{background:var(--surface);border:1px solid var(--line);border-radius:20px;
+  padding:16px 12px;margin-bottom:14px;display:flex;gap:8px;text-align:center;box-shadow:var(--shadow)}
 .statcard>div{flex:1}
-.statcard .big{font-size:26px;font-weight:700}
-.statcard .lbl{font-size:11.5px;color:var(--muted);margin-top:3px}
-.badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}
-.badge.done{color:var(--good);border:1px solid var(--good)}
-.badge.miss{color:var(--critical);border:1px solid var(--critical)}
-.badge.nolog{color:var(--muted);border:1px solid var(--border)}
-.badge.progress{color:var(--ink2);border:1px solid var(--border)}
-.calhead{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 10px}
-.calhead .mname{font-size:15px;font-weight:700}
-.calhead button{background:var(--surface);border:1px solid var(--border);color:var(--ink);border-radius:10px;
-  padding:6px 14px;font-size:15px;cursor:pointer}
+.statcard .big{font-family:'Playfair Display',serif;font-size:28px;font-weight:800;color:var(--brandlight)}
+.statcard .lbl{font-size:10px;color:var(--muted);margin-top:4px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.06)}
+.badge.done{color:var(--good)} .badge.miss{color:var(--critical)}
+.badge.nolog{color:var(--muted)} .badge.progress{color:var(--ink2)}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin:6px 2px 12px}
+.calhead .mname{font-size:16px;font-weight:700}
+.calhead button{background:var(--surface);border:1px solid var(--line);color:var(--ink2);border-radius:12px;
+  width:38px;height:34px;font-size:16px;cursor:pointer}
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px}
-.caldow{text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;padding:2px 0}
-.callegend{display:flex;flex-wrap:wrap;gap:10px 14px;margin:10px 2px 2px;font-size:10.5px;color:var(--muted);font-weight:600}
+.caldow{text-align:center;font-size:10px;color:var(--muted);font-weight:700;padding:2px 0;letter-spacing:.05em}
+.callegend{display:flex;align-items:center;gap:8px;margin:12px 4px 4px;font-size:10.5px;color:var(--muted);font-weight:600}
+.callegend .ramp{width:74px;height:8px;border-radius:99px;flex-shrink:0;
+  background:linear-gradient(90deg,#0ca30c,#7fce3f,#fab219,#ec835a,#d03b3b)}
 .callegend span{display:flex;align-items:center;gap:5px}
-.callegend i{width:10px;height:10px;border-radius:3px;display:inline-block}
-.calcell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--border);cursor:pointer;color:var(--ink2);gap:2px}
-.calcell .phdot{width:7px;height:7px;border-radius:99px}
-.calcell.blank{background:none;border:none;cursor:default}
+.callegend i{width:10px;height:10px;border-radius:4px;display:inline-block;flex-shrink:0}
+.calcell{aspect-ratio:1;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--line);cursor:pointer;color:var(--ink2);gap:2px;
+  font-variant-numeric:tabular-nums}
+.calcell .phdot{width:6px;height:6px;border-radius:99px}
+.calcell.blank{background:none;border:none;cursor:default;box-shadow:none}
 .calcell.done{background:rgba(12,163,12,.18);border-color:var(--good);color:var(--good)}
 .calcell.miss{background:rgba(208,59,59,.15);border-color:var(--critical);color:var(--critical)}
-.calcell.nolog{opacity:.45}
-.calcell.today{outline:2px solid var(--ink);outline-offset:1px;color:var(--ink)}
-.calcell.future{opacity:.3;cursor:default}
+.calcell.nolog{opacity:.4}
+.calcell.today{outline:2px solid var(--brandlight);outline-offset:1px;color:var(--ink)}
+.calcell.future{opacity:.28;cursor:default}
 .ddmac{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;
-  padding:8px 0;border-bottom:1px solid var(--grid)}
+  padding:9px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
 .ddmac .ok{color:var(--good);font-weight:700}.ddmac .bad{color:var(--critical);font-weight:700}
-.ddmeal{font-size:13px;color:var(--ink2);padding:7px 0;border-bottom:1px solid var(--grid)}
+.ddmeal{font-size:13px;color:var(--ink2);padding:8px 0;border-bottom:1px solid var(--line)}
 .ddmeal b{color:var(--ink)}
-.phaserow{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px}
-.phaserow .ptop{display:flex;justify-content:space-between;align-items:center}
-.phaserow .pname{font-weight:800;font-size:13.5px;letter-spacing:.03em}
-.phaserow .pdates{font-size:11.5px;color:var(--muted)}
-.phaserow .pdesc{font-size:12px;color:var(--ink2);margin-top:4px;line-height:1.45}
-.photogrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.photogrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 @media(min-width:960px){.photogrid{grid-template-columns:repeat(6,1fr)}}
-.photocell{position:relative;border-radius:12px;overflow:hidden;background:var(--surface2);aspect-ratio:3/4;cursor:pointer}
+.photocell{position:relative;border-radius:14px;overflow:hidden;background:var(--surface2);aspect-ratio:3/4;cursor:pointer}
 .photocell img{width:100%;height:100%;object-fit:cover;display:block}
 .photocell .pdate{position:absolute;bottom:0;left:0;right:0;font-size:10px;font-weight:700;
-  background:rgba(0,0,0,.55);padding:3px 6px}
-#micBtn.rec{background:var(--critical);border-color:var(--critical)}
+  background:rgba(0,0,0,.55);padding:4px 7px;backdrop-filter:blur(4px)}
+
+/* ---------- AI chat ---------- */
+#micBtn.rec{background:var(--critical);color:#fff}
 #chatMsgs{max-height:38vh;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;padding:2px}
-.cm{max-width:85%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.4;white-space:pre-wrap}
-.cm.user{align-self:flex-end;background:var(--ink);color:#111;border-bottom-right-radius:4px}
-.cm.ai{align-self:flex-start;background:var(--surface2);color:var(--ink);border-bottom-left-radius:4px}
+.cm{max-width:85%;padding:10px 13px;border-radius:16px;font-size:14px;line-height:1.4;white-space:pre-wrap}
+.cm.user{align-self:flex-end;background:var(--brand);color:#001018;border-bottom-right-radius:5px;font-weight:600}
+.cm.ai{align-self:flex-start;background:var(--surface);color:var(--ink);border-bottom-left-radius:5px}
 .cm.typing{color:var(--muted);font-style:italic}
-.cm img{max-width:140px;border-radius:10px;display:block}
-.estcard{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px}
-.estcard input.ename{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);
-  border-radius:9px;padding:8px 10px;font-size:15px;font-weight:700;margin-bottom:8px}
+.cm img{max-width:140px;border-radius:11px;display:block}
+.estcard{background:var(--field);border:1px solid var(--line);border-radius:16px;padding:13px;margin-bottom:10px}
+.estcard input.ename{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--ink);
+  border-radius:10px;padding:9px 11px;font-size:15px;font-weight:700;margin-bottom:8px}
 .estgrid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:9px}
-.estgrid label{display:block;font-size:10px;color:var(--muted);font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
-.estgrid input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);
-  border-radius:9px;padding:8px 6px;font-size:15px;text-align:center}
+.estgrid label{display:block;font-size:9px;color:var(--muted);font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em}
+.estgrid input{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--ink);
+  border-radius:10px;padding:9px 6px;font-size:15px;text-align:center;font-weight:600}
 .estconf{font-size:11px;color:var(--muted);margin-bottom:9px}
 .estadd{background:var(--good);border:none;color:#fff;font-weight:700;font-size:14px;
-  border-radius:10px;padding:10px 16px;cursor:pointer;white-space:nowrap}
+  border-radius:12px;padding:11px 16px;cursor:pointer;white-space:nowrap}
 .chatrow{display:flex;gap:8px;align-items:center}
-.chatrow input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--ink);
-  border-radius:11px;padding:11px 12px;font-size:16px;min-width:0}
-.chatrow button{background:var(--surface2);border:1px solid var(--border);color:var(--ink);
-  border-radius:11px;padding:10px 13px;font-size:17px;cursor:pointer;flex-shrink:0}
-.chatrow button#chatSend{background:var(--ink);color:#111;font-weight:700}
-.feedchips{display:flex;gap:8px;margin-bottom:12px}
-.feedwrap{display:block}
-@media(min-width:960px){.feedwrap{display:grid;grid-template-columns:1fr 1fr;gap:14px}}
-.feedcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;
-  margin-bottom:12px;cursor:pointer}
-.feedimg{width:100%;height:150px;object-fit:cover;display:block;background:var(--surface2)}
-.feedimg-fallback{width:100%;height:150px;display:flex;align-items:center;justify-content:center;
-  font-size:56px;background:linear-gradient(135deg,#232322,#2c2c2a)}
-.feedbody{padding:12px 14px 13px;position:relative}
-.feedtitle{font-size:15px;font-weight:700;padding-right:34px}
-.feedmacs{font-size:12px;color:var(--muted);margin-top:4px}
-.heart{position:absolute;top:10px;right:10px;background:none;border:none;font-size:20px;cursor:pointer;
-  color:var(--muted);padding:4px}
-.heart.on{color:var(--critical)}
-.feedload{text-align:center;color:var(--muted);font-size:13px;padding:26px 0}
-.refreshbtn{background:var(--surface);border:1px solid var(--border);color:var(--ink2);border-radius:99px;
-  padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-left:auto;display:block}
-.feedtop{display:flex;align-items:center;margin-bottom:12px;gap:8px}
-.feedctx{font-size:12px;color:var(--muted);flex:1}
-#mdImgWrap{border-radius:14px;overflow:hidden;margin-bottom:12px}
-#mdImgWrap img{width:100%;height:170px;object-fit:cover;display:block}
-#mdOverview{font-size:13.5px;color:var(--ink2);line-height:1.5;margin-bottom:10px}
-#mdMacs{font-size:13px;font-weight:600;margin-bottom:10px}
-#mdIngr{margin:0 0 14px;padding-left:18px;font-size:13.5px;color:var(--ink2);line-height:1.7}
-.mdbtns{display:flex;gap:10px}
-.mdbtns .btn{margin-top:0}
-#toast{position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-90px);
-  background:var(--surface2);border:1px solid var(--border);color:var(--ink);padding:11px 18px;
-  border-radius:99px;font-size:13.5px;font-weight:600;z-index:100;transition:transform .3s ease;max-width:86vw;text-align:center}
+.chatrow input{flex:1;background:var(--field);border:1px solid var(--line);color:var(--ink);
+  border-radius:14px;padding:12px 13px;font-size:16px;min-width:0}
+.chatrow input:focus{outline:none;border-color:var(--brand)}
+.chatrow button{background:var(--surface);border:none;color:var(--ink);
+  border-radius:14px;padding:11px 13px;font-size:16px;cursor:pointer;flex-shrink:0}
+.chatrow button#chatSend{background:var(--brand);color:#001018;font-weight:800}
+
+/* ---------- toast & loading ---------- */
+#toast{position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-100px);
+  background:rgba(27,33,56,.95);backdrop-filter:blur(12px);color:var(--ink);padding:12px 20px;
+  border-radius:99px;font-size:13.5px;font-weight:600;z-index:100;transition:transform .3s cubic-bezier(.32,.72,.25,1);
+  max-width:86vw;text-align:center;box-shadow:0 10px 32px rgba(0,0,0,.45)}
 #toast.show{transform:translateX(-50%) translateY(0)}
-#loading{position:fixed;inset:0;background:rgba(13,13,13,.85);z-index:90;display:none;
-  flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#loading{position:fixed;inset:0;background:rgba(6,8,14,.85);z-index:90;display:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #loading.show{display:flex}
-.spinner{width:38px;height:38px;border:3px solid var(--grid);border-top-color:var(--ink);
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.12);border-top-color:var(--brand);
   border-radius:99px;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 #loading .lt{font-size:14px;color:var(--ink2);font-weight:600}
-.settingcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px}
-.settingcard p{font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 12px}
+
+/* ---------- settings ---------- */
+.settingcard{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:17px;margin-bottom:13px;box-shadow:var(--shadow)}
+.settingcard p{font-size:12.5px;color:var(--muted);line-height:1.5;margin:7px 0 12px}
 .keystatus{font-size:13px;font-weight:600;margin-top:10px}
 .keystatus.ok{color:var(--good)} .keystatus.no{color:var(--warning)}
 </style>
@@ -299,18 +317,18 @@ nav button.active{color:var(--brandlight)}
     <div class="hero" id="planHero"></div>
     <div class="cols">
       <div class="card">
-        <h2>Today's checklist</h2>
+        <h2>Checklist</h2>
         <div id="checklist"></div>
-        <div class="daydone" id="dayDone">Day complete — all boxes green 💪</div>
+        <div class="daydone" id="dayDone">Day complete 💪</div>
         <div class="weekline" id="weekLine"></div>
       </div>
       <div class="card">
         <h2>Body</h2>
         <div class="metrics">
-          <div class="metric"><label>Weight (lb)</label>
+          <div class="metric"><label>Weight lb</label>
             <div class="mrow"><input id="wInput" type="number" step="0.1" inputmode="decimal" placeholder="—">
             <button id="wSave">✓</button></div></div>
-          <div class="metric"><label>Sleep (hrs)</label>
+          <div class="metric"><label>Sleep hrs</label>
             <div class="mrow"><input id="sInput" type="number" step="0.5" inputmode="decimal" placeholder="—">
             <button id="sSave">✓</button></div></div>
         </div>
@@ -319,13 +337,13 @@ nav button.active{color:var(--brandlight)}
       </div>
       <div class="card">
         <h2>Sleep</h2>
-        <div id="sleepAvgRow"><span id="sleepAvgNum">—</span><span id="sleepAvgLbl">7-day rolling avg</span></div>
+        <div id="sleepAvgRow"><span id="sleepAvgNum">—</span><span id="sleepAvgLbl">7-day avg</span></div>
         <div class="sleepbars" id="sleepBars"></div>
         <div class="sleepnote" id="sleepNote"></div>
       </div>
     </div>
     <div class="card" id="doneCard" style="display:none">
-      <h2>Completed today</h2>
+      <h2>Completed</h2>
       <div id="doneList"></div>
     </div>
     <input type="file" id="progressPhotoInput" accept="image/*" capture="environment" style="display:none">
@@ -337,7 +355,7 @@ nav button.active{color:var(--brandlight)}
       <div>
         <div class="rings" id="rings"></div>
         <div class="addrow">
-          <button class="addbtn" id="btnPhoto"><span class="ic">📷</span>Scan food</button>
+          <button class="addbtn" id="btnPhoto"><span class="ic">📷</span>Scan</button>
           <button class="addbtn" id="btnBarcode"><span class="ic"><svg width="22" height="20" viewBox="0 0 24 20" fill="currentColor"><rect x="1" y="2" width="2" height="16"/><rect x="5" y="2" width="1" height="16"/><rect x="8" y="2" width="3" height="16"/><rect x="13" y="2" width="1" height="16"/><rect x="16" y="2" width="2" height="16"/><rect x="20" y="2" width="1" height="16"/><rect x="22.5" y="2" width="1.5" height="16"/></svg></span>Barcode</button>
           <button class="addbtn" id="btnDescribe"><span class="ic">💬</span>Describe</button>
           <button class="addbtn" id="btnManual"><span class="ic">✎</span>Manual</button>
@@ -345,30 +363,17 @@ nav button.active{color:var(--brandlight)}
         <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
       </div>
       <div>
-        <h2 class="sect">Today's meals</h2>
+        <h2 class="sect">Meals</h2>
         <div id="mealList"></div>
       </div>
     </div>
   </section>
 
-  <!-- FEED -->
-  <section class="page" id="page-feed">
-    <div class="feedtop">
-      <div class="feedctx" id="feedCtx"></div>
-      <button class="refreshbtn" id="feedRefresh">↻ Refresh</button>
-    </div>
-    <div class="feedchips">
-      <button class="chip sel" data-feed="foryou">For you</button>
-      <button class="chip" data-feed="favs">♥ Favorites</button>
-    </div>
-    <div id="feedList" class="feedwrap"></div>
-  </section>
-
   <!-- PLAN -->
   <section class="page" id="page-plan">
     <div class="statcard">
-      <div><div class="big" id="statDone">–</div><div class="lbl">days complete</div></div>
-      <div><div class="big" id="statTotal">–</div><div class="lbl">days tracked</div></div>
+      <div><div class="big" id="statDone">–</div><div class="lbl">complete</div></div>
+      <div><div class="big" id="statTotal">–</div><div class="lbl">tracked</div></div>
       <div><div class="big" id="statStreak">–</div><div class="lbl">streak</div></div>
     </div>
     <div class="calhead">
@@ -378,16 +383,12 @@ nav button.active{color:var(--brandlight)}
     </div>
     <div class="calgrid" id="calGrid"></div>
     <div class="callegend">
-      <span><i style="background:#0ca30c"></i>on plan</span>
-      <span><i style="background:#7fce3f"></i>close</span>
-      <span><i style="background:#fab219"></i>a bit over</span>
-      <span><i style="background:#ec835a"></i>over</span>
-      <span><i style="background:#d03b3b"></i>way over</span>
+      <span class="ramp"></span><span>on plan → over</span>
       <span><i style="background:#6d9ee8"></i>under-fueled</span>
     </div>
-    <div class="card" style="margin-top:6px">
+    <div class="card" style="margin-top:8px">
       <h2>Progress photos</h2>
-      <button class="btn primary" id="addPhotoBtn">📸 Take progress photo</button>
+      <button class="btn primary" id="addPhotoBtn">📸 Take photo</button>
       <div class="photogrid" id="photoGrid"></div>
     </div>
   </section>
@@ -401,33 +402,28 @@ nav button.active{color:var(--brandlight)}
   <!-- SETTINGS -->
   <section class="page" id="page-settings">
     <div class="settingcard">
-      <h3 style="margin:0;font-size:15px">AI photo scanning</h3>
-      <p>Uses Claude to estimate macros from photos and descriptions. Key is stored server-side.</p>
+      <h3 style="margin:0;font-size:15px">AI scanning</h3>
+      <p>Claude estimates macros from photos and text.</p>
       <div class="field"><input type="password" id="apiKeyInput" placeholder="sk-ant-..."></div>
       <button class="btn primary" id="saveKeyBtn">Save key</button>
       <div class="keystatus" id="keyStatus"></div>
     </div>
     <div class="settingcard">
       <h3 style="margin:0;font-size:15px">Notifications</h3>
-      <p>9am day-type briefing, live macro warnings, and the Friday 6:45am progress-photo reminder.</p>
+      <p>Morning briefing, live macro warnings, Friday photo reminder.</p>
       <button class="btn primary" id="notifBtn">Enable notifications</button>
       <div class="keystatus" id="notifStatus"></div>
-      <button class="btn ghost" id="notifTest" style="display:none">Send test notification</button>
-    </div>
-    <div class="settingcard">
-      <h3 style="margin:0;font-size:15px">Lucky Numbers</h3>
-      <p>Your operating system for the Wasatch Warrior, April 17. Log honestly, check the boxes, and let the plan do the thinking.</p>
+      <button class="btn ghost" id="notifTest" style="display:none">Send test</button>
     </div>
   </section>
 </main>
 
 <nav>
-  <button data-page="dash" class="active"><span class="ic">◎</span>Dashboard</button>
-  <button data-page="macros"><span class="ic">🎯</span>Macros</button>
-  <button data-page="feed"><span class="ic">🍽</span>Feed</button>
-  <button data-page="plan"><span class="ic">🗓</span>Plan</button>
-  <button data-page="goals"><span class="ic">⚑</span>Goals</button>
-  <button data-page="settings"><span class="ic">⚙︎</span>Settings</button>
+  <button data-page="dash" class="active"><svg viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 8.5V21h14V8.5"/><path d="M9 21v-6h6v6"/></svg><span>Home</span></button>
+  <button data-page="macros"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg><span>Macros</span></button>
+  <button data-page="plan"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10.5h18"/></svg><span>Plan</span></button>
+  <button data-page="goals"><svg viewBox="0 0 24 24"><path d="M5 3v18"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg><span>Goals</span></button>
+  <button data-page="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Settings</span></button>
 </nav>
 
 <!-- meal sheet -->
@@ -478,7 +474,7 @@ nav button.active{color:var(--brandlight)}
   <div id="bcreader"></div>
   <div class="bchint">Point your camera at the barcode</div>
   <input type="file" id="bcPhotoInput" accept="image/*" capture="environment" style="display:none">
-  <button class="btn ghost" id="bcPhotoBtn" style="margin-top:10px">📸 Photo mode (no permission prompt)</button>
+  <button class="btn ghost" id="bcPhotoBtn" style="margin-top:10px">📸 Photo mode</button>
   <button class="btn ghost" id="bcCancel">Cancel</button>
 </div>
 
@@ -499,21 +495,6 @@ nav button.active{color:var(--brandlight)}
   </div>
   <button class="btn primary" id="saveGoalBtn">Save goal</button>
   <button class="btn ghost" id="cancelGoalBtn">Cancel</button>
-</div>
-
-<!-- feed meal detail sheet -->
-<div class="sheet" id="mealDetailSheet">
-  <h3 id="mdTitle"></h3>
-  <div id="mdImgWrap"></div>
-  <div id="mdMacs"></div>
-  <div id="mdOverview"></div>
-  <h2 class="sect" style="margin:0 0 6px">Ingredients</h2>
-  <ul id="mdIngr"></ul>
-  <div class="mdbtns">
-    <button class="btn ghost" id="mdFav" style="flex:1">♥ Save</button>
-    <button class="btn primary" id="mdAte" style="flex:2">I ate this</button>
-  </div>
-  <button class="btn ghost" id="mdClose">Close</button>
 </div>
 
 <!-- day detail sheet -->
@@ -634,7 +615,6 @@ document.querySelectorAll('nav button').forEach(b=>{
     if(b.dataset.page==='plan') renderPlan();
     if(b.dataset.page==='goals') renderGoals();
     if(b.dataset.page==='settings'){ checkKey(); refreshNotifStatus(); }
-    if(b.dataset.page==='feed') openFeed();
     if(b.dataset.page==='dash'){ renderHero(); renderChecklist(); renderWeightChart(); renderSleepCard(); }
     if(b.dataset.page==='macros') refreshToday();
   });
@@ -691,10 +671,10 @@ function compoundsToday(){ return compoundsForDate(todayStr()); }
 function checkDefsFor(ds){
   const dw = dowOf(ds);
   const defs = [
-    {key:'macros', icon:'🎯', label:'Hit my macros', required:true},
+    {key:'macros', icon:'🎯', label:'Macros', required:true},
     {key:'workout', icon:'🏋️', label:'Workout', required:dw!==0, note:true},
     {key:'cardio', icon:'🏃', label:'Cardio', required:dw!==0},
-    {key:'compounds', icon:'💉', label:'Compounds & ancillaries', required:true},
+    {key:'compounds', icon:'💉', label:'Compounds', required:true},
   ];
   if(dw===5) defs.push({key:'photo', icon:'📸', label:'Progress photo', required:true, photo:true});
   return defs;
@@ -715,7 +695,7 @@ function renderChecklist(){
   const cToday = compoundsToday();
   const compText = cToday.length
     ? cToday.map(c=>c.name + (c.dose? ' ' + c.dose : '')).join(' · ')
-    : 'No compounds configured yet — tell Claude your list and it appears here.';
+    : 'No compounds configured';
   // unchecked first; checked sink to the bottom (still green)
   const ordered = checkDefsFor(ds).map(d=>({d,
     done: d.photo ? todayPhotoDone : !!(todayChecks[d.key] && todayChecks[d.key].done)}));
@@ -725,8 +705,8 @@ function renderChecklist(){
     if(d.key==='macros') sub = `<div class="chksub">${Math.round(t.calories)}/${g.calories} cal · C ${Math.round(t.carbs)}/${g.carbs} · P ${Math.round(t.protein)}/${g.protein} · F ${Math.round(t.fat)}/${g.fat}</div>`;
     if(d.key==='compounds') sub = `<div class="chksub">${escapeHtml(compText)}</div>`;
     let extra = '';
-    if(d.note) extra = `<input class="chknote" id="workoutNote" placeholder="What did you hit? e.g. Push — chest/shoulders/tris" value="${escapeHtml(st.note||'')}">`;
-    if(d.photo && !done) extra = `<button class="chkphotobtn" id="chkPhotoBtn">📸 Take this week's photo</button>`;
+    if(d.note) extra = `<input class="chknote" id="workoutNote" placeholder="What did you hit?" value="${escapeHtml(st.note||'')}">`;
+    if(d.photo && !done) extra = `<button class="chkphotobtn" id="chkPhotoBtn">📸 Take photo</button>`;
     const opt = d.required ? '' : '<span class="chkopt">optional</span>';
     return `<div class="chk ${done?'done':''}" data-key="${d.key}">
       <button class="chkbox" data-key="${d.key}" ${d.photo?'data-photo="1"':''}>${done?'✓':''}</button>
@@ -735,7 +715,7 @@ function renderChecklist(){
   };
   const pending = ordered.filter(x=>!x.done), doneItems = ordered.filter(x=>x.done);
   $('checklist').innerHTML = pending.map(itemHtml).join('') ||
-    '<div class="empty" style="padding:10px 0">Everything done for today 💪</div>';
+    '<div class="empty" style="padding:10px 0">All done 💪</div>';
   $('doneList').innerHTML = doneItems.map(itemHtml).join('');
   $('doneCard').style.display = doneItems.length ? 'block' : 'none';
   document.querySelectorAll('.chkbox').forEach(b=>b.addEventListener('click', async ()=>{
@@ -780,8 +760,8 @@ async function renderWeekLine(){
       if(checkDefsFor(d).every(x=>!x.required || (x.photo ? photoOk : (c[x.key]&&c[x.key].done)))) complete++;
       if(c.workout && c.workout.done) workouts.push(c.workout.note || '✓');
     }
-    $('weekLine').innerHTML = `This week: <b style="color:var(--ink)">${complete} day${complete===1?'':'s'} fully complete</b> · Workouts: ` +
-      (workouts.length ? workouts.map(escapeHtml).join(' · ') : '<span style="color:var(--serious)">none yet</span>');
+    $('weekLine').innerHTML = `<b style="color:var(--ink)">${complete}</b> complete this week` +
+      (workouts.length ? ' · ' + workouts.map(escapeHtml).join(' · ') : '');
   }catch(e){ /* quiet */ }
 }
 
@@ -859,10 +839,9 @@ async function renderWeightChart(){
     const mode = (currentPhase()||{}).mode || 'cut';
     const ahead = mode==='cut' ? diff <= 0.5 : diff >= -0.5;
     el.className = 'wtrend ' + (ahead ? 'ok':'warn');
-    el.textContent = `7-day avg ${avg.toFixed(1)} lb · plan says ${projWeight(last.day).toFixed(1)} · ` +
-      (Math.abs(diff) <= 0.7 ? 'right on plan ✓' :
-        diff > 0 ? `${diff.toFixed(1)} lb over plan${mode==='cut' ? ' — tighten up' : ' — fine in a bulk'}` :
-                   `${(-diff).toFixed(1)} lb under plan${mode==='cut' ? ' — ahead of schedule' : ' — eat more'}`);
+    el.textContent = `${avg.toFixed(1)} avg · plan ${projWeight(last.day).toFixed(1)} · ` +
+      (Math.abs(diff) <= 0.7 ? 'on plan ✓' :
+        diff > 0 ? `+${diff.toFixed(1)} lb` : `−${(-diff).toFixed(1)} lb ahead`);
   }catch(e){}
 }
 async function renderSleepCard(){
@@ -875,7 +854,7 @@ async function renderSleepCard(){
     if(!logged.length){
       $('sleepAvgNum').textContent = '—';
       $('sleepBars').innerHTML = '';
-      $('sleepNote').textContent = 'Log your hours each morning to start the rolling average.';
+      $('sleepNote').textContent = 'Log hours each morning';
       return;
     }
     const avg = logged.reduce((a,b)=>a+b,0)/logged.length;
@@ -892,9 +871,7 @@ async function renderSleepCard(){
         <span class="bl">${DL[dowOf(d)]}</span></div>`;
     }
     $('sleepBars').innerHTML = bars;
-    $('sleepNote').textContent = logged.length < 7
-      ? `${logged.length} of 7 nights logged — average firms up as you log each morning.`
-      : (avg >= 7 ? 'Solid recovery week 😴' : 'Averaging under 7 — growth happens in bed.');
+    $('sleepNote').textContent = logged.length < 7 ? `${logged.length}/7 nights logged` : '';
   }catch(e){}
 }
 
@@ -940,7 +917,7 @@ async function loadTodayPhoto(){
 async function renderPhotos(){
   try{
     const rows = await rest('prep_photos?select=*&order=day.desc&limit=60');
-    if(!rows || !rows.length){ $('photoGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">No photos yet — Fridays are photo day.</div>'; return; }
+    if(!rows || !rows.length){ $('photoGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">No photos yet</div>'; return; }
     $('photoGrid').innerHTML = rows.map(p=>{
       const url = SB + '/storage/v1/object/public/photos/' + encodeURIComponent(p.path);
       return `<div class="photocell" data-url="${url}">
@@ -978,13 +955,12 @@ function renderRings(){
     </div>`;
   }).join('');
   const chip = $('todayChip'); const lbl = (g.label||'custom');
-  const ph = currentPhase();
-  chip.textContent = lbl.toUpperCase() + (ph ? ' · ' + ph.name.toUpperCase() : '');
+  chip.textContent = lbl.toUpperCase();
   chip.className = 'daychip ' + lbl;
 }
 const SRC_ICON = {photo:'📷', barcode:'🏷', manual:'✎', ai:'💬', feed:'🍽'};
 function renderMeals(){
-  if(!todayMeals.length){ $('mealList').innerHTML = '<div class="empty">Nothing logged yet — scan your first meal.</div>'; return; }
+  if(!todayMeals.length){ $('mealList').innerHTML = '<div class="empty">Nothing logged yet</div>'; return; }
   $('mealList').innerHTML = todayMeals.map(m=>{
     const t = new Date(m.created_at).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
     return `<div class="meal">
@@ -1073,7 +1049,7 @@ function showEstimate(est){
   $('estBar').style.display = 'block';
   $('eName').value = est.name; $('eCal').value = est.calories;
   $('eCarbs').value = est.carbs; $('eProtein').value = est.protein; $('eFat').value = est.fat;
-  $('estConf').textContent = 'AI estimate · ' + (est.confidence||'medium') + ' confidence · edit anything or reply below to adjust';
+  $('estConf').textContent = (est.confidence||'medium') + ' confidence · reply below to adjust';
 }
 function readEstimateCard(){
   return {
@@ -1106,7 +1082,7 @@ async function chatCall(userContent, userBubbleHtml){
 }
 $('btnDescribe').addEventListener('click', ()=>{
   chatReset('ai', 'Describe your meal');
-  bubble('ai', "What did you eat? Name a dish, a restaurant item, or list ingredients — I'll estimate the macros. You can correct me after.");
+  bubble('ai', "What did you eat?");
   openSheet($('chatSheet'));
   setTimeout(()=>$('chatInput').focus(), 300);
 });
@@ -1248,9 +1224,7 @@ async function onBarcode(code){
 const GOAL_ORDER = [1,2,3,4,5,6,0];
 function renderGoals(){
   const ph = currentPhase();
-  $('goalsIntro').textContent = ph
-    ? `These are the weekly targets for your current phase — ${ph.name}. They repeat weekly until the phase ends, then the next phase's numbers take over automatically. Tap a day to edit.`
-    : 'Weekly targets. Tap a day to edit.';
+  $('goalsIntro').textContent = (ph ? ph.name + ' · ' : '') + 'repeats weekly · tap to edit';
   const pm = ph ? (phaseMacros[ph.id]||{}) : {};
   $('goalList').innerHTML = GOAL_ORDER.map(dow=>{
     const g = pm[dow] || {label:'custom',carbs:0,protein:0,fat:0,calories:0};
@@ -1451,21 +1425,6 @@ function renderStats(){
   }
   $('statDone').textContent=done; $('statTotal').textContent=total; $('statStreak').textContent=streak;
 }
-function renderPhaseList(){
-  const today = todayStr();
-  $('phaseList').innerHTML = phases.map(p=>{
-    const active = today >= p.start_date && today <= p.end_date;
-    const past = today > p.end_date;
-    const fmt = ds => new Date(ds+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'});
-    return `<div class="phaserow" style="${active?'border-color:'+(PH_COLORS[p.id]||'#888'):''};${past?'opacity:.55':''}">
-      <div class="ptop">
-        <span class="pname" style="color:${PH_COLORS[p.id]||'var(--ink)'}">${escapeHtml(p.name.toUpperCase())}${active?' · NOW':''}${past?' ✓':''}</span>
-        <span class="pdates">${fmt(p.start_date)} – ${fmt(p.end_date)}</span>
-      </div>
-      <div class="pdesc">${escapeHtml(p.description)}</div>
-    </div>`;
-  }).join('');
-}
 async function renderPlan(){
   try{
     await loadHistData();
@@ -1503,144 +1462,6 @@ function openDayDetail(ds){
 }
 $('ddClose').addEventListener('click', closeSheets);
 
-// ---------- feed ----------
-const feed = {meals:[], fetchedAt:0, key:'', mode:'foryou', favs:[], detail:null, recent:[]};
-try{ feed.recent = JSON.parse(localStorage.getItem('feedRecent')||'[]'); }catch(e){}
-function remainingMacros(){
-  const g = todayGoal();
-  const t = {calories:0,carbs:0,protein:0,fat:0};
-  todayMeals.forEach(m=>{ for(const k in t) t[k]+=Number(m[k])||0; });
-  return {calories:Math.max(0,Math.round(g.calories-t.calories)), carbs:Math.max(0,Math.round(g.carbs-t.carbs)),
-    protein:Math.max(0,Math.round(g.protein-t.protein)), fat:Math.max(0,Math.round(g.fat-t.fat))};
-}
-function mealImg(m, cls){
-  const url = 'https://image.pollinations.ai/prompt/' +
-    encodeURIComponent((m.image_hint||m.title) + ', appetizing food photography, natural light') +
-    '?width=560&height=320&nologo=true';
-  return `<img class="${cls}" loading="lazy" src="${url}" alt=""
-    onerror="this.outerHTML='<div class=&quot;feedimg-fallback&quot;>${m.emoji||'🍽'}</div>'">`;
-}
-async function openFeed(force){
-  const rem = remainingMacros(); const g = todayGoal();
-  const ph = currentPhase();
-  $('feedCtx').textContent = (g.label||'custom').toUpperCase() + ' day' + (ph? ' · '+ph.name : '') + ' · left: ' +
-    rem.calories + ' cal · C ' + rem.carbs + ' · P ' + rem.protein + ' · F ' + rem.fat;
-  if(feed.mode==='favs'){ renderFavs(); return; }
-  const key = JSON.stringify([rem, g.label]);
-  const stale = (Date.now()-feed.fetchedAt) > 15*60*1000;
-  if(!force && feed.meals.length && feed.key===key && !stale){ renderFeed(); return; }
-  $('feedList').innerHTML = '<div class="feedload">Cooking up ideas for your day…</div>';
-  try{
-    const favs = await rest('favorites?select=title&order=created_at.desc&limit=20');
-    const d = await fn({action:'recommend', label:g.label||'custom', mode:(ph||{}).mode||'cut', remaining:rem,
-      hour:new Date().getHours(), exclude:feed.recent, favorites:(favs||[]).map(f=>f.title)});
-    feed.meals = d.meals||[]; feed.key = key; feed.fetchedAt = Date.now();
-    feed.recent = [...feed.meals.map(m=>m.title), ...feed.recent].slice(0, 30);
-    try{ localStorage.setItem('feedRecent', JSON.stringify(feed.recent)); }catch(e){}
-    renderFeed();
-  }catch(err){
-    if(String(err.message).includes('no_api_key'))
-      $('feedList').innerHTML = '<div class="empty">Add your Anthropic API key in Settings to get meal recommendations.</div>';
-    else $('feedList').innerHTML = '<div class="empty">' + escapeHtml(err.message) + '</div>';
-  }
-}
-async function loadFavTitles(){
-  try{ const favs = await rest('favorites?select=*&order=created_at.desc'); feed.favs = favs||[]; }
-  catch(e){ feed.favs = []; }
-}
-function isFav(title){ return feed.favs.some(f=>f.title===title); }
-async function renderFeed(){
-  await loadFavTitles();
-  if(!feed.meals.length){ $('feedList').innerHTML='<div class="empty">No ideas right now — try Refresh.</div>'; return; }
-  $('feedList').innerHTML = feed.meals.map((m,i)=>
-    `<div class="feedcard" data-i="${i}">
-      ${mealImg(m,'feedimg')}
-      <div class="feedbody">
-        <button class="heart ${isFav(m.title)?'on':''}" data-hi="${i}">${isFav(m.title)?'♥':'♡'}</button>
-        <div class="feedtitle">${m.emoji||''} ${escapeHtml(m.title)}</div>
-        <div class="feedmacs">${m.calories} cal · C ${m.carbs}g · P ${m.protein}g · F ${m.fat}g</div>
-      </div>
-    </div>`).join('');
-  document.querySelectorAll('.feedcard').forEach(c=>c.addEventListener('click', e=>{
-    if(e.target.closest('.heart')) return;
-    openMealDetail(feed.meals[Number(c.dataset.i)], false);
-  }));
-  document.querySelectorAll('.heart[data-hi]').forEach(h=>h.addEventListener('click', async e=>{
-    e.stopPropagation();
-    await toggleFav(feed.meals[Number(h.dataset.hi)]);
-    renderFeed();
-  }));
-}
-async function renderFavs(){
-  await loadFavTitles();
-  if(!feed.favs.length){ $('feedList').innerHTML='<div class="empty">No favorites yet — tap ♡ on a meal you like.</div>'; return; }
-  $('feedList').innerHTML = feed.favs.map((m,i)=>
-    `<div class="feedcard" data-fi="${i}">
-      ${mealImg(m,'feedimg')}
-      <div class="feedbody">
-        <button class="heart on" data-fh="${i}">♥</button>
-        <div class="feedtitle">${m.emoji||''} ${escapeHtml(m.title)}</div>
-        <div class="feedmacs">${m.calories} cal · C ${m.carbs}g · P ${m.protein}g · F ${m.fat}g</div>
-      </div>
-    </div>`).join('');
-  document.querySelectorAll('.feedcard[data-fi]').forEach(c=>c.addEventListener('click', e=>{
-    if(e.target.closest('.heart')) return;
-    const f = feed.favs[Number(c.dataset.fi)];
-    openMealDetail({...f, ingredients: f.ingredients||[]}, true);
-  }));
-  document.querySelectorAll('.heart[data-fh]').forEach(h=>h.addEventListener('click', async e=>{
-    e.stopPropagation();
-    await toggleFav(feed.favs[Number(h.dataset.fh)]);
-    renderFavs();
-  }));
-}
-async function toggleFav(m){
-  try{
-    if(isFav(m.title)){
-      await rest('favorites?title=eq.' + encodeURIComponent(m.title), {method:'DELETE'});
-      toast('Removed from favorites');
-    } else {
-      await rest('favorites?on_conflict=title', {method:'POST', headers:{'Prefer':'resolution=merge-duplicates'},
-        body:{title:m.title, emoji:m.emoji||'🍽', image_hint:m.image_hint||'', overview:m.overview||'',
-          ingredients:m.ingredients||[], calories:m.calories, carbs:m.carbs, protein:m.protein, fat:m.fat}});
-      toast('Saved to favorites ♥');
-    }
-    await loadFavTitles();
-  }catch(e){ toast(e.message); }
-}
-document.querySelectorAll('.feedchips .chip').forEach(c=>c.addEventListener('click', ()=>{
-  document.querySelectorAll('.feedchips .chip').forEach(x=>x.classList.toggle('sel', x===c));
-  feed.mode = c.dataset.feed;
-  openFeed();
-}));
-$('feedRefresh').addEventListener('click', ()=>{ if(feed.mode==='foryou') openFeed(true); else renderFavs(); });
-function openMealDetail(m, fromFavs){
-  feed.detail = m;
-  $('mdTitle').textContent = (m.emoji||'') + ' ' + m.title;
-  $('mdImgWrap').innerHTML = mealImg(m, '');
-  $('mdMacs').textContent = `${m.calories} cal · C ${m.carbs}g · P ${m.protein}g · F ${m.fat}g`;
-  $('mdOverview').textContent = m.overview||'';
-  $('mdIngr').innerHTML = (m.ingredients||[]).map(i=>'<li>'+escapeHtml(i)+'</li>').join('') || '<li>—</li>';
-  $('mdFav').textContent = isFav(m.title) ? '♥ Saved' : '♡ Save';
-  openSheet($('mealDetailSheet'));
-}
-$('mdClose').addEventListener('click', closeSheets);
-$('mdFav').addEventListener('click', async ()=>{
-  if(!feed.detail) return;
-  await toggleFav(feed.detail);
-  $('mdFav').textContent = isFav(feed.detail.title) ? '♥ Saved' : '♡ Save';
-});
-$('mdAte').addEventListener('click', async ()=>{
-  if(!feed.detail) return;
-  $('mdAte').disabled = true;
-  try{
-    await saveMealRecord({name:feed.detail.title, calories:feed.detail.calories, carbs:feed.detail.carbs,
-      protein:feed.detail.protein, fat:feed.detail.fat, source:'feed'});
-    closeSheets(); await refreshToday(); toast('Logged ' + feed.detail.title + ' 💪');
-  }catch(e){ toast(e.message); }
-  $('mdAte').disabled = false;
-});
-
 // ---------- push notifications ----------
 function urlB64ToU8(s){
   const pad = '='.repeat((4 - s.length % 4) % 4);
@@ -1651,7 +1472,7 @@ async function refreshNotifStatus(){
   const el = $('notifStatus'), btn = $('notifBtn'), test = $('notifTest');
   if(!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)){
     el.className='keystatus no';
-    el.textContent = '⚠ Notifications need the app installed: open it from your Home Screen icon (re-add it if needed).';
+    el.textContent = 'Open from your Home Screen icon to enable';
     btn.style.display='none'; test.style.display='none'; return;
   }
   btn.style.display='block';
@@ -1696,7 +1517,7 @@ async function checkKey(){
   const el = $('keyStatus');
   try{ const d = await fn({action:'has_api_key'});
     el.className = 'keystatus ' + (d.has_key?'ok':'no');
-    el.textContent = d.has_key ? '✓ Photo scanning is enabled' : '⚠ No API key yet — photo scanning is off';
+    el.textContent = d.has_key ? '✓ Enabled' : 'No API key yet';
   }catch(e){ el.className='keystatus no'; el.textContent='Could not check key status'; }
 }
 $('saveKeyBtn').addEventListener('click', async ()=>{
@@ -1712,7 +1533,7 @@ $('saveKeyBtn').addEventListener('click', async ()=>{
 // ---------- init ----------
 (async function init(){
   if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
-  $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+  $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
   try{
     const [phRows, pmRows, cRows, chkRows] = await Promise.all([
       rest('phases?select=*&order=sort'),
@@ -1732,7 +1553,7 @@ $('saveKeyBtn').addEventListener('click', async ()=>{
   clearShownNotifs();
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){
     hideToast();
-    $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+    $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
     renderHero(); refreshToday(); clearShownNotifs(); }});
 })();
 </script>
