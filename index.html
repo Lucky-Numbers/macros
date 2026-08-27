@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Lucky Numbers</title><!-- build 19 -->
+<title>Lucky Numbers</title><!-- build 20 -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -288,11 +288,15 @@ nav button.active{color:var(--brandlight)}
 .chatrow button#chatSend{background:var(--brand);color:#001018;font-weight:800}
 
 /* ---------- toast & loading ---------- */
-#toast{position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-100px);
+/* hidden state must clear the screen no matter how tall the toast or the notch is:
+   -100% removes its own height, the extra 160px covers top offset + any safe-area inset */
+#toast{position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;
+  transform:translateX(-50%) translateY(calc(-100% - 160px));opacity:0;pointer-events:none;
   background:rgba(27,33,56,.95);backdrop-filter:blur(12px);color:var(--ink);padding:12px 20px;
-  border-radius:99px;font-size:13.5px;font-weight:600;z-index:100;transition:transform .3s cubic-bezier(.32,.72,.25,1);
+  border-radius:22px;font-size:13.5px;font-weight:600;z-index:100;
+  transition:transform .3s cubic-bezier(.32,.72,.25,1), opacity .25s ease;
   max-width:86vw;text-align:center;box-shadow:0 10px 32px rgba(0,0,0,.45)}
-#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
 #loading{position:fixed;inset:0;background:rgba(6,8,14,.85);z-index:90;display:none;
   flex-direction:column;align-items:center;justify-content:center;gap:14px;
   backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
@@ -312,10 +316,39 @@ nav button.active{color:var(--brandlight)}
 .authsub{font-size:12.5px;color:var(--muted);text-align:center;margin-bottom:22px}
 #wizardScreen{position:fixed;inset:0;z-index:65;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;
   background:radial-gradient(130% 55% at 50% 0%, #151b32 0%, #0c1020 52%, #080a13 100%)}
-.wizinner{max-width:420px;margin:0 auto;padding:calc(28px + env(safe-area-inset-top)) 22px calc(40px + env(safe-area-inset-bottom))}
-.wizpreview{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px;
-  font-size:13px;color:var(--ink2);margin:14px 0 6px;line-height:1.5}
-.wizpreview b{color:var(--brandlight)}
+.wizinner{max-width:420px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 22px calc(40px + env(safe-area-inset-bottom))}
+.wstep{display:none}
+.wstep.active{display:block;animation:stepin .3s cubic-bezier(.25,.8,.35,1)}
+.wstep.leaving{animation:stepout .16s ease forwards}
+@keyframes stepin{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+@keyframes stepout{to{opacity:0;transform:translateX(-26px)}}
+.wback{background:var(--surface);border:1px solid var(--line);color:var(--ink2);width:38px;height:38px;
+  border-radius:12px;font-size:20px;line-height:1;cursor:pointer;margin-bottom:22px;display:block}
+.wtitle{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;margin-bottom:6px}
+.wsub{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.5}
+.wopt{display:flex;align-items:center;gap:14px;width:100%;background:var(--surface);border:1px solid var(--line);
+  border-radius:18px;padding:16px;margin-bottom:11px;cursor:pointer;text-align:left;color:var(--ink);
+  box-shadow:var(--shadow);transition:transform .12s}
+.wopt:active{transform:scale(.97);border-color:var(--brand)}
+.wopt .wic{font-size:26px;flex-shrink:0}
+.wopt b{font-size:15.5px;display:block}
+.wopt small{font-size:12px;color:var(--muted);display:block;margin-top:2px}
+.wrow{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--ink2);flex-wrap:wrap}
+.wrow input{background:var(--field);border:1px solid var(--line);color:var(--ink);border-radius:12px;
+  padding:12px;font-size:16px;min-width:0}
+.wrow input:focus{outline:none;border-color:var(--brand)}
+.wskip{display:block;text-align:center;color:var(--muted);font-size:13px;font-weight:600;background:none;border:none;
+  margin:14px auto 0;cursor:pointer;padding:8px}
+#buildScreen{position:fixed;inset:0;z-index:75;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(130% 55% at 50% 0%, #151b32 0%, #0c1020 52%, #080a13 100%)}
+.buildinner{text-align:center;padding:24px}
+.buildring{width:104px;height:104px;border-radius:50%;margin:0 auto 30px;position:relative;
+  background:conic-gradient(from 0deg, rgba(0,191,255,0) 0deg, rgba(0,191,255,.15) 120deg, var(--brand) 360deg);
+  -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 8px));
+  mask:radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 8px));
+  animation:spin 1.05s linear infinite;filter:drop-shadow(0 0 18px rgba(0,191,255,.45))}
+.buildtitle{font-family:'Playfair Display',serif;font-size:24px;font-weight:800;margin-bottom:10px}
+.buildsub{font-size:13px;color:var(--muted);min-height:18px;transition:opacity .3s}
 .field select{width:100%;background:var(--field);border:1px solid var(--line);color:var(--ink);
   border-radius:12px;padding:12px;font-size:16px;-webkit-appearance:none;appearance:none}
 .stackrow{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
@@ -567,39 +600,71 @@ nav button.active{color:var(--brandlight)}
 <!-- onboarding wizard -->
 <div id="wizardScreen">
   <div class="wizinner">
-    <div class="authlogo" style="margin-bottom:4px"><span class="lucky">Lucky</span> Numbers</div>
-    <div class="authsub">Quick setup — we'll build your daily targets.</div>
-    <h2 class="sect" style="margin-top:18px">About you</h2>
-    <div class="chips" id="wizSexChips">
-      <button class="chip sel" data-v="m">Male</button>
-      <button class="chip" data-v="f">Female</button>
+
+    <div class="wstep" data-step="goal">
+      <button class="wback" data-back="signout">‹</button>
+      <div class="wtitle">What's your goal?</div>
+      <div class="wsub">This shapes your whole plan. You can change it anytime.</div>
+      <button class="wopt" data-goal="lose"><span class="wic">🔥</span><span><b>Lose Fat</b><small>A steady cut that protects your muscle</small></span></button>
+      <button class="wopt" data-goal="build"><span class="wic">💪</span><span><b>Build Muscle</b><small>A lean surplus with controlled gain</small></span></button>
+      <button class="wopt" data-goal="recomp"><span class="wic">⚖️</span><span><b>Body Recomp</b><small>Drop fat and build at the same weight</small></span></button>
+      <button class="wopt" data-goal="compete"><span class="wic">🏆</span><span><b>Compete</b><small>Full prep — growth, cut, and peak week</small></span></button>
     </div>
-    <div class="grid2">
-      <div class="field"><label>Weight (lb)</label><input id="wizWeight" type="number" inputmode="decimal"></div>
-      <div class="field"><label>Height (inches)</label><input id="wizHeight" type="number" inputmode="numeric" placeholder="e.g. 67"></div>
-    </div>
-    <div class="grid2">
+
+    <div class="wstep" data-step="stats">
+      <button class="wback" data-back="goal">‹</button>
+      <div class="wtitle">Current stats</div>
+      <div class="wsub">We use these to find your maintenance calories.</div>
+      <div class="chips" id="wizSexChips">
+        <button class="chip sel" data-v="m">Male</button>
+        <button class="chip" data-v="f">Female</button>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Weight (lb)</label><input id="wizWeight" type="number" inputmode="decimal"></div>
+        <div class="field"><label>Height (inches)</label><input id="wizHeight" type="number" inputmode="numeric" placeholder="e.g. 67"></div>
+      </div>
       <div class="field"><label>Age</label><input id="wizAge" type="number" inputmode="numeric"></div>
-      <div class="field"><label>Training</label><select id="wizActivity">
-        <option value="light">1–2 days/week</option>
-        <option value="moderate" selected>3–5 days/week</option>
-        <option value="high">6+ days/week</option>
-      </select></div>
+      <button class="btn primary" id="wizStatsNext">Continue</button>
     </div>
-    <h2 class="sect">Your goal</h2>
-    <div class="chips" id="wizGoalChips">
-      <button class="chip sel" data-v="cut">Cut</button>
-      <button class="chip" data-v="maintain">Maintain</button>
-      <button class="chip" data-v="build">Build</button>
+
+    <div class="wstep" data-step="target">
+      <button class="wback" data-back="stats">‹</button>
+      <div class="wtitle">Where are you headed?</div>
+      <div class="wsub">We'll pace your calories to land there.</div>
+      <div class="wrow">Weigh
+        <input id="wizTargetW" type="number" inputmode="decimal" style="width:90px" placeholder="lb"> by
+        <input id="wizTargetDate" type="date" style="flex:1">
+      </div>
+      <button class="btn primary" id="wizTargetNext" style="margin-top:22px">Continue</button>
+      <button class="wskip" id="wizTargetSkip">Skip for now</button>
     </div>
-    <div class="field"><label>Name it (optional)</label><input id="wizTitle" placeholder="e.g. Summer shred"></div>
-    <div class="grid2">
-      <div class="field"><label>Target date (optional)</label><input id="wizDate" type="date"></div>
-      <div class="field"><label>Target weight (optional)</label><input id="wizTarget" type="number" inputmode="decimal"></div>
+
+    <div class="wstep" data-step="show">
+      <button class="wback" data-back="stats">‹</button>
+      <div class="wtitle">When's your show?</div>
+      <div class="wsub">We'll build your growth phase, contest prep, and peak week backwards from stage day.</div>
+      <div class="field"><label>Show date</label><input id="wizShowDate" type="date"></div>
+      <button class="btn primary" id="wizShowNext" style="margin-top:12px">Continue</button>
     </div>
-    <div class="wizpreview" id="wizPreview"></div>
-    <button class="btn primary" id="wizStartBtn">Start tracking</button>
-    <div class="authsub" style="margin-top:12px;font-size:11px">Estimates, not medical advice. You can edit every number later in Goals.</div>
+
+    <div class="wstep" data-step="activity">
+      <button class="wback" data-back="target">‹</button>
+      <div class="wtitle">How often do you train?</div>
+      <div class="wsub">Sessions per week — lifting, cardio, sport.</div>
+      <button class="wopt" data-act="light"><span class="wic">🚶</span><span><b>1–2 days a week</b><small>Getting started or maintaining</small></span></button>
+      <button class="wopt" data-act="moderate"><span class="wic">🏃</span><span><b>3–5 days a week</b><small>Consistent training</small></span></button>
+      <button class="wopt" data-act="high"><span class="wic">🏋️</span><span><b>6+ days a week</b><small>Living in the gym</small></span></button>
+    </div>
+
+  </div>
+</div>
+
+<!-- plan build screen -->
+<div id="buildScreen">
+  <div class="buildinner">
+    <div class="buildring"></div>
+    <div class="buildtitle">Building your plan</div>
+    <div class="buildsub" id="buildStatus">Calculating your maintenance…</div>
   </div>
 </div>
 
@@ -657,7 +722,8 @@ const PRESETS = {
 };
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const PH_COLORS = {cut1:'var(--ph-cut1)', reverse:'var(--ph-reverse)', bulk:'var(--ph-bulk)', prep:'var(--ph-prep)', show:'var(--ph-show)',
-  plan:'#5aa2f0', cut:'var(--ph-cut1)', maintain:'var(--ph-prep)', build:'var(--ph-bulk)'};
+  plan:'#5aa2f0', cut:'var(--ph-cut1)', maintain:'var(--ph-prep)', build:'var(--ph-bulk)',
+  growth:'var(--ph-bulk)', peak:'var(--ph-show)'};
 // per-user plan boundaries (from profile; sensible fallbacks pre-login)
 const planStart = () => (profile && profile.plan_start) || '2100-01-01';
 const gradeStart = () => (profile && profile.grade_start) || '2100-01-01';
@@ -1743,69 +1809,164 @@ $('authBtnIn').addEventListener('click', ()=>doAuth('in'));
 $('authBtnUp').addEventListener('click', ()=>doAuth('up'));
 $('authPw').addEventListener('keydown', e=>{ if(e.key==='Enter') doAuth('in'); });
 
-// ---------- onboarding wizard ----------
-function showWizard(){ $('wizardScreen').style.display='block'; window.scrollTo(0,0); }
-let wizSex = 'm', wizGoal = 'cut';
+// ---------- onboarding wizard (stepped flow) ----------
+let wizSex = 'm', wizGoal = 'lose', wizAct = 'moderate';
+let stepBusy = false;
+function goStep(name, instant){
+  const cur = document.querySelector('.wstep.active');
+  const next = document.querySelector(`.wstep[data-step="${name}"]`);
+  if(!next || cur === next || stepBusy) return;
+  if(cur && !instant){
+    stepBusy = true;
+    cur.classList.add('leaving');
+    setTimeout(()=>{
+      cur.classList.remove('active','leaving');
+      next.classList.add('active');
+      $('wizardScreen').scrollTo(0,0);
+      stepBusy = false;
+    }, 160);
+  } else {
+    if(cur) cur.classList.remove('active','leaving');
+    next.classList.add('active');
+  }
+}
+function showWizard(){
+  $('wizardScreen').style.display='block';
+  document.querySelectorAll('.wstep').forEach(s=>s.classList.remove('active','leaving'));
+  goStep('goal', true);
+}
+document.querySelectorAll('.wback').forEach(b=>b.addEventListener('click', ()=>{
+  if(b.dataset.back === 'signout'){ saveSession(null); location.reload(); return; }
+  goStep(b.dataset.back);
+}));
+document.querySelectorAll('.wopt[data-goal]').forEach(b=>b.addEventListener('click', ()=>{
+  wizGoal = b.dataset.goal;
+  goStep('stats');
+}));
 document.querySelectorAll('#wizSexChips .chip').forEach(c=>c.addEventListener('click', ()=>{
   wizSex = c.dataset.v;
   document.querySelectorAll('#wizSexChips .chip').forEach(x=>x.classList.toggle('sel', x===c));
-  wizPreview();
 }));
-document.querySelectorAll('#wizGoalChips .chip').forEach(c=>c.addEventListener('click', ()=>{
-  wizGoal = c.dataset.v;
-  document.querySelectorAll('#wizGoalChips .chip').forEach(x=>x.classList.toggle('sel', x===c));
-  wizPreview();
+$('wizStatsNext').addEventListener('click', ()=>{
+  if(!Number($('wizWeight').value) || !Number($('wizHeight').value) || !Number($('wizAge').value)){
+    toast('Fill in weight, height, and age'); return;
+  }
+  goStep(wizGoal === 'compete' ? 'show' : 'target');
+});
+$('wizTargetNext').addEventListener('click', ()=>{
+  const tw = Number($('wizTargetW').value), td = $('wizTargetDate').value;
+  if((tw && !td) || (!tw && td)){ toast('Fill in both — or skip for now'); return; }
+  if(td && td <= todayStr()){ toast('Pick a future date'); return; }
+  goStep('activity');
+});
+$('wizTargetSkip').addEventListener('click', ()=>{
+  $('wizTargetW').value=''; $('wizTargetDate').value='';
+  goStep('activity');
+});
+$('wizShowNext').addEventListener('click', ()=>{
+  const d = $('wizShowDate').value;
+  if(!d){ toast('Pick your show date'); return; }
+  if(addDays(todayStr(), 21) > d){ toast('Show date needs to be at least 3 weeks out'); return; }
+  buildPlan();
+});
+document.querySelectorAll('.wopt[data-act]').forEach(b=>b.addEventListener('click', ()=>{
+  wizAct = b.dataset.act;
+  buildPlan();
 }));
-function wizCompute(){
+
+function calcTDEE(act){
   const w = Number($('wizWeight').value), hIn = Number($('wizHeight').value), age = Number($('wizAge').value);
-  if(!w || !hIn || !age) return null;
   const kg = w/2.2046, cm = hIn*2.54;
   const bmr = 10*kg + 6.25*cm - 5*age + (wizSex==='m' ? 5 : -161);
-  const mult = {light:1.35, moderate:1.55, high:1.7}[$('wizActivity').value] || 1.55;
-  const tdee = bmr*mult;
-  let cal = Math.round((wizGoal==='cut' ? tdee-500 : wizGoal==='build' ? tdee+300 : tdee)/5)*5;
-  const protein = Math.round(w * (wizGoal==='cut' ? 1.1 : 1.0));
-  const fat = Math.max(50, Math.round(w*0.35));
+  return bmr * ({light:1.35, moderate:1.55, high:1.7}[act] || 1.55);
+}
+function macroSet(cal, w, pMult, fMult, fMin){
+  const protein = Math.round(w * pMult);
+  const fat = Math.max(fMin, Math.round(w * fMult));
   let carbs = Math.round((cal - protein*4 - fat*9)/4);
   if(carbs < 60){ carbs = 60; cal = kcal(carbs, protein, fat); }
-  return {tdee: Math.round(tdee), cal, protein, fat, carbs};
+  return {calories: Math.round(cal/5)*5, carbs, protein, fat};
 }
-function wizPreview(){
-  const c = wizCompute();
-  $('wizPreview').innerHTML = c
-    ? `Maintenance ≈ <b>${c.tdee}</b> cal · your daily target: <b>${c.cal} cal</b> — C ${c.carbs}g · P ${c.protein}g · F ${c.fat}g`
-    : 'Fill in your stats to see your numbers.';
+function weekRows(phaseId, m){
+  const rows = [];
+  for(let d=0; d<7; d++) rows.push({phase_id: phaseId, day_of_week: d, label:'moderate', ...m});
+  return rows;
 }
-['wizWeight','wizHeight','wizAge'].forEach(id=>$(id).addEventListener('input', wizPreview));
-$('wizActivity').addEventListener('change', wizPreview);
-$('wizStartBtn').addEventListener('click', async ()=>{
-  const c = wizCompute();
-  if(!c){ toast('Fill in weight, height, and age first'); return; }
-  $('wizStartBtn').disabled = true;
+async function writePlan(){
+  const today = todayStr();
+  const w = Number($('wizWeight').value);
+  const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || 'America/Denver';
+  let phases_, macros_, prof;
+  if(wizGoal === 'compete'){
+    const show = $('wizShowDate').value;
+    const tdee = calcTDEE('high');
+    const peakStart = addDays(show, -6);
+    const prepIdeal = addDays(show, -112);            // ~16 weeks of prep
+    const prepStart = prepIdeal > today ? prepIdeal : today;
+    phases_ = []; macros_ = [];
+    let sort = 0;
+    if(prepStart > today){
+      phases_.push({id:'growth', name:'Growth', mode:'bulk', start_date:today, end_date:addDays(prepStart,-1),
+        description:'Build tissue before the cut begins.', sort:sort++});
+      macros_.push(...weekRows('growth', macroSet(tdee+300, w, 1.0, 0.35, 60)));
+    }
+    phases_.push({id:'prep', name:'Contest Prep', mode:'cut', start_date:prepStart, end_date:addDays(peakStart,-1),
+      description:'The cut — protect muscle, drop fat.', sort:sort++});
+    const prepM = macroSet(tdee-600, w, 1.2, 0.28, 45);
+    macros_.push(...weekRows('prep', prepM));
+    phases_.push({id:'peak', name:'Peak Week', mode:'cut', start_date:peakStart, end_date:show,
+      description:'Final week — fine-tune with your coach or experience.', sort:sort++});
+    macros_.push(...weekRows('peak', prepM));
+    prof = {onboarded:true, goal_title:'Road to the Stage', event_date:show, weight_anchors:null, timezone:tz};
+  } else {
+    const tdee = calcTDEE(wizAct);
+    const target = Number($('wizTargetW').value) || null;
+    const tdate = $('wizTargetDate').value || null;
+    let delta = wizGoal==='lose' ? -500 : wizGoal==='build' ? 300 : -250;
+    if(target && tdate){
+      const days = Math.max(14, daysBetween(today, tdate));
+      const need = (target - w) * 3500 / days;
+      delta = wizGoal==='build' ? Math.min(450, Math.max(150, need)) : Math.max(-750, Math.min(-250, need));
+    }
+    const m = macroSet(tdee+delta, w, wizGoal==='build' ? 1.0 : 1.1, 0.35, 50);
+    const title = {lose:'Fat Loss', build:'Muscle Build', recomp:'Recomp'}[wizGoal];
+    const end = tdate || addDays(today, 365);
+    phases_ = [{id:'plan', name:title, mode: wizGoal==='build' ? 'bulk' : 'cut',
+      start_date:today, end_date:end, description:'', sort:0}];
+    macros_ = weekRows('plan', m);
+    prof = {onboarded:true, goal_title:title, event_date:tdate,
+      weight_anchors: (target && tdate) ? [[today, w], [tdate, target]] : null, timezone:tz};
+  }
+  await rest('phases?on_conflict=user_id,id', {method:'POST',
+    headers:{'Prefer':'resolution=merge-duplicates'}, body:phases_});
+  await rest('phase_macros?on_conflict=user_id,phase_id,day_of_week', {method:'POST',
+    headers:{'Prefer':'resolution=merge-duplicates'}, body:macros_});
+  await rest('profiles?id=eq.'+session.user.id, {method:'PATCH',
+    headers:{'Prefer':'return=minimal'}, body:prof});
+}
+const BUILD_LINES = ['Calculating your maintenance…','Setting protein where it protects muscle…',
+  'Balancing carbs and fat…','Laying out your phases…','Almost there…'];
+async function buildPlan(){
+  if(!Number($('wizWeight').value)){ goStep('stats'); return; }
+  $('buildScreen').style.display='flex';
+  let li = 0;
+  const cycle = setInterval(()=>{
+    li = Math.min(li+1, BUILD_LINES.length-1);
+    $('buildStatus').textContent = BUILD_LINES[li];
+  }, 750);
+  $('buildStatus').textContent = BUILD_LINES[0];
   try{
-    const today = todayStr();
-    const eventDate = $('wizDate').value || null;
-    const end = eventDate || addDays(today, 365);
-    const title = $('wizTitle').value.trim() ||
-      (wizGoal==='cut' ? 'Cut' : wizGoal==='build' ? 'Build' : 'Maintain');
-    const mode = wizGoal==='build' ? 'bulk' : 'cut';
-    await rest('phases?on_conflict=user_id,id', {method:'POST', headers:{'Prefer':'resolution=merge-duplicates'},
-      body:{id:'plan', name:title, mode, start_date:today, end_date:end, description:'', sort:0}});
-    const rows = [];
-    for(let d=0; d<7; d++) rows.push({phase_id:'plan', day_of_week:d, label:'moderate',
-      calories:c.cal, carbs:c.carbs, protein:c.protein, fat:c.fat});
-    await rest('phase_macros?on_conflict=user_id,phase_id,day_of_week', {method:'POST',
-      headers:{'Prefer':'resolution=merge-duplicates'}, body:rows});
-    const target = Number($('wizTarget').value) || null;
-    const anchors = target ? [[today, Number($('wizWeight').value)], [end, target]] : null;
-    await rest('profiles?id=eq.'+session.user.id, {method:'PATCH', headers:{'Prefer':'return=minimal'},
-      body:{onboarded:true, goal_title:title, event_date:eventDate, weight_anchors:anchors,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Denver'}});
+    await Promise.all([writePlan(), new Promise(r=>setTimeout(r, 3000))]);
+    clearInterval(cycle);
     $('wizardScreen').style.display='none';
+    $('buildScreen').style.display='none';
     await loadApp();
-  }catch(e){ toast(e.message); }
-  $('wizStartBtn').disabled = false;
-});
+  }catch(e){
+    clearInterval(cycle);
+    $('buildScreen').style.display='none';
+    toast(e.message);
+  }
+}
 
 // ---------- init ----------
 async function startApp(){
