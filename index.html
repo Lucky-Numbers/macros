@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Lucky Numbers</title><!-- build 18 -->
+<title>Lucky Numbers</title><!-- build 19 -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -302,6 +302,27 @@ nav button.active{color:var(--brandlight)}
 @keyframes spin{to{transform:rotate(360deg)}}
 #loading .lt{font-size:14px;color:var(--ink2);font-weight:600}
 
+/* ---------- auth & onboarding ---------- */
+#authScreen{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(130% 55% at 50% 0%, #151b32 0%, #0c1020 52%, #080a13 100%);padding:24px}
+.authcard{width:100%;max-width:360px}
+.authlogo{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;text-align:center;margin-bottom:6px}
+.authlogo .lucky{color:var(--brand)}
+.authsub{font-size:12.5px;color:var(--muted);text-align:center;margin-bottom:22px}
+#wizardScreen{position:fixed;inset:0;z-index:65;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:radial-gradient(130% 55% at 50% 0%, #151b32 0%, #0c1020 52%, #080a13 100%)}
+.wizinner{max-width:420px;margin:0 auto;padding:calc(28px + env(safe-area-inset-top)) 22px calc(40px + env(safe-area-inset-bottom))}
+.wizpreview{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px;
+  font-size:13px;color:var(--ink2);margin:14px 0 6px;line-height:1.5}
+.wizpreview b{color:var(--brandlight)}
+.field select{width:100%;background:var(--field);border:1px solid var(--line);color:var(--ink);
+  border-radius:12px;padding:12px;font-size:16px;-webkit-appearance:none;appearance:none}
+.stackrow{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.stackrow:last-child{border-bottom:none}
+.stackrow .smain{flex:1;min-width:0}
+.stackrow .ssub{color:var(--muted);font-size:11.5px;margin-left:6px}
+
 /* ---------- settings ---------- */
 .settingcard{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:17px;margin-bottom:13px;box-shadow:var(--shadow)}
 .settingcard p{font-size:12.5px;color:var(--muted);line-height:1.5;margin:7px 0 12px}
@@ -404,11 +425,26 @@ nav button.active{color:var(--brandlight)}
   <!-- SETTINGS -->
   <section class="page" id="page-settings">
     <div class="settingcard">
-      <h3 style="margin:0;font-size:15px">AI scanning</h3>
-      <p>Claude estimates macros from photos and text.</p>
-      <div class="field"><input type="password" id="apiKeyInput" placeholder="sk-ant-..."></div>
-      <button class="btn primary" id="saveKeyBtn">Save key</button>
-      <div class="keystatus" id="keyStatus"></div>
+      <h3 style="margin:0;font-size:15px">Account</h3>
+      <p id="acctEmail" style="margin-bottom:10px"></p>
+      <div class="field"><input type="password" id="newPwInput" placeholder="New password" autocomplete="new-password"></div>
+      <button class="btn ghost" id="changePwBtn">Change password</button>
+      <button class="btn ghost" id="signOutBtn" style="color:var(--serious)">Sign out</button>
+    </div>
+    <div class="settingcard">
+      <h3 style="margin:0;font-size:15px">My stack</h3>
+      <p>Compounds &amp; ancillaries you check off daily. Yours only — nothing here is a recommendation.</p>
+      <div id="stackList"></div>
+      <div class="field" style="margin-top:10px"><input id="stackName" placeholder="Name (e.g. Creatine)"></div>
+      <div class="grid2">
+        <div class="field"><input id="stackDose" placeholder="Dose (optional)"></div>
+        <div class="field"><select id="stackFreq">
+          <option value="daily">Every day</option>
+          <option value="eod">Every other day</option>
+          <option value="e3d">Every 3 days</option>
+        </select></div>
+      </div>
+      <button class="btn ghost" id="stackAddBtn">+ Add to stack</button>
     </div>
     <div class="settingcard">
       <h3 style="margin:0;font-size:15px">Notifications</h3>
@@ -416,6 +452,13 @@ nav button.active{color:var(--brandlight)}
       <button class="btn primary" id="notifBtn">Enable notifications</button>
       <div class="keystatus" id="notifStatus"></div>
       <button class="btn ghost" id="notifTest" style="display:none">Send test</button>
+    </div>
+    <div class="settingcard" id="aiCard" style="display:none">
+      <h3 style="margin:0;font-size:15px">AI scanning</h3>
+      <p>Claude estimates macros from photos and text. Admin only.</p>
+      <div class="field"><input type="password" id="apiKeyInput" placeholder="sk-ant-..."></div>
+      <button class="btn primary" id="saveKeyBtn">Save key</button>
+      <div class="keystatus" id="keyStatus"></div>
     </div>
   </section>
 </main>
@@ -509,17 +552,98 @@ nav button.active{color:var(--brandlight)}
   <button class="btn ghost" id="ddClose" style="margin-top:14px">Close</button>
 </div>
 
+<!-- auth screen -->
+<div id="authScreen">
+  <div class="authcard">
+    <div class="authlogo"><span class="lucky">Lucky</span> Numbers</div>
+    <div class="authsub">Macros, training, and the plan — in one place.</div>
+    <div class="field"><input id="authEmail" type="email" placeholder="Email" autocomplete="email" inputmode="email"></div>
+    <div class="field"><input id="authPw" type="password" placeholder="Password (8+ characters)" autocomplete="current-password"></div>
+    <button class="btn primary" id="authBtnIn">Sign in</button>
+    <button class="btn ghost" id="authBtnUp">Create account</button>
+  </div>
+</div>
+
+<!-- onboarding wizard -->
+<div id="wizardScreen">
+  <div class="wizinner">
+    <div class="authlogo" style="margin-bottom:4px"><span class="lucky">Lucky</span> Numbers</div>
+    <div class="authsub">Quick setup — we'll build your daily targets.</div>
+    <h2 class="sect" style="margin-top:18px">About you</h2>
+    <div class="chips" id="wizSexChips">
+      <button class="chip sel" data-v="m">Male</button>
+      <button class="chip" data-v="f">Female</button>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Weight (lb)</label><input id="wizWeight" type="number" inputmode="decimal"></div>
+      <div class="field"><label>Height (inches)</label><input id="wizHeight" type="number" inputmode="numeric" placeholder="e.g. 67"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Age</label><input id="wizAge" type="number" inputmode="numeric"></div>
+      <div class="field"><label>Training</label><select id="wizActivity">
+        <option value="light">1–2 days/week</option>
+        <option value="moderate" selected>3–5 days/week</option>
+        <option value="high">6+ days/week</option>
+      </select></div>
+    </div>
+    <h2 class="sect">Your goal</h2>
+    <div class="chips" id="wizGoalChips">
+      <button class="chip sel" data-v="cut">Cut</button>
+      <button class="chip" data-v="maintain">Maintain</button>
+      <button class="chip" data-v="build">Build</button>
+    </div>
+    <div class="field"><label>Name it (optional)</label><input id="wizTitle" placeholder="e.g. Summer shred"></div>
+    <div class="grid2">
+      <div class="field"><label>Target date (optional)</label><input id="wizDate" type="date"></div>
+      <div class="field"><label>Target weight (optional)</label><input id="wizTarget" type="number" inputmode="decimal"></div>
+    </div>
+    <div class="wizpreview" id="wizPreview"></div>
+    <button class="btn primary" id="wizStartBtn">Start tracking</button>
+    <div class="authsub" style="margin-top:12px;font-size:11px">Estimates, not medical advice. You can edit every number later in Goals.</div>
+  </div>
+</div>
+
 <div id="toast"></div>
 <div id="loading"><div class="spinner"></div><div class="lt" id="loadingText">Working…</div></div>
 
 <script>
 const SB = 'https://rvbyxvwifzcnfrjsdgkh.supabase.co';
 const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2Ynl4dndpZnpjbmZyanNkZ2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MjA4NzIsImV4cCI6MjA5MTA5Njg3Mn0.3lEbeX3UXN9eooaiQ0ks8qRwPq6qjRNizOQWOis7BB0';
-const H = {'apikey': ANON, 'Authorization': 'Bearer ' + ANON, 'Content-Type': 'application/json'};
 const VAPID_PUB = 'BJTMVMdr4qb1Chxc7JiZbTbmoOuvf3DtySl39OqcsFvdzNACNqC7TFdYWUa-qBmp2bjGhtsuYEywY9s01Sx3uuQ';
-const SHOW_DAY = '2027-04-17';
-const PLAN_START = '2026-08-20';
 const $ = id => document.getElementById(id);
+
+// ---------- auth session ----------
+let session = null;   // {access_token, refresh_token, expires_at, user:{id,email}}
+let profile = null;   // profiles row for the signed-in user
+function loadSession(){ try{ session = JSON.parse(localStorage.getItem('ln_session')||'null'); }catch(e){ session = null; } }
+function saveSession(s){ session = s;
+  try{ if(s) localStorage.setItem('ln_session', JSON.stringify(s)); else localStorage.removeItem('ln_session'); }catch(e){} }
+async function authRequest(path, body, method='POST'){
+  const r = await fetch(SB + '/auth/v1/' + path, {method,
+    headers:{'Content-Type':'application/json','apikey':ANON,
+      ...(session && path==='user' ? {'Authorization':'Bearer '+session.access_token} : {})},
+    body: body ? JSON.stringify(body) : undefined});
+  const d = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error_description || d.msg || d.error || ('Auth error ('+r.status+')'));
+  return d;
+}
+function packSession(d){
+  return {access_token: d.access_token, refresh_token: d.refresh_token,
+    expires_at: d.expires_at || (Math.floor(Date.now()/1000) + (d.expires_in||3600)),
+    user: {id: d.user.id, email: d.user.email}};
+}
+let refreshing = null;
+async function ensureFreshToken(){
+  if(!session) throw new Error('signed out');
+  if(Date.now()/1000 < session.expires_at - 120) return;
+  if(!refreshing){
+    refreshing = authRequest('token?grant_type=refresh_token', {refresh_token: session.refresh_token})
+      .then(d => { saveSession(packSession(d)); })
+      .catch(e => { saveSession(null); showAuth(); throw e; })
+      .finally(()=>{ refreshing = null; });
+  }
+  await refreshing;
+}
 const MACROS = [
   {key:'calories', label:'Calories', color:'var(--cal)', unit:''},
   {key:'protein',  label:'Protein',  color:'var(--protein)', unit:'g'},
@@ -532,9 +656,15 @@ const PRESETS = {
   high:     {carbs:300, protein:200, fat:45},
 };
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const PH_COLORS = {cut1:'var(--ph-cut1)', reverse:'var(--ph-reverse)', bulk:'var(--ph-bulk)', prep:'var(--ph-prep)', show:'var(--ph-show)'};
-// weight projection anchors (piecewise linear)
-const W_ANCHORS = [['2026-08-22',177],['2026-09-16',173.5],['2026-09-23',174.5],['2027-01-08',186],['2027-04-17',175]];
+const PH_COLORS = {cut1:'var(--ph-cut1)', reverse:'var(--ph-reverse)', bulk:'var(--ph-bulk)', prep:'var(--ph-prep)', show:'var(--ph-show)',
+  plan:'#5aa2f0', cut:'var(--ph-cut1)', maintain:'var(--ph-prep)', build:'var(--ph-bulk)'};
+// per-user plan boundaries (from profile; sensible fallbacks pre-login)
+const planStart = () => (profile && profile.plan_start) || '2100-01-01';
+const gradeStart = () => (profile && profile.grade_start) || '2100-01-01';
+const wAnchors = () => {
+  const a = profile && profile.weight_anchors;
+  return (Array.isArray(a) && a.length >= 2) ? a : null;
+};
 const kcal = (c,p,f) => Math.round(4*(Number(c)||0) + 4*(Number(p)||0) + 9*(Number(f)||0));
 const todayStr = () => new Date().toLocaleDateString('en-CA');
 const dowOf = ds => new Date(ds + 'T12:00:00').getDay();
@@ -560,30 +690,39 @@ function goalForDate(ds){
 }
 function todayGoal(){ return goalForDate(todayStr()); }
 function projWeight(ds){
-  if(ds <= W_ANCHORS[0][0]) return W_ANCHORS[0][1];
-  for(let i=1;i<W_ANCHORS.length;i++){
-    if(ds <= W_ANCHORS[i][0]){
-      const [d0,w0]=W_ANCHORS[i-1], [d1,w1]=W_ANCHORS[i];
+  const A = wAnchors(); if(!A) return null;
+  if(ds <= A[0][0]) return A[0][1];
+  for(let i=1;i<A.length;i++){
+    if(ds <= A[i][0]){
+      const [d0,w0]=A[i-1], [d1,w1]=A[i];
       const t0=new Date(d0).getTime(), t1=new Date(d1).getTime(), t=new Date(ds).getTime();
       return w0 + (w1-w0)*((t-t0)/(t1-t0));
     }
   }
-  return W_ANCHORS[W_ANCHORS.length-1][1];
+  return A[A.length-1][1];
 }
 
 // ---------- helpers ----------
 async function rest(path, opts={}){
+  await ensureFreshToken();
   const r = await fetch(SB + '/rest/v1/' + path, {
     method: opts.method || 'GET',
-    headers: {...H, ...(opts.headers||{})},
+    headers: {'apikey': ANON, 'Authorization': 'Bearer ' + session.access_token,
+      'Content-Type': 'application/json', ...(opts.headers||{})},
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
-  if(!r.ok){ throw new Error('Database error (' + r.status + ')'); }
+  if(!r.ok){
+    if(r.status === 401){ saveSession(null); showAuth(); throw new Error('Signed out — sign in again'); }
+    throw new Error('Database error (' + r.status + ')');
+  }
   const t = await r.text();
   return t ? JSON.parse(t) : null;
 }
 async function fn(body){
-  const r = await fetch(SB + '/functions/v1/macro-ai', {method:'POST', headers:H, body:JSON.stringify(body)});
+  await ensureFreshToken();
+  const r = await fetch(SB + '/functions/v1/macro-ai', {method:'POST',
+    headers:{'apikey': ANON, 'Authorization': 'Bearer ' + session.access_token, 'Content-Type': 'application/json'},
+    body:JSON.stringify(body)});
   const d = await r.json().catch(()=>({error:'Server error'}));
   if(!r.ok) throw new Error(d.error || 'Server error');
   return d;
@@ -616,7 +755,7 @@ document.querySelectorAll('nav button').forEach(b=>{
     $('page-' + b.dataset.page).classList.add('active');
     if(b.dataset.page==='plan') renderPlan();
     if(b.dataset.page==='goals') renderGoals();
-    if(b.dataset.page==='settings'){ checkKey(); refreshNotifStatus(); }
+    if(b.dataset.page==='settings'){ renderAccount(); renderStack(); refreshNotifStatus(); if(profile && profile.is_admin) checkKey(); }
     if(b.dataset.page==='dash'){ renderHero(); renderChecklist(); renderWeightChart(); renderSleepCard(); }
     if(b.dataset.page==='macros') refreshToday();
   });
@@ -626,7 +765,8 @@ document.querySelectorAll('nav button').forEach(b=>{
 function renderHero(){
   const today = todayStr();
   const ph = currentPhase();
-  const daysTo = Math.max(0, Math.round((new Date(SHOW_DAY+'T12:00:00') - new Date(today+'T12:00:00'))/86400000));
+  const eventDate = profile && profile.event_date;
+  const daysTo = eventDate ? Math.max(0, Math.round((new Date(eventDate+'T12:00:00') - new Date(today+'T12:00:00'))/86400000)) : null;
   let phLine = '';
   if(ph){
     const total = Math.round((new Date(ph.end_date+'T12:00:00') - new Date(ph.start_date+'T12:00:00'))/86400000)+1;
@@ -642,13 +782,15 @@ function renderHero(){
     return `<div class="seg" style="flex-grow:${Math.max(1,Math.round(w/86400000))}">
       <div class="fill" style="background:${PH_COLORS[p.id]||'#888'};width:${fillPct}%"></div></div>`;
   }).join('');
+  const count = daysTo !== null
+    ? `<div class="herocount"><div class="hcnum">${daysTo}</div><div class="hclbl">days</div></div>` : '';
   $('planHero').innerHTML = `
     <div class="herorow">
       <div style="min-width:0">
-        <div class="herotitle">Road to Wasatch Warrior</div>
+        <div class="herotitle">${escapeHtml((profile && profile.goal_title) || 'Lucky Numbers')}</div>
         ${phLine}
       </div>
-      <div class="herocount"><div class="hcnum">${daysTo}</div><div class="hclbl">days</div></div>
+      ${count}
     </div>
     <div class="planbar">${bar}</div>`;
 }
@@ -676,8 +818,9 @@ function checkDefsFor(ds){
     {key:'macros', icon:'🎯', label:'Macros', required:true},
     {key:'workout', icon:'🏋️', label:'Workout', required:dw!==0, note:true},
     {key:'cardio', icon:'🏃', label:'Cardio', required:dw!==0},
-    {key:'compounds', icon:'💉', label:'Compounds and Ancillaries', required:true},
   ];
+  // only people who configured a stack (Settings → My stack) see this item
+  if(compounds.length) defs.push({key:'compounds', icon:'💉', label:'Compounds and Ancillaries', required:true});
   if(dw===5) defs.push({key:'photo', icon:'📸', label:'Progress photo', required:true, photo:true});
   return defs;
 }
@@ -722,7 +865,7 @@ function renderChecklist(){
     todayChecks[key] = {...cur, done: next};
     renderChecklist();
     try{
-      await rest('daily_checks?on_conflict=day,item', {method:'POST',
+      await rest('daily_checks?on_conflict=user_id,day,item', {method:'POST',
         headers:{'Prefer':'resolution=merge-duplicates'},
         body:{day: todayStr(), item:key, done: next, note: cur.note||'', updated_at: new Date().toISOString()}});
     }catch(e){ toast(e.message); }
@@ -732,7 +875,7 @@ function renderChecklist(){
     const cur = todayChecks['workout'] || {done:false, note:''};
     todayChecks['workout'] = {...cur, note: wn.value};
     try{
-      await rest('daily_checks?on_conflict=day,item', {method:'POST',
+      await rest('daily_checks?on_conflict=user_id,day,item', {method:'POST',
         headers:{'Prefer':'resolution=merge-duplicates'},
         body:{day: todayStr(), item:'workout', done: cur.done, note: wn.value, updated_at: new Date().toISOString()}});
     }catch(e){ toast(e.message); }
@@ -752,7 +895,7 @@ async function loadTodayMetrics(){
 async function saveMetric(field, val){
   const body = {day: todayStr(), updated_at: new Date().toISOString()};
   body[field] = val;
-  await rest('day_metrics?on_conflict=day', {method:'POST',
+  await rest('day_metrics?on_conflict=user_id,day', {method:'POST',
     headers:{'Prefer':'resolution=merge-duplicates'}, body});
 }
 $('wSave').addEventListener('click', async ()=>{
@@ -772,7 +915,8 @@ async function renderWeightChart(){
     const start = data[0].day, end = todayStr();
     const span = Math.max(1, (new Date(end) - new Date(start))/86400000);
     const all = data.map(r=>Number(r.weight));
-    const projStart = projWeight(start), projEnd = projWeight(end);
+    const hasPlan = wAnchors() !== null;
+    const projStart = hasPlan ? projWeight(start) : all[0], projEnd = hasPlan ? projWeight(end) : all[0];
     const lo = Math.floor(Math.min(...all, projStart, projEnd) - 1), hi = Math.ceil(Math.max(...all, projStart, projEnd) + 1);
     // plot area with room for axis labels: x 32..334, y 6..114
     const X = ds => 32 + 302 * ((new Date(ds) - new Date(start))/86400000) / span;
@@ -791,9 +935,9 @@ async function renderWeightChart(){
     let xlabels = `<text x="32" y="127" fill="#898781" font-size="9" text-anchor="start">${fmtD(start)}</text>` +
       `<text x="183" y="127" fill="#898781" font-size="9" text-anchor="middle">${fmtD(mid)}</text>` +
       `<text x="334" y="127" fill="#898781" font-size="9" text-anchor="end">${fmtD(end)}</text>`;
-    // projection line
+    // projection line (only when the user has a weight plan)
     let proj = '';
-    for(let i=0;i<=20;i++){
+    if(hasPlan) for(let i=0;i<=20;i++){
       const ds = addDays(start, Math.round(span*i/20));
       proj += (i?'L':'M') + X(ds).toFixed(1) + ',' + Y(projWeight(ds)).toFixed(1);
     }
@@ -809,14 +953,19 @@ async function renderWeightChart(){
     // 7-day avg vs projection
     const last7 = data.slice(-7).map(r=>Number(r.weight));
     const avg = last7.reduce((a,b)=>a+b,0)/last7.length;
-    const diff = avg - projWeight(last.day);
     const el = $('wTrend');
-    const mode = (currentPhase()||{}).mode || 'cut';
-    const ahead = mode==='cut' ? diff <= 0.5 : diff >= -0.5;
-    el.className = 'wtrend ' + (ahead ? 'ok':'warn');
-    el.textContent = `Avg: ${avg.toFixed(1)} · Plan: ${projWeight(last.day).toFixed(1)} · ` +
-      (Math.abs(diff) <= 0.7 ? 'On plan ✓' :
-        diff > 0 ? `+${diff.toFixed(1)} lb` : `−${(-diff).toFixed(1)} lb ahead`);
+    if(!hasPlan){
+      el.className = 'wtrend ok';
+      el.textContent = `Avg: ${avg.toFixed(1)} lb`;
+    } else {
+      const diff = avg - projWeight(last.day);
+      const mode = (currentPhase()||{}).mode || 'cut';
+      const ahead = mode==='cut' ? diff <= 0.5 : diff >= -0.5;
+      el.className = 'wtrend ' + (ahead ? 'ok':'warn');
+      el.textContent = `Avg: ${avg.toFixed(1)} · Plan: ${projWeight(last.day).toFixed(1)} · ` +
+        (Math.abs(diff) <= 0.7 ? 'On plan ✓' :
+          diff > 0 ? `+${diff.toFixed(1)} lb` : `−${(-diff).toFixed(1)} lb ahead`);
+    }
   }catch(e){}
 }
 async function renderSleepCard(){
@@ -871,9 +1020,10 @@ $('progressPhotoInput').addEventListener('change', async e=>{
   loading(true, 'Saving progress photo…');
   try{
     const blob = await resizeToBlob(file, 1400);
-    const name = todayStr() + '-' + Date.now() + '.jpg';
+    await ensureFreshToken();
+    const name = session.user.id + '/' + todayStr() + '-' + Date.now() + '.jpg';
     const up = await fetch(SB + '/storage/v1/object/photos/' + name, {
-      method:'POST', headers:{'apikey':ANON, 'Authorization':'Bearer '+ANON, 'Content-Type':'image/jpeg'}, body: blob});
+      method:'POST', headers:{'apikey':ANON, 'Authorization':'Bearer '+session.access_token, 'Content-Type':'image/jpeg'}, body: blob});
     if(!up.ok) throw new Error('Upload failed (' + up.status + ')');
     await rest('prep_photos', {method:'POST', headers:{'Prefer':'return=minimal'},
       body:{day: todayStr(), path: name}});
@@ -894,7 +1044,7 @@ async function renderPhotos(){
     const rows = await rest('prep_photos?select=*&order=day.desc&limit=60');
     if(!rows || !rows.length){ $('photoGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">No photos yet</div>'; return; }
     $('photoGrid').innerHTML = rows.map(p=>{
-      const url = SB + '/storage/v1/object/public/photos/' + encodeURIComponent(p.path);
+      const url = SB + '/storage/v1/object/public/photos/' + p.path.split('/').map(encodeURIComponent).join('/');
       return `<div class="photocell" data-url="${url}">
         <img loading="lazy" src="${url}" alt="">
         <div class="pdate">${fmtDay(p.day)}</div>
@@ -989,7 +1139,7 @@ $('autoCalBtn').addEventListener('click', ()=>{ $('fCal').value = kcal($('fCarbs
 $('cancelMealBtn').addEventListener('click', closeSheets);
 async function saveMealRecord(rec){
   const g = todayGoal();
-  await rest('day_goals?on_conflict=day', {method:'POST',
+  await rest('day_goals?on_conflict=user_id,day', {method:'POST',
     headers:{'Prefer':'resolution=ignore-duplicates'},
     body:{day:todayStr(), label:g.label, calories:g.calories, carbs:g.carbs, protein:g.protein, fat:g.fat}});
   await rest('meals', {method:'POST', headers:{'Prefer':'return=minimal'},
@@ -1245,7 +1395,7 @@ $('saveGoalBtn').addEventListener('click', async ()=>{
     carbs:Number($('gCarbs').value)||0, protein:Number($('gProtein').value)||0,
     fat:Number($('gFat').value)||0, calories:Number($('gCal').value)||kcal($('gCarbs').value,$('gProtein').value,$('gFat').value)};
   try{
-    await rest('phase_macros?on_conflict=phase_id,day_of_week', {method:'POST',
+    await rest('phase_macros?on_conflict=user_id,phase_id,day_of_week', {method:'POST',
       headers:{'Prefer':'resolution=merge-duplicates'}, body});
     (phaseMacros[ph.id] = phaseMacros[ph.id] || {})[goalDow] = body;
     closeSheets(); renderGoals(); renderRings(); renderChecklist(); toast(DAYS[goalDow] + ' goal saved');
@@ -1301,7 +1451,6 @@ function histGoal(ds){
 // GRACE gives a 7% no-penalty band on every rule; beyond that the score
 // decays to 0 at 30% off target. Also tracks which DIRECTION the misses
 // went — eating past a limit (over) vs leaving fuel on the table (under).
-const GRADE_START = '2026-08-17';  // 8/15–8/16 were only partially tracked while the app was being built
 const GRACE = 0.07;
 function macroCloseness(ds){
   const t = histData.byDay[ds]; if(!t) return null;
@@ -1334,7 +1483,7 @@ function dayStatus(ds){
   const hasChecks = !!histData.checksByDay[ds];
   if(!hasMeals && !hasChecks) return 'nolog';
   let ok;
-  if(ds >= PLAN_START){
+  if(ds >= planStart()){
     const c = histData.checksByDay[ds] || {};
     ok = checkDefsFor(ds).every(d=>{
       if(!d.required) return true;
@@ -1369,13 +1518,13 @@ function renderCalendar(){
     let tint = '';
     const isPast = ds < todayStr();
     const phTint = phc ? `style="background:color-mix(in srgb, ${phc} 16%, var(--surface));border-color:color-mix(in srgb, ${phc} 35%, var(--border))"` : '';
-    const mc = (isPast && ds >= GRADE_START && st!=='nolog') ? macroCloseness(ds) : null;
+    const mc = (isPast && ds >= gradeStart() && st!=='nolog') ? macroCloseness(ds) : null;
     let gradedCls = st;
     if(mc){
       const sc = scoreColor(mc.score, mc.under > mc.over);
       tint = `style="background:color-mix(in srgb, ${sc} 20%, var(--surface));border-color:color-mix(in srgb, ${sc} 55%, var(--border));color:${sc}"`;
       gradedCls = st.replace(/\b(done|miss)\b/g,'').trim();
-    } else if(isPast && ds < GRADE_START){
+    } else if(isPast && ds < gradeStart()){
       gradedCls = st.replace(/\b(done|miss)\b/g,'').trim();
       tint = phTint;
     } else if(phc && st!=='done' && st!=='miss' && !st.includes('today done')){
@@ -1426,7 +1575,7 @@ function openDayDetail(ds){
     (goal.label||'custom').toUpperCase() + '</span> ' +
     (isToday ? '<span class="badge progress">In progress</span>' : (ok?'<span class="badge done">✓ Complete</span>':'<span class="badge miss">✗ Incomplete</span>'));
   const c = histData.checksByDay[ds] || {};
-  $('ddChecklist').innerHTML = ds >= PLAN_START ? checkDefsFor(ds).map(d=>{
+  $('ddChecklist').innerHTML = ds >= planStart() ? checkDefsFor(ds).map(d=>{
     const done = d.photo ? histData.photoDays.has(ds) : (c[d.key] && c[d.key].done);
     const note = c[d.key] && c[d.key].note ? ' — ' + escapeHtml(c[d.key].note) : '';
     return `<div style="font-size:13px;padding:3px 0"><span class="${done?'':''}" style="color:${done?'var(--good)':'var(--critical)'}">${done?'✓':'✗'}</span> ${d.icon} ${d.label}${note}${d.required?'':' <span class="chkopt">optional</span>'}</div>`;
@@ -1473,10 +1622,17 @@ $('notifBtn').addEventListener('click', async ()=>{
     const perm = await Notification.requestPermission();
     if(perm!=='granted'){ toast('Notifications were not allowed'); return; }
     const reg = await navigator.serviceWorker.ready;
-    const sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:urlB64ToU8(VAPID_PUB)});
-    await rest('push_subs?on_conflict=endpoint', {method:'POST',
+    let sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:urlB64ToU8(VAPID_PUB)});
+    const store = () => rest('push_subs?on_conflict=endpoint', {method:'POST',
       headers:{'Prefer':'resolution=merge-duplicates'},
       body:{endpoint: sub.endpoint, sub: sub.toJSON()}});
+    try{ await store(); }
+    catch(err){
+      // endpoint may belong to a previous account on this device — start a fresh subscription
+      await sub.unsubscribe().catch(()=>{});
+      sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:urlB64ToU8(VAPID_PUB)});
+      await store();
+    }
     toast('Notifications enabled 🎉');
     refreshNotifStatus();
   }catch(e){ toast('Could not enable: ' + e.message); }
@@ -1510,11 +1666,151 @@ $('saveKeyBtn').addEventListener('click', async ()=>{
   $('saveKeyBtn').disabled = false;
 });
 
-// ---------- init ----------
-(async function init(){
-  if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
-  $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
+// ---------- account (settings) ----------
+function renderAccount(){
+  if(!session) return;
+  $('acctEmail').textContent = session.user.email;
+  $('aiCard').style.display = (profile && profile.is_admin) ? 'block' : 'none';
+}
+$('signOutBtn').addEventListener('click', ()=>{ saveSession(null); location.reload(); });
+$('changePwBtn').addEventListener('click', async ()=>{
+  const pw = $('newPwInput').value;
+  if(pw.length < 8){ toast('Password needs 8+ characters'); return; }
   try{
+    await ensureFreshToken();
+    await authRequest('user', {password: pw}, 'PUT');
+    $('newPwInput').value=''; toast('Password updated');
+  }catch(e){ toast(e.message); }
+});
+
+// ---------- my stack (compounds editor) ----------
+async function renderStack(){
+  try{
+    const rows = await rest('compound_items?select=*&order=sort');
+    compounds = rows || [];
+    $('stackList').innerHTML = compounds.length ? compounds.map(c=>{
+      const sched = c.interval_days === 2 ? 'every other day' : c.interval_days === 3 ? 'every 3 days'
+        : (c.dows === '0,1,2,3,4,5,6' || !c.dows) ? 'daily' : 'custom days';
+      return `<div class="stackrow"><div class="smain"><b>${escapeHtml(c.name)}</b>${c.dose?' · '+escapeHtml(c.dose):''}
+        <span class="ssub">${sched}</span></div>
+        <button class="mdel" data-sid="${c.id}">✕</button></div>`;
+    }).join('') : '<div class="empty" style="padding:12px 0">Nothing yet — add what you take below.</div>';
+    document.querySelectorAll('[data-sid]').forEach(b=>b.addEventListener('click', async ()=>{
+      if(!confirm('Remove this item?')) return;
+      try{ await rest('compound_items?id=eq.'+b.dataset.sid, {method:'DELETE'}); renderStack(); }
+      catch(e){ toast(e.message); }
+    }));
+  }catch(e){}
+}
+$('stackAddBtn').addEventListener('click', async ()=>{
+  const name = $('stackName').value.trim();
+  if(!name){ toast('Give it a name'); return; }
+  const freq = $('stackFreq').value;
+  const body = {name, dose: $('stackDose').value.trim(), phases:'all', sort: compounds.length,
+    dows:'0,1,2,3,4,5,6',
+    interval_days: freq==='eod' ? 2 : freq==='e3d' ? 3 : null,
+    anchor_date: (freq==='eod'||freq==='e3d') ? todayStr() : null};
+  try{
+    await rest('compound_items', {method:'POST', headers:{'Prefer':'return=minimal'}, body});
+    $('stackName').value=''; $('stackDose').value='';
+    renderStack(); renderChecklist();
+  }catch(e){ toast(e.message); }
+});
+
+// ---------- auth screen ----------
+function showAuth(){ $('authScreen').style.display='flex'; $('wizardScreen').style.display='none'; }
+function hideAuth(){ $('authScreen').style.display='none'; }
+async function doAuth(mode){
+  const email = $('authEmail').value.trim().toLowerCase();
+  const pw = $('authPw').value;
+  if(!email || !email.includes('@')){ toast('Enter your email'); return; }
+  if(pw.length < 8){ toast('Password needs 8+ characters'); return; }
+  $('authBtnIn').disabled = $('authBtnUp').disabled = true;
+  try{
+    const d = mode === 'up'
+      ? await authRequest('signup', {email, password: pw})
+      : await authRequest('token?grant_type=password', {email, password: pw});
+    if(!d.access_token) throw new Error('Check your email to confirm, then sign in.');
+    saveSession(packSession(d));
+    hideAuth();
+    await loadApp();
+  }catch(e){
+    toast(/invalid/i.test(e.message) ? 'Wrong email or password' : e.message);
+  }
+  $('authBtnIn').disabled = $('authBtnUp').disabled = false;
+}
+$('authBtnIn').addEventListener('click', ()=>doAuth('in'));
+$('authBtnUp').addEventListener('click', ()=>doAuth('up'));
+$('authPw').addEventListener('keydown', e=>{ if(e.key==='Enter') doAuth('in'); });
+
+// ---------- onboarding wizard ----------
+function showWizard(){ $('wizardScreen').style.display='block'; window.scrollTo(0,0); }
+let wizSex = 'm', wizGoal = 'cut';
+document.querySelectorAll('#wizSexChips .chip').forEach(c=>c.addEventListener('click', ()=>{
+  wizSex = c.dataset.v;
+  document.querySelectorAll('#wizSexChips .chip').forEach(x=>x.classList.toggle('sel', x===c));
+  wizPreview();
+}));
+document.querySelectorAll('#wizGoalChips .chip').forEach(c=>c.addEventListener('click', ()=>{
+  wizGoal = c.dataset.v;
+  document.querySelectorAll('#wizGoalChips .chip').forEach(x=>x.classList.toggle('sel', x===c));
+  wizPreview();
+}));
+function wizCompute(){
+  const w = Number($('wizWeight').value), hIn = Number($('wizHeight').value), age = Number($('wizAge').value);
+  if(!w || !hIn || !age) return null;
+  const kg = w/2.2046, cm = hIn*2.54;
+  const bmr = 10*kg + 6.25*cm - 5*age + (wizSex==='m' ? 5 : -161);
+  const mult = {light:1.35, moderate:1.55, high:1.7}[$('wizActivity').value] || 1.55;
+  const tdee = bmr*mult;
+  let cal = Math.round((wizGoal==='cut' ? tdee-500 : wizGoal==='build' ? tdee+300 : tdee)/5)*5;
+  const protein = Math.round(w * (wizGoal==='cut' ? 1.1 : 1.0));
+  const fat = Math.max(50, Math.round(w*0.35));
+  let carbs = Math.round((cal - protein*4 - fat*9)/4);
+  if(carbs < 60){ carbs = 60; cal = kcal(carbs, protein, fat); }
+  return {tdee: Math.round(tdee), cal, protein, fat, carbs};
+}
+function wizPreview(){
+  const c = wizCompute();
+  $('wizPreview').innerHTML = c
+    ? `Maintenance ≈ <b>${c.tdee}</b> cal · your daily target: <b>${c.cal} cal</b> — C ${c.carbs}g · P ${c.protein}g · F ${c.fat}g`
+    : 'Fill in your stats to see your numbers.';
+}
+['wizWeight','wizHeight','wizAge'].forEach(id=>$(id).addEventListener('input', wizPreview));
+$('wizActivity').addEventListener('change', wizPreview);
+$('wizStartBtn').addEventListener('click', async ()=>{
+  const c = wizCompute();
+  if(!c){ toast('Fill in weight, height, and age first'); return; }
+  $('wizStartBtn').disabled = true;
+  try{
+    const today = todayStr();
+    const eventDate = $('wizDate').value || null;
+    const end = eventDate || addDays(today, 365);
+    const title = $('wizTitle').value.trim() ||
+      (wizGoal==='cut' ? 'Cut' : wizGoal==='build' ? 'Build' : 'Maintain');
+    const mode = wizGoal==='build' ? 'bulk' : 'cut';
+    await rest('phases?on_conflict=user_id,id', {method:'POST', headers:{'Prefer':'resolution=merge-duplicates'},
+      body:{id:'plan', name:title, mode, start_date:today, end_date:end, description:'', sort:0}});
+    const rows = [];
+    for(let d=0; d<7; d++) rows.push({phase_id:'plan', day_of_week:d, label:'moderate',
+      calories:c.cal, carbs:c.carbs, protein:c.protein, fat:c.fat});
+    await rest('phase_macros?on_conflict=user_id,phase_id,day_of_week', {method:'POST',
+      headers:{'Prefer':'resolution=merge-duplicates'}, body:rows});
+    const target = Number($('wizTarget').value) || null;
+    const anchors = target ? [[today, Number($('wizWeight').value)], [end, target]] : null;
+    await rest('profiles?id=eq.'+session.user.id, {method:'PATCH', headers:{'Prefer':'return=minimal'},
+      body:{onboarded:true, goal_title:title, event_date:eventDate, weight_anchors:anchors,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Denver'}});
+    $('wizardScreen').style.display='none';
+    await loadApp();
+  }catch(e){ toast(e.message); }
+  $('wizStartBtn').disabled = false;
+});
+
+// ---------- init ----------
+async function startApp(){
+  try{
+    phases = []; phaseMacros = {}; todayChecks = {};
     const [phRows, pmRows, cRows, chkRows] = await Promise.all([
       rest('phases?select=*&order=sort'),
       rest('phase_macros?select=*'),
@@ -1526,12 +1822,29 @@ $('saveKeyBtn').addEventListener('click', async ()=>{
     compounds = cRows||[];
     (chkRows||[]).forEach(r=>{ todayChecks[r.item] = {done:r.done, note:r.note}; });
     renderHero();
+    renderAccount();
     await Promise.all([loadTodayMetrics(), loadTodayPhoto()]);
     await refreshToday();
     renderWeightChart(); renderSleepCard();
   }catch(e){ toast('Could not load data: ' + e.message); }
   clearShownNotifs();
-  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){
+}
+async function loadApp(){
+  try{
+    const rows = await rest('profiles?select=*');
+    profile = (rows && rows[0]) || null;
+    if(!profile){ toast('Could not load your profile — try again'); return; }
+    if(!profile.onboarded){ showWizard(); wizPreview(); return; }
+    await startApp();
+  }catch(e){ /* rest() already routed to auth screen on 401 */ }
+}
+(async function init(){
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+  $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
+  loadSession();
+  if(!session){ showAuth(); return; }
+  await loadApp();
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && session && profile){
     hideToast();
     $('todayDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
     renderHero(); refreshToday(); clearShownNotifs(); }});
