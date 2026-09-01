@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Lucky Numbers</title><!-- build 22 -->
+<title>Lucky Numbers</title><!-- build 23 -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -354,6 +354,14 @@ nav button.active{color:var(--brandlight)}
 .stackrow .smain{flex:1;min-width:0}
 .stackrow .ssub{color:var(--muted);font-size:11.5px;margin-left:6px}
 
+/* ---------- coach & account ---------- */
+.coachcard{display:flex;flex-direction:column;min-height:calc(100vh - 240px)}
+.coachmsgs{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:8px;padding:2px;min-height:220px}
+.accthead{display:flex;align-items:center;justify-content:space-between;margin:2px 4px 12px}
+.accthead button{background:var(--surface);border:1px solid var(--line);color:var(--ink2);width:38px;height:38px;
+  border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.accthead button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
 /* ---------- settings ---------- */
 .settingcard{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:17px;margin-bottom:13px;box-shadow:var(--shadow)}
 .settingcard p{font-size:12.5px;color:var(--muted);line-height:1.5;margin:7px 0 12px}
@@ -385,11 +393,6 @@ nav button.active{color:var(--brandlight)}
       </div>
       <div>
         <div class="card">
-          <h2>Checklist</h2>
-          <div id="checklist"></div>
-          <div class="daydone" id="dayDone">Day complete 💪</div>
-        </div>
-        <div class="card">
           <h2>Body</h2>
           <div class="metrics">
             <div class="metric"><label>Weight lb</label>
@@ -401,6 +404,11 @@ nav button.active{color:var(--brandlight)}
           </div>
           <svg id="wchart" viewBox="0 0 340 140" preserveAspectRatio="none"></svg>
           <div class="wtrend" id="wTrend"></div>
+        </div>
+        <div class="card">
+          <h2>Checklist</h2>
+          <div id="checklist"></div>
+          <div class="daydone" id="dayDone">Day complete 💪</div>
         </div>
         <div class="card">
           <h2>Sleep</h2>
@@ -426,7 +434,7 @@ nav button.active{color:var(--brandlight)}
     <div class="statcard">
       <div><div class="big" id="statDone">–</div><div class="lbl">complete</div></div>
       <div><div class="big" id="statTotal">–</div><div class="lbl">tracked</div></div>
-      <div><div class="big" id="statStreak">–</div><div class="lbl">streak</div></div>
+      <div><div class="big" id="statPct">–</div><div class="lbl">on plan</div></div>
     </div>
     <div class="calhead">
       <button id="calPrev">‹</button>
@@ -445,60 +453,77 @@ nav button.active{color:var(--brandlight)}
     </div>
   </section>
 
-  <!-- GOALS -->
-  <section class="page" id="page-goals">
-    <p style="font-size:12.5px;color:var(--muted);margin:2px 2px 12px" id="goalsIntro"></p>
-    <div id="goalList"></div>
+  <!-- AI COACH -->
+  <section class="page" id="page-coach">
+    <div class="card coachcard">
+      <h2>AI Coach</h2>
+      <div id="coachMsgs" class="coachmsgs"></div>
+      <div class="chatrow" style="margin-top:12px">
+        <input id="coachInput" placeholder="What can I eat right now?" autocomplete="off">
+        <button id="coachSend" title="Send">➤</button>
+      </div>
+    </div>
   </section>
 
-  <!-- SETTINGS -->
-  <section class="page" id="page-settings">
+  <!-- ACCOUNT -->
+  <section class="page" id="page-account">
+    <div class="accthead">
+      <h2 class="sect" style="margin:0">Account</h2>
+      <button id="settingsBtn" title="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
     <div class="settingcard">
-      <h3 style="margin:0;font-size:15px">Account</h3>
-      <p id="acctEmail" style="margin-bottom:10px"></p>
+      <p id="acctEmail" style="margin:0 0 12px;font-size:14px;color:var(--ink)"></p>
       <div class="field"><input type="password" id="newPwInput" placeholder="New password" autocomplete="new-password"></div>
       <button class="btn ghost" id="changePwBtn">Change password</button>
       <button class="btn ghost" id="signOutBtn" style="color:var(--serious)">Sign out</button>
     </div>
-    <div class="settingcard">
-      <h3 style="margin:0;font-size:15px">My stack</h3>
-      <p>Compounds &amp; ancillaries you check off daily. Yours only — nothing here is a recommendation.</p>
-      <div id="stackList"></div>
-      <div class="field" style="margin-top:10px"><input id="stackName" placeholder="Name (e.g. Creatine)"></div>
-      <div class="grid2">
-        <div class="field"><input id="stackDose" placeholder="Dose (optional)"></div>
-        <div class="field"><select id="stackFreq">
-          <option value="daily">Every day</option>
-          <option value="eod">Every other day</option>
-          <option value="e3d">Every 3 days</option>
-        </select></div>
-      </div>
-      <button class="btn ghost" id="stackAddBtn">+ Add to stack</button>
-    </div>
-    <div class="settingcard">
-      <h3 style="margin:0;font-size:15px">Notifications</h3>
-      <p>Morning briefing, live macro warnings, Friday photo reminder.</p>
-      <button class="btn primary" id="notifBtn">Enable notifications</button>
-      <div class="keystatus" id="notifStatus"></div>
-      <button class="btn ghost" id="notifTest" style="display:none">Send test</button>
-    </div>
-    <div class="settingcard" id="aiCard" style="display:none">
-      <h3 style="margin:0;font-size:15px">AI scanning</h3>
-      <p>Claude estimates macros from photos and text. Admin only.</p>
-      <div class="field"><input type="password" id="apiKeyInput" placeholder="sk-ant-..."></div>
-      <button class="btn primary" id="saveKeyBtn">Save key</button>
-      <div class="keystatus" id="keyStatus"></div>
-    </div>
+    <h2 class="sect">Weekly targets</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin:2px 2px 12px" id="goalsIntro"></p>
+    <div id="goalList"></div>
   </section>
 </main>
 
 <nav>
   <button data-page="dash" class="active"><svg viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 8.5V21h14V8.5"/><path d="M9 21v-6h6v6"/></svg><span>Home</span></button>
-
   <button data-page="plan"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10.5h18"/></svg><span>Plan</span></button>
-  <button data-page="goals"><svg viewBox="0 0 24 24"><path d="M5 3v18"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg><span>Goals</span></button>
-  <button data-page="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Settings</span></button>
+  <button data-page="coach"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-3.8-.8L3 20l1-4.9a8.1 8.1 0 0 1-1-3.6 8.4 8.4 0 0 1 9-8.4 8.4 8.4 0 0 1 9 8.4z"/></svg><span>Coach</span></button>
+  <button data-page="account"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg><span>Account</span></button>
 </nav>
+
+<!-- settings sheet (gear on Account) -->
+<div class="sheet" id="settingsSheet">
+  <h3>Settings</h3>
+  <div class="settingcard" style="box-shadow:none;background:var(--field)">
+    <h3 style="margin:0;font-size:15px">My stack</h3>
+    <p>Compounds &amp; ancillaries you check off daily. Yours only — nothing here is a recommendation.</p>
+    <div id="stackList"></div>
+    <div class="field" style="margin-top:10px"><input id="stackName" placeholder="Name (e.g. Creatine)"></div>
+    <div class="grid2">
+      <div class="field"><input id="stackDose" placeholder="Dose (optional)"></div>
+      <div class="field"><select id="stackFreq">
+        <option value="daily">Every day</option>
+        <option value="eod">Every other day</option>
+        <option value="e3d">Every 3 days</option>
+      </select></div>
+    </div>
+    <button class="btn ghost" id="stackAddBtn">+ Add to stack</button>
+  </div>
+  <div class="settingcard" style="box-shadow:none;background:var(--field)">
+    <h3 style="margin:0;font-size:15px">Notifications</h3>
+    <p>Morning briefing, live macro warnings, Friday photo reminder.</p>
+    <button class="btn primary" id="notifBtn">Enable notifications</button>
+    <div class="keystatus" id="notifStatus"></div>
+    <button class="btn ghost" id="notifTest" style="display:none">Send test</button>
+  </div>
+  <div class="settingcard" id="aiCard" style="display:none;box-shadow:none;background:var(--field)">
+    <h3 style="margin:0;font-size:15px">AI scanning</h3>
+    <p>Claude estimates macros from photos and text. Admin only.</p>
+    <div class="field"><input type="password" id="apiKeyInput" placeholder="sk-ant-..."></div>
+    <button class="btn primary" id="saveKeyBtn">Save key</button>
+    <div class="keystatus" id="keyStatus"></div>
+  </div>
+  <button class="btn ghost" id="settingsClose">Close</button>
+</div>
 
 <!-- meal sheet -->
 <div class="overlay" id="overlay"></div>
@@ -816,8 +841,8 @@ document.querySelectorAll('nav button').forEach(b=>{
     b.classList.add('active');
     $('page-' + b.dataset.page).classList.add('active');
     if(b.dataset.page==='plan') renderPlan();
-    if(b.dataset.page==='goals') renderGoals();
-    if(b.dataset.page==='settings'){ renderAccount(); renderStack(); refreshNotifStatus(); if(profile && profile.is_admin) checkKey(); }
+    if(b.dataset.page==='account'){ renderAccount(); renderGoals(); }
+    if(b.dataset.page==='coach') coachOpen();
     if(b.dataset.page==='dash'){ renderHero(); refreshToday(); renderWeightChart(); renderSleepCard(); }
   });
 });
@@ -1488,11 +1513,12 @@ function dayChecksMacro(t, goal, mode){
 let histData = null;
 let calYear, calMonth;
 async function loadHistData(){
-  const [meals, snaps, checks, photos] = await Promise.all([
+  const [meals, snaps, checks, photos, wts] = await Promise.all([
     rest('meals?select=day,name,calories,carbs,protein,fat,source,created_at&order=created_at.asc'),
     rest('day_goals?select=*'),
     rest('daily_checks?select=day,item,done,note'),
     rest('prep_photos?select=day'),
+    rest('day_metrics?select=day,weight&weight=not.is.null&order=day.asc'),
   ]);
   const byDay = {}, mealsByDay = {};
   (meals||[]).forEach(m=>{
@@ -1503,7 +1529,7 @@ async function loadHistData(){
   const snapByDay = {}; (snaps||[]).forEach(s=>snapByDay[s.day]=s);
   const checksByDay = {}; (checks||[]).forEach(c=>{ (checksByDay[c.day]=checksByDay[c.day]||{})[c.item]=c; });
   const photoDays = new Set((photos||[]).map(p=>p.day));
-  histData = {byDay, mealsByDay, snapByDay, checksByDay, photoDays};
+  histData = {byDay, mealsByDay, snapByDay, checksByDay, photoDays, weights: wts||[]};
 }
 function histGoal(ds){
   return histData.snapByDay[ds] || goalForDate(ds);
@@ -1598,22 +1624,46 @@ function renderCalendar(){
   document.querySelectorAll('.calcell[data-ds]').forEach(c=>
     c.addEventListener('click', ()=>openDayDetail(c.dataset.ds)));
 }
+// How close the weight trend is to the projected plan: 1 at/ahead of plan,
+// fading to 0 at 5 lb off in the wrong direction. null when there's no plan line.
+function weightScore(){
+  const ws = (histData.weights||[]);
+  if(!ws.length) return null;
+  const last7 = ws.slice(-7).map(r=>Number(r.weight));
+  const avg = last7.reduce((a,b)=>a+b,0)/last7.length;
+  const proj = projWeight(ws[ws.length-1].day);
+  if(proj === null) return null;
+  const diff = avg - proj;
+  const mode = (currentPhase()||{}).mode || 'cut';
+  const off = mode==='cut' ? Math.max(0, diff) : Math.max(0, -diff);
+  return Math.max(0, 1 - off/5);
+}
 function renderStats(){
   const today = todayStr();
   const allDays = new Set([...Object.keys(histData.byDay), ...Object.keys(histData.checksByDay)]);
   const days = [...allDays].sort();
-  let done=0, total=0, streak=0;
+  let done=0, total=0;
+  const scores=[];
   if(days.length){
-    const rows=[];
     for(let d = days[0]; d < today; d = addDays(d,1)){
       total++;
-      const st = dayStatus(d);
-      rows.push(st);
-      if(st==='done') done++;
+      if(dayStatus(d)==='done') done++;
+      if(d >= gradeStart()){
+        const mc = macroCloseness(d);
+        if(mc) scores.push(mc.score);
+      }
     }
-    for(let i=rows.length-1;i>=0;i--){ if(rows[i]==='done') streak++; else break; }
   }
-  $('statDone').textContent=done; $('statTotal').textContent=total; $('statStreak').textContent=streak;
+  // Plan completion: how close macros have landed day-by-day, blended with the weight trend
+  let pct = null;
+  if(scores.length){
+    let s = scores.reduce((a,b)=>a+b,0)/scores.length;
+    const wsc = weightScore();
+    if(wsc !== null) s = s*0.7 + wsc*0.3;
+    pct = Math.round(s*100);
+  }
+  $('statDone').textContent=done; $('statTotal').textContent=total;
+  $('statPct').textContent = pct===null ? '–' : pct + '%';
 }
 async function renderPlan(){
   try{
@@ -1962,6 +2012,57 @@ async function buildPlan(){
     toast(e.message);
   }
 }
+
+// ---------- AI coach ----------
+const coach = {messages: [], busy: false, loaded: false};
+function coachStorageKey(){ return 'ln_coach_' + (session ? session.user.id : 'anon'); }
+function coachRender(){
+  const box = $('coachMsgs');
+  box.innerHTML = coach.messages.length
+    ? coach.messages.map(m=>`<div class="cm ${m.role==='user'?'user':'ai'}">${escapeHtml(m.text)}</div>`).join('')
+    : '<div class="empty" style="margin:auto">Ask me anything about your day.<br><br>"What can I eat right now?"<br>"Can I afford a burrito tonight?"<br>"How am I tracking this week?"</div>';
+  box.scrollTop = box.scrollHeight;
+}
+function coachOpen(){
+  if(!coach.loaded){
+    try{ coach.messages = JSON.parse(localStorage.getItem(coachStorageKey())||'[]'); }catch(e){ coach.messages = []; }
+    coach.loaded = true;
+  }
+  coachRender();
+}
+function coachSave(){
+  try{ localStorage.setItem(coachStorageKey(), JSON.stringify(coach.messages.slice(-30))); }catch(e){}
+}
+async function coachAsk(){
+  const txt = $('coachInput').value.trim();
+  if(!txt || coach.busy) return;
+  coach.busy = true;
+  $('coachInput').value = '';
+  coach.messages.push({role:'user', text: txt});
+  coachRender(); coachSave();
+  const box = $('coachMsgs');
+  const t = document.createElement('div'); t.className = 'cm ai typing'; t.textContent = 'thinking…';
+  box.appendChild(t); box.scrollTop = box.scrollHeight;
+  try{
+    const d = await fn({action:'coach',
+      messages: coach.messages.slice(-12).map(m=>({role: m.role==='user'?'user':'assistant', content: m.text}))});
+    coach.messages.push({role:'ai', text: d.reply || '…'});
+  }catch(e){
+    coach.messages.push({role:'ai', text: 'Hit a snag: ' + e.message});
+  }
+  coach.busy = false;
+  coachRender(); coachSave();
+}
+$('coachSend').addEventListener('click', coachAsk);
+$('coachInput').addEventListener('keydown', e=>{ if(e.key==='Enter') coachAsk(); });
+
+// ---------- settings sheet ----------
+$('settingsBtn').addEventListener('click', ()=>{
+  openSheet($('settingsSheet'));
+  renderStack(); refreshNotifStatus();
+  if(profile && profile.is_admin) checkKey();
+});
+$('settingsClose').addEventListener('click', closeSheets);
 
 // ---------- init ----------
 async function startApp(){
