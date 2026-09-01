@@ -1,11 +1,11 @@
 {
   "name": "Lucky Numbers",
   "short_name": "Lucky Numbers",
-  "start_url": "/macros/",
-  "scope": "/macros/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0a0a14",
-  "theme_color": "#0a0a14",
+  "background_color": "#0a0d18",
+  "theme_color": "#0a0d18",
   "icons": [
     {
       "src": "icon.png",
