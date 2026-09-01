@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Lucky Numbers</title><!-- build 20 -->
+<title>Lucky Numbers</title><!-- build 21 -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -127,28 +127,26 @@ h2.sect{margin:20px 4px 10px}
 .sleepnote{font-size:12px;color:var(--muted);margin-top:10px}
 
 /* ---------- rings ---------- */
-.rings{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.ring-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;
-  padding:15px 10px 13px;text-align:center;box-shadow:var(--shadow)}
-.ringwrap{position:relative;width:112px;height:112px;margin:0 auto}
-.ringwrap svg{transform:rotate(-90deg)}
-.ring-track{fill:none;stroke:rgba(255,255,255,.08);stroke-width:9}
-.ring-prog{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dasharray .6s ease}
-.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.rv{font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
-.rg{font-size:10.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
-.ring-label{margin-top:9px;font-size:12.5px;color:var(--ink2);font-weight:700;
-  display:flex;align-items:center;justify-content:center;gap:6px}
-.dot{width:7px;height:7px;border-radius:99px;display:inline-block}
-.ring-sub{font-size:11px;color:var(--muted);margin-top:2px;min-height:13px;font-variant-numeric:tabular-nums}
-.ring-sub.over{color:var(--serious);font-weight:700}
+.minirings{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.miniring{text-align:center}
+.mrwrap{position:relative;width:64px;height:64px;margin:0 auto}
+.mrwrap svg{transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:rgba(255,255,255,.08)}
+.ring-prog{fill:none;stroke-linecap:round;transition:stroke-dasharray .6s ease}
+.mrval{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.mrlbl{margin-top:7px;font-size:10.5px;color:var(--ink2);font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:4px}
+.dot{width:6px;height:6px;border-radius:99px;display:inline-block;flex-shrink:0}
+.mrsub{font-size:10px;color:var(--muted);margin-top:2px;min-height:12px;font-variant-numeric:tabular-nums}
+.mrsub.over{color:var(--serious);font-weight:700}
 
 /* ---------- add row & meals ---------- */
 .addrow{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:16px 0 4px}
-.addbtn{background:var(--surface);border:1px solid var(--line);color:var(--ink2);
-  border-radius:16px;padding:13px 2px 11px;font-size:11px;font-weight:600;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .12s;box-shadow:var(--shadow)}
-.addbtn:active{transform:scale(.94);background:var(--surface2)}
+.addbtn{background:var(--surface2);border:none;color:var(--ink2);
+  border-radius:14px;padding:12px 2px 10px;font-size:11px;font-weight:600;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .12s}
+.addbtn:active{transform:scale(.94);background:var(--grid)}
 .addbtn .ic{font-size:20px;line-height:1}
 .meal{background:var(--surface);border:1px solid var(--line);border-radius:16px;
   padding:12px 13px;margin-bottom:9px;display:flex;align-items:center;gap:11px;box-shadow:var(--shadow)}
@@ -373,29 +371,47 @@ nav button.active{color:var(--brandlight)}
   <section class="page active" id="page-dash">
     <div class="hero" id="planHero"></div>
     <div class="cols">
-      <div class="card">
-        <h2>Checklist</h2>
-        <div id="checklist"></div>
-        <div class="daydone" id="dayDone">Day complete 💪</div>
-      </div>
-      <div class="card">
-        <h2>Body</h2>
-        <div class="metrics">
-          <div class="metric"><label>Weight lb</label>
-            <div class="mrow"><input id="wInput" type="number" step="0.1" inputmode="decimal" placeholder="—">
-            <button id="wSave">✓</button></div></div>
-          <div class="metric"><label>Sleep hrs</label>
-            <div class="mrow"><input id="sInput" type="number" step="0.5" inputmode="decimal" placeholder="—">
-            <button id="sSave">✓</button></div></div>
+      <div>
+        <div class="card">
+          <div class="minirings" id="rings"></div>
+          <div class="addrow" style="margin:16px 0 2px">
+            <button class="addbtn" id="btnPhoto"><span class="ic">📷</span>Scan</button>
+            <button class="addbtn" id="btnBarcode"><span class="ic"><svg width="22" height="20" viewBox="0 0 24 20" fill="currentColor"><rect x="1" y="2" width="2" height="16"/><rect x="5" y="2" width="1" height="16"/><rect x="8" y="2" width="3" height="16"/><rect x="13" y="2" width="1" height="16"/><rect x="16" y="2" width="2" height="16"/><rect x="20" y="2" width="1" height="16"/><rect x="22.5" y="2" width="1.5" height="16"/></svg></span>Barcode</button>
+            <button class="addbtn" id="btnDescribe"><span class="ic">💬</span>Describe</button>
+            <button class="addbtn" id="btnManual"><span class="ic">✎</span>Manual</button>
+          </div>
+          <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
         </div>
-        <svg id="wchart" viewBox="0 0 340 140" preserveAspectRatio="none"></svg>
-        <div class="wtrend" id="wTrend"></div>
+        <div class="card">
+          <h2>Meals</h2>
+          <div id="mealList"></div>
+        </div>
       </div>
-      <div class="card">
-        <h2>Sleep</h2>
-        <div id="sleepAvgRow"><span id="sleepAvgNum">—</span><span id="sleepAvgLbl">7-day avg</span></div>
-        <div class="sleepbars" id="sleepBars"></div>
-        <div class="sleepnote" id="sleepNote"></div>
+      <div>
+        <div class="card">
+          <h2>Checklist</h2>
+          <div id="checklist"></div>
+          <div class="daydone" id="dayDone">Day complete 💪</div>
+        </div>
+        <div class="card">
+          <h2>Body</h2>
+          <div class="metrics">
+            <div class="metric"><label>Weight lb</label>
+              <div class="mrow"><input id="wInput" type="number" step="0.1" inputmode="decimal" placeholder="—">
+              <button id="wSave">✓</button></div></div>
+            <div class="metric"><label>Sleep hrs</label>
+              <div class="mrow"><input id="sInput" type="number" step="0.5" inputmode="decimal" placeholder="—">
+              <button id="sSave">✓</button></div></div>
+          </div>
+          <svg id="wchart" viewBox="0 0 340 140" preserveAspectRatio="none"></svg>
+          <div class="wtrend" id="wTrend"></div>
+        </div>
+        <div class="card">
+          <h2>Sleep</h2>
+          <div id="sleepAvgRow"><span id="sleepAvgNum">—</span><span id="sleepAvgLbl">7-day avg</span></div>
+          <div class="sleepbars" id="sleepBars"></div>
+          <div class="sleepnote" id="sleepNote"></div>
+        </div>
       </div>
     </div>
     <div class="card" id="doneCard" style="display:none">
@@ -403,26 +419,6 @@ nav button.active{color:var(--brandlight)}
       <div id="doneList"></div>
     </div>
     <input type="file" id="progressPhotoInput" accept="image/*" capture="environment" style="display:none">
-  </section>
-
-  <!-- MACROS -->
-  <section class="page" id="page-macros">
-    <div class="cols">
-      <div>
-        <div class="rings" id="rings"></div>
-        <div class="addrow">
-          <button class="addbtn" id="btnPhoto"><span class="ic">📷</span>Scan</button>
-          <button class="addbtn" id="btnBarcode"><span class="ic"><svg width="22" height="20" viewBox="0 0 24 20" fill="currentColor"><rect x="1" y="2" width="2" height="16"/><rect x="5" y="2" width="1" height="16"/><rect x="8" y="2" width="3" height="16"/><rect x="13" y="2" width="1" height="16"/><rect x="16" y="2" width="2" height="16"/><rect x="20" y="2" width="1" height="16"/><rect x="22.5" y="2" width="1.5" height="16"/></svg></span>Barcode</button>
-          <button class="addbtn" id="btnDescribe"><span class="ic">💬</span>Describe</button>
-          <button class="addbtn" id="btnManual"><span class="ic">✎</span>Manual</button>
-        </div>
-        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
-      </div>
-      <div>
-        <h2 class="sect">Meals</h2>
-        <div id="mealList"></div>
-      </div>
-    </div>
   </section>
 
   <!-- PLAN -->
@@ -498,7 +494,7 @@ nav button.active{color:var(--brandlight)}
 
 <nav>
   <button data-page="dash" class="active"><svg viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 8.5V21h14V8.5"/><path d="M9 21v-6h6v6"/></svg><span>Home</span></button>
-  <button data-page="macros"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg><span>Macros</span></button>
+
   <button data-page="plan"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10.5h18"/></svg><span>Plan</span></button>
   <button data-page="goals"><svg viewBox="0 0 24 24"><path d="M5 3v18"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg><span>Goals</span></button>
   <button data-page="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Settings</span></button>
@@ -822,8 +818,7 @@ document.querySelectorAll('nav button').forEach(b=>{
     if(b.dataset.page==='plan') renderPlan();
     if(b.dataset.page==='goals') renderGoals();
     if(b.dataset.page==='settings'){ renderAccount(); renderStack(); refreshNotifStatus(); if(profile && profile.is_admin) checkKey(); }
-    if(b.dataset.page==='dash'){ renderHero(); renderChecklist(); renderWeightChart(); renderSleepCard(); }
-    if(b.dataset.page==='macros') refreshToday();
+    if(b.dataset.page==='dash'){ renderHero(); refreshToday(); renderWeightChart(); renderSleepCard(); }
   });
 });
 
@@ -1125,24 +1120,24 @@ function renderRings(){
   const g = todayGoal();
   const totals = {calories:0, carbs:0, protein:0, fat:0};
   todayMeals.forEach(m=>{ for(const k in totals) totals[k]+=Number(m[k])||0; });
-  const C = 2*Math.PI*48;
+  const C = 2*Math.PI*27;
   $('rings').innerHTML = MACROS.map(mc=>{
     const val = Math.round(totals[mc.key]), goal = g[mc.key]||0;
     const pct = goal>0 ? Math.min(1, val/goal) : 0;
     const left = goal - val;
     const sub = left>=0 ? `${Math.round(left)}${mc.unit} left`
                         : `+${Math.round(-left)}${mc.unit} over`;
-    return `<div class="ring-card">
-      <div class="ringwrap">
-        <svg width="112" height="112" viewBox="0 0 112 112">
-          <circle class="ring-track" cx="56" cy="56" r="48"></circle>
-          <circle class="ring-prog" cx="56" cy="56" r="48" stroke="${mc.color}"
+    return `<div class="miniring">
+      <div class="mrwrap">
+        <svg width="64" height="64" viewBox="0 0 64 64">
+          <circle class="ring-track" cx="32" cy="32" r="27" style="stroke-width:6"></circle>
+          <circle class="ring-prog" cx="32" cy="32" r="27" stroke="${mc.color}" style="stroke-width:6"
             stroke-dasharray="${(pct*C).toFixed(1)} ${C.toFixed(1)}"></circle>
         </svg>
-        <div class="ring-center"><div class="rv">${val}</div><div class="rg">/ ${goal}${mc.unit}</div></div>
+        <div class="mrval">${val}</div>
       </div>
-      <div class="ring-label"><span class="dot" style="background:${mc.color}"></span>${mc.label}</div>
-      <div class="ring-sub ${left<0?'over':''}">${sub}</div>
+      <div class="mrlbl"><span class="dot" style="background:${mc.color}"></span>${mc.label==='Calories'?'Cal':mc.label}</div>
+      <div class="mrsub ${left<0?'over':''}">${sub}</div>
     </div>`;
   }).join('');
   const chip = $('todayChip'); const lbl = (g.label||'custom');
