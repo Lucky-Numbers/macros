@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lucky Numbers — Admin</title>
+<meta name="theme-color" content="#0a0a14">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;
+  --page:#0a0d18; --surface:#131829; --field:#0e1322; --ink:#eef1f8; --ink2:#c3cadb; --muted:#7e88a0;
+  --line:rgba(255,255,255,.06); --brand:#00bfff; --good:#26c08d; --bad:#ec835a}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(130% 55% at 50% 0%, #151b32 0%, #0c1020 52%, #080a13 100%) fixed;
+  color:var(--ink);font-family:'Inter',system-ui,-apple-system,sans-serif;letter-spacing:-.01em}
+.wrap{max-width:760px;margin:0 auto;padding:calc(30px + env(safe-area-inset-top)) 20px calc(60px + env(safe-area-inset-bottom))}
+h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin:0}
+h1 .lucky{color:var(--brand)}
+.sub{font-size:12.5px;color:var(--muted);margin:2px 0 24px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px;
+  box-shadow:0 8px 28px rgba(0,0,0,.38)}
+.bignum{font-size:64px;font-weight:800;line-height:1;letter-spacing:-.03em}
+.biglabel{font-size:13px;color:var(--muted);font-weight:600;margin-top:6px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn{border:none;border-radius:14px;padding:13px 18px;font-size:14px;font-weight:700;cursor:pointer;
+  font-family:inherit;letter-spacing:inherit}
+.btn.primary{background:linear-gradient(135deg,#33ccff,var(--brand) 55%,#0099cc);color:#04121c;width:100%}
+.btn.ghost{background:var(--field);border:1px solid var(--line);color:var(--ink2)}
+.btn:active{opacity:.85}
+.btn[disabled]{opacity:.5}
+input{width:100%;background:var(--field);border:1px solid var(--line);border-radius:14px;color:var(--ink);
+  padding:13px 15px;font-size:14px;font-family:inherit;margin-bottom:10px;outline:none}
+input:focus{border-color:rgba(0,191,255,.5)}
+label{font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:.05em;text-transform:uppercase;display:block;margin:2px 2px 6px}
+.sect{font-size:15px;font-weight:800;margin:0 0 12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{color:var(--muted);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:9px 8px;border-bottom:1px solid var(--line);color:var(--ink2);white-space:nowrap}
+td.em{color:var(--ink);font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.pill{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--field)}
+.pill.on{color:var(--good)} .pill.off{color:var(--muted)}
+.note{font-size:12px;color:var(--muted);line-height:1.55;margin:10px 0 0}
+.note b{color:var(--ink2)}
+#toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%) translateY(calc(-100% - 160px));
+  opacity:0;pointer-events:none;background:#1b2138;border:1px solid var(--line);color:var(--ink);z-index:99;
+  padding:12px 18px;border-radius:16px;font-size:13.5px;font-weight:600;transition:transform .3s,opacity .25s;max-width:86vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#loginView,#deniedView{max-width:360px;margin:8vh auto 0}
+.hidden{display:none}
+a{color:var(--brand);text-decoration:none}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div class="wrap">
+  <h1><span class="lucky">Lucky</span> Numbers</h1>
+  <div class="sub">Admin dashboard</div>
+
+  <!-- sign in -->
+  <div id="loginView" class="hidden">
+    <form class="card" id="loginForm" action="#" method="post" novalidate>
+      <div class="sect">Sign in</div>
+      <input id="liEmail" name="email" type="email" placeholder="Email" autocomplete="username" inputmode="email">
+      <input id="liPw" name="password" type="password" placeholder="Password" autocomplete="current-password">
+      <button class="btn primary" type="submit" id="liBtn">Sign in</button>
+    </form>
+  </div>
+
+  <!-- not an admin -->
+  <div id="deniedView" class="hidden">
+    <div class="card">
+      <div class="sect">Admins only</div>
+      <p class="note">This account doesn't have admin access. <a href="./">Back to the app</a></p>
+      <button class="btn ghost" id="deniedOut" style="margin-top:10px">Sign out</button>
+    </div>
+  </div>
+
+  <!-- dashboard -->
+  <div id="dashView" class="hidden">
+    <div class="card" style="text-align:center;padding:30px 20px">
+      <div class="bignum" id="totalUsers">–</div>
+      <div class="biglabel">TOTAL USERS</div>
+      <div class="row" style="justify-content:center;margin-top:18px">
+        <button class="btn ghost" id="refreshBtn">↻ Refresh</button>
+        <button class="btn ghost hidden" id="airtableOpen">Open Airtable ↗</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sect">Users</div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Email</th><th>Joined</th><th>Goal</th><th>Meals</th><th>Last log</th><th>AI today</th></tr></thead>
+          <tbody id="userRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sect">Airtable sync <span class="pill off" id="atPill">not set up</span></div>
+      <p class="note" style="margin:0 0 14px">New signups are pushed to your Airtable automatically once this is saved.
+      Create a base with a <b>Users</b> table containing fields <b>Email</b>, <b>User ID</b>, and <b>Signed up</b> (date).</p>
+      <label>Personal access token</label>
+      <input id="atToken" type="password" placeholder="pat… (needs data.records:write on the base)" autocomplete="off">
+      <label>Base ID</label>
+      <input id="atBase" placeholder="app… (from the base's API docs or URL)" autocomplete="off">
+      <label>Table name</label>
+      <input id="atTable" placeholder="Users" autocomplete="off">
+      <label>Airtable link (for the button above)</label>
+      <input id="atUrl" placeholder="https://airtable.com/app…" autocomplete="off">
+      <div class="row">
+        <button class="btn ghost" id="atSave">Save settings</button>
+        <button class="btn ghost" id="atBackfill">Backfill existing users →</button>
+      </div>
+      <p class="note">Backfill pushes every current user once — run it a single time after saving, or you'll get duplicate rows.</p>
+    </div>
+
+    <div class="card">
+      <div class="sect">AI limit</div>
+      <label>Requests per user per day</label>
+      <input id="aiLimit" placeholder="40" inputmode="numeric" autocomplete="off">
+      <button class="btn ghost" id="aiLimitSave">Save limit</button>
+    </div>
+
+    <div class="row" style="justify-content:space-between">
+      <a href="./" style="font-size:13px;font-weight:600">‹ Back to the app</a>
+      <button class="btn ghost" id="signOut">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SB = 'https://rvbyxvwifzcnfrjsdgkh.supabase.co';
+const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2Ynl4dndpZnpjbmZyanNkZ2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MjA4NzIsImV4cCI6MjA5MTA5Njg3Mn0.3lEbeX3UXN9eooaiQ0ks8qRwPq6qjRNizOQWOis7BB0';
+const $ = id => document.getElementById(id);
+
+let session = null;
+try{ session = JSON.parse(localStorage.getItem('ln_session')||'null'); }catch(e){}
+function saveSession(s){ session=s; if(s) localStorage.setItem('ln_session', JSON.stringify(s)); else localStorage.removeItem('ln_session'); }
+
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'), 3200); }
+
+async function ensureFresh(){
+  if(!session) return false;
+  if(session.expires_at && session.expires_at - 60 > Date.now()/1000) return true;
+  try{
+    const r = await fetch(SB+'/auth/v1/token?grant_type=refresh_token', {method:'POST',
+      headers:{'apikey':ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({refresh_token: session.refresh_token})});
+    const d = await r.json();
+    if(!r.ok || !d.access_token){ saveSession(null); return false; }
+    saveSession({access_token:d.access_token, refresh_token:d.refresh_token,
+      expires_at:Math.floor(Date.now()/1000)+(d.expires_in||3600), user:session.user});
+    return true;
+  }catch(e){ return false; }
+}
+
+async function fn(payload){
+  await ensureFresh();
+  const r = await fetch(SB+'/functions/v1/macro-ai', {method:'POST',
+    headers:{'Content-Type':'application/json','apikey':ANON,'Authorization':'Bearer '+(session?session.access_token:ANON)},
+    body:JSON.stringify(payload)});
+  const d = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error || ('Error '+r.status));
+  return d;
+}
+
+function show(view){ ['loginView','deniedView','dashView'].forEach(v=>$(v).classList.toggle('hidden', v!==view)); }
+
+function fmtDate(s){ if(!s) return '—'; return String(s).slice(0,10); }
+
+async function loadDash(){
+  let d;
+  try{ d = await fn({action:'admin_stats'}); }
+  catch(e){
+    if(/forbidden/i.test(e.message)){ show('deniedView'); return; }
+    toast(e.message); return;
+  }
+  show('dashView');
+  $('totalUsers').textContent = d.total;
+  const rows = (d.users||[]).map(u =>
+    '<tr><td class="em">'+ (u.email||'—').replace(/</g,'&lt;') +'</td>'+
+    '<td>'+ fmtDate(u.created_at) +'</td>'+
+    '<td>'+ (u.goal_title ? String(u.goal_title).replace(/</g,'&lt;') : (u.onboarded?'—':'<span class="pill off">not onboarded</span>')) +'</td>'+
+    '<td>'+ (u.meal_count ?? 0) +'</td>'+
+    '<td>'+ fmtDate(u.last_meal) +'</td>'+
+    '<td>'+ (u.ai_today ?? 0) +'</td></tr>').join('');
+  $('userRows').innerHTML = rows || '<tr><td colspan="6" style="color:var(--muted)">No users yet</td></tr>';
+  const pill=$('atPill');
+  pill.textContent = d.airtable_ready ? 'connected' : 'not set up';
+  pill.className = 'pill ' + (d.airtable_ready?'on':'off');
+  const btn=$('airtableOpen');
+  if(d.airtable_url){ btn.classList.remove('hidden'); btn.onclick=()=>window.open(d.airtable_url,'_blank'); }
+  else btn.classList.add('hidden');
+  try{
+    const st = await fn({action:'admin_airtable_status'});
+    if(st.base) $('atBase').value = st.base;
+    if(st.table) $('atTable').value = st.table;
+    if(st.url) $('atUrl').value = st.url;
+    $('atToken').placeholder = st.token_set ? '•••••• saved — paste to replace' : 'pat… (needs data.records:write on the base)';
+  }catch(e){}
+}
+
+$('loginForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const email=$('liEmail').value.trim().toLowerCase(), pw=$('liPw').value;
+  if(!email || !pw){ toast('Email and password required'); return; }
+  $('liBtn').disabled=true;
+  try{
+    const r = await fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',
+      headers:{'apikey':ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({email,password:pw})});
+    const d = await r.json();
+    if(!r.ok || !d.access_token) throw new Error(d.error_description||d.msg||'Wrong email or password');
+    saveSession({access_token:d.access_token, refresh_token:d.refresh_token,
+      expires_at:Math.floor(Date.now()/1000)+(d.expires_in||3600),
+      user:{id:d.user.id, email:d.user.email}});
+    await loadDash();
+  }catch(e2){ toast(e2.message); }
+  $('liBtn').disabled=false;
+});
+
+$('refreshBtn').addEventListener('click', loadDash);
+$('signOut').addEventListener('click', ()=>{ saveSession(null); location.reload(); });
+$('deniedOut').addEventListener('click', ()=>{ saveSession(null); location.reload(); });
+
+async function saveSetting(key, value){ await fn({action:'admin_set_setting', key, value}); }
+
+$('atSave').addEventListener('click', async ()=>{
+  $('atSave').disabled=true;
+  try{
+    const tok=$('atToken').value.trim();
+    if(tok) await saveSetting('airtable_token', tok);
+    await saveSetting('airtable_base', $('atBase').value.trim());
+    await saveSetting('airtable_table', $('atTable').value.trim() || 'Users');
+    await saveSetting('airtable_url', $('atUrl').value.trim());
+    $('atToken').value='';
+    toast('Airtable settings saved');
+    loadDash();
+  }catch(e){ toast(e.message); }
+  $('atSave').disabled=false;
+});
+
+$('atBackfill').addEventListener('click', async ()=>{
+  if(!confirm('Push all existing users to Airtable now? Run this only once.')) return;
+  $('atBackfill').disabled=true;
+  try{
+    const r = await fn({action:'admin_airtable_backfill'});
+    toast(r.ok ? ('Backfilled '+r.sent+' users') : ('Sent '+r.sent+', failed '+r.failed+': '+(r.error||'')));
+  }catch(e){ toast(e.message); }
+  $('atBackfill').disabled=false;
+});
+
+$('aiLimitSave').addEventListener('click', async ()=>{
+  try{ await saveSetting('ai_daily_limit', $('aiLimit').value.trim()); toast('AI limit saved'); }
+  catch(e){ toast(e.message); }
+});
+
+(async ()=>{
+  if(session && await ensureFresh()) loadDash();
+  else show('loginView');
+})();
+</script>
+</body>
+</html>
