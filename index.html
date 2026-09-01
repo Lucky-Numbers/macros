@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Lucky Numbers</title><!-- build 21 -->
+<title>Lucky Numbers</title><!-- build 22 -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -148,16 +148,16 @@ h2.sect{margin:20px 4px 10px}
   display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .12s}
 .addbtn:active{transform:scale(.94);background:var(--grid)}
 .addbtn .ic{font-size:20px;line-height:1}
-.meal{background:var(--surface);border:1px solid var(--line);border-radius:16px;
-  padding:12px 13px;margin-bottom:9px;display:flex;align-items:center;gap:11px;box-shadow:var(--shadow)}
+.meal{padding:9px 2px;margin:0;display:flex;align-items:center;gap:10px;cursor:pointer;
+  border-bottom:1px solid var(--line)}
+.meal:last-child{border-bottom:none}
 .meal .mmain{flex:1;min-width:0}
-.meal .mname{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.meal .mmac{font-size:11.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums;display:none}
+.meal .mname{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meal .mmac{font-size:11px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums;display:none}
 .meal.open .mmac{display:block}
-.meal{cursor:pointer}
-.meal .msrc{font-size:15px}
-.meal .mdel{background:none;border:none;color:var(--muted);font-size:16px;padding:6px;cursor:pointer}
-.empty{color:var(--muted);font-size:13px;text-align:center;padding:24px 10px}
+.meal .msrc{font-size:13px;flex-shrink:0}
+.meal .mdel{background:none;border:none;color:var(--muted);font-size:14px;padding:5px;cursor:pointer;flex-shrink:0}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:16px 10px}
 
 /* ---------- tab bar ---------- */
 nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:rgba(10,13,24,.78);
@@ -382,10 +382,6 @@ nav button.active{color:var(--brandlight)}
           </div>
           <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
         </div>
-        <div class="card">
-          <h2>Meals</h2>
-          <div id="mealList"></div>
-        </div>
       </div>
       <div>
         <div class="card">
@@ -413,6 +409,10 @@ nav button.active{color:var(--brandlight)}
           <div class="sleepnote" id="sleepNote"></div>
         </div>
       </div>
+    </div>
+    <div class="card">
+      <h2>Meals</h2>
+      <div id="mealList"></div>
     </div>
     <div class="card" id="doneCard" style="display:none">
       <h2>Completed</h2>
