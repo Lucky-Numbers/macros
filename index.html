@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Lucky Numbers</title><!-- build 25 -->
+<title>Lucky Numbers</title><!-- build 26 -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -95,6 +95,17 @@ h2.sect{margin:20px 4px 10px}
   border-radius:11px;padding:8px 11px;font-size:13px;margin-top:7px}
 .chknote:focus{outline:none;border-color:var(--brand)}
 .chkopt{font-size:9.5px;color:var(--muted);background:var(--surface2);border-radius:99px;padding:2px 7px;margin-left:6px;vertical-align:1px;font-weight:700;letter-spacing:.05em}
+/* show-prep milestones */
+.ms{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ms:last-child{border-bottom:none}
+.msbox{width:26px;height:26px;border-radius:9px;border:1.6px solid var(--muted);background:none;color:#fff;
+  font-size:14px;font-weight:800;flex-shrink:0;cursor:pointer;margin-top:1px;line-height:1}
+.ms.done .msbox{background:var(--good);border-color:var(--good)}
+.ms.done .mstitle{color:var(--muted);text-decoration:line-through}
+.mstitle{font-size:13.5px;font-weight:600;line-height:1.35}
+.msdue{font-size:11.5px;color:var(--muted);margin-top:3px;font-weight:600}
+.ms.over .msdue{color:var(--serious)}
+.ms.soon .msdue{color:var(--warning)}
 .chkphotobtn{background:var(--surface2);border:none;color:var(--ink);border-radius:11px;
   padding:9px 13px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
 .daydone{background:rgba(12,163,12,.14);border-radius:13px;
@@ -468,6 +479,10 @@ nav button.active{color:var(--brandlight)}
       <span class="ramp"></span><span>on plan → over</span>
       <span><i style="background:#6d9ee8"></i>under-fueled</span>
     </div>
+    <div class="card" id="msCard" style="margin-top:8px;display:none">
+      <h2 style="display:flex;justify-content:space-between;align-items:baseline">Show prep <span id="msCount" style="font-size:12px;color:var(--muted);font-weight:600"></span></h2>
+      <div id="msList"></div>
+    </div>
     <div class="card" style="margin-top:8px">
       <h2>Progress photos</h2>
       <button class="btn primary" id="addPhotoBtn">📸 Take photo</button>
@@ -642,7 +657,7 @@ nav button.active{color:var(--brandlight)}
       <button class="authlink" type="button" id="forgotLink">Forgot password?</button>
     </form>
     <div class="landinstall" id="landInstall">
-      <div class="lititle">📲 Get the app on your phone</div>
+      <div class="lititle"><span style="margin-right:7px">📲</span>Get the app on your phone</div>
       <div id="instSteps">
         <div class="listep"><span class="lin">1</span><span>Open this page in <b>Safari</b></span></div>
         <div class="listep"><span class="lin">2</span><span>Tap the <b>Share</b> button&nbsp;<svg class="lishare" width="16" height="19" viewBox="0 0 16 19" fill="none"><path d="M8 1v11M8 1L4.5 4.5M8 1l3.5 3.5" stroke="#00bfff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7H1.8v10.2h12.4V7H13" stroke="#00bfff" stroke-width="1.7" stroke-linecap="round"/></svg>&nbsp;at the bottom of Safari</span></div>
@@ -959,6 +974,9 @@ function checkDefsFor(ds){
   ];
   // only people who configured a stack (Settings → My stack) see this item
   if(compounds.length) defs.push({key:'compounds', icon:'💉', label:'Compounds and Ancillaries', required:true});
+  // competitors: posing practice Mon / Wed / Fri (prejudging is 100% of the score)
+  if(profile && profile.event_date && [1,3,5].includes(dw))
+    defs.push({key:'posing', icon:'🏆', label:'Posing practice', required: ds >= '2026-09-07'});
   if(dw===5) defs.push({key:'photo', icon:'📸', label:'Progress photo', required:true, photo:true});
   return defs;
 }
@@ -1719,10 +1737,64 @@ function renderStats(){
 }
 async function renderPlan(){
   try{
-    await loadHistData();
+    await Promise.all([loadHistData(), loadMilestones()]);
     if(calYear===undefined){ const n=new Date(); calYear=n.getFullYear(); calMonth=n.getMonth(); }
-    renderStats(); renderCalendar(); renderPhotos();
+    renderStats(); renderCalendar(); renderMilestones(); renderPhotos();
   }catch(e){ toast(e.message); }
+}
+// ---------- show-prep milestones ----------
+let milestones = [];
+async function loadMilestones(){
+  try{ milestones = await rest('milestones?select=id,title,due,done,sort&order=due.asc,sort.asc'); }
+  catch(e){ milestones = []; }
+}
+function renderMilestones(){
+  const card = $('msCard');
+  if(!milestones || !milestones.length){ card.style.display='none'; return; }
+  card.style.display='block';
+  const today = todayStr();
+  const doneN = milestones.filter(m=>m.done).length;
+  $('msCount').textContent = doneN + ' of ' + milestones.length;
+  $('msList').innerHTML = milestones.map(m=>{
+    const d = daysBetween(today, m.due);
+    let cls = '', when;
+    if(m.done) when = 'Done';
+    else if(d < 0){ cls='over'; when = Math.abs(d) + (d===-1?' day':' days') + ' overdue'; }
+    else if(d === 0){ cls='soon'; when = 'Today'; }
+    else if(d <= 14){ cls='soon'; when = 'In ' + d + (d===1?' day':' days'); }
+    else if(d <= 60) when = 'In ' + Math.round(d/7) + ' wks';
+    else when = fmtDay(m.due);
+    const dateBit = (m.done || when===fmtDay(m.due)) ? '' : ' · ' + fmtDay(m.due);
+    return `<div class="ms ${m.done?'done':''} ${cls}">
+      <button class="msbox" data-id="${escapeHtml(m.id)}">${m.done?'✓':''}</button>
+      <div><div class="mstitle">${escapeHtml(m.title)}</div><div class="msdue">${when}${dateBit}</div></div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.msbox').forEach(b=>b.addEventListener('click', async ()=>{
+    const m = milestones.find(x=>x.id===b.dataset.id); if(!m) return;
+    m.done = !m.done; renderMilestones();
+    try{
+      await rest('milestones?id=eq.'+encodeURIComponent(m.id), {method:'PATCH',
+        headers:{'Prefer':'return=minimal'}, body:{done:m.done, done_at: m.done ? new Date().toISOString() : null}});
+    }catch(e){ toast(e.message); }
+  }));
+}
+// Default show-prep timeline for new competitors (offsets in days before the show)
+function showMilestones(show){
+  const M = (days, id, title, sort) => ({id, title, due: addDays(show, -days), sort});
+  return [
+    M(200,'poses','Learn the 5 mandatory poses — film yourself weekly',1),
+    M(140,'music','Pick posing music — clean 60-second edit',2),
+    M(100,'trunks','Order Classic-legal trunks (black, matte, spandex)',3),
+    M(75,'routine','Routine built — 60s to your track, 5 mandatories + classic pose',4),
+    M(60,'trunksfit','Trunks in hand — practice posing in them',5),
+    M(42,'height','Measure height barefoot, morning → confirm class & weight cap',6),
+    M(42,'capcheck','Cap check — projected stage weight has a 2+ lb buffer?',7),
+    M(30,'tan','Book stage tan (natural tone, no orange)',8),
+    M(16,'packet','Read athlete packet — check-in, weigh-in, schedule',9),
+    M(7,'peak','Peak week plan locked — conservative, no water cutting',10),
+    M(1,'checkin','Check-in bag: trunks, safety pins, music file, NPC card, receipt',11),
+  ].filter(m => m.due >= todayStr());
 }
 $('calPrev').addEventListener('click', ()=>{ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); });
 $('calNext').addEventListener('click', ()=>{ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); });
@@ -2085,6 +2157,11 @@ async function writePlan(){
     headers:{'Prefer':'resolution=merge-duplicates'}, body:macros_});
   await rest('profiles?id=eq.'+session.user.id, {method:'PATCH',
     headers:{'Prefer':'return=minimal'}, body:prof});
+  if(wizGoal === 'compete'){
+    const ms = showMilestones($('wizShowDate').value);
+    if(ms.length) await rest('milestones?on_conflict=user_id,id', {method:'POST',
+      headers:{'Prefer':'resolution=merge-duplicates'}, body:ms}).catch(()=>{});
+  }
 }
 const BUILD_LINES = ['Calculating your maintenance…','Setting protein where it protects muscle…',
   'Balancing carbs and fat…','Laying out your phases…','Almost there…'];
