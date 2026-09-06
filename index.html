@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Lucky Numbers</title><!-- build 26 -->
+<title>Lucky Numbers</title><!-- build 27 -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -193,6 +193,31 @@ nav button.active{color:var(--brandlight)}
 .sheet::before{content:'';display:block;width:38px;height:4px;border-radius:99px;
   background:rgba(255,255,255,.18);margin:2px auto 16px}
 .sheet.show{transform:translateY(0)}
+.sheet.dragging{transition:none}
+.sheetx{position:absolute;top:12px;right:14px;width:32px;height:32px;border-radius:99px;border:none;
+  background:rgba(255,255,255,.08);color:var(--ink2);font-size:14px;font-weight:700;cursor:pointer;line-height:1}
+/* portrait lock: when a phone is turned sideways, counter-rotate the whole app so it stays put */
+html.lock-l body,html.lock-r body{position:fixed;top:0;left:0;width:100vh;height:100vw;overflow-y:auto;overflow-x:hidden;
+  transform-origin:top left;-webkit-overflow-scrolling:touch}
+html.lock-l body{transform:rotate(-90deg) translateX(-100%)}
+html.lock-r body{transform:rotate(90deg) translateY(-100%)}
+/* first-run tutorial */
+#tutScreen{position:fixed;inset:0;z-index:85;display:none;flex-direction:column;
+  background:radial-gradient(130% 55% at 50% 0%, #151b32 0%, #0c1020 52%, #080a13 100%)}
+#tutScreen.show{display:flex;animation:pagein .25s ease}
+.tutslides{flex:1;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tutslides::-webkit-scrollbar{display:none}
+.tut{flex:0 0 100%;width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;padding:calc(30px + env(safe-area-inset-top)) 34px 20px}
+.tuticon{font-size:66px;margin-bottom:22px;line-height:1}
+.tut h2{font-family:'Playfair Display',serif;font-size:27px;font-weight:800;margin:0 0 12px}
+.tut p{font-size:15.5px;color:var(--ink2);line-height:1.55;margin:0;max-width:320px}
+.tut p b{color:var(--brand)}
+.tutfoot{padding:0 28px calc(28px + env(safe-area-inset-bottom));max-width:380px;margin:0 auto;width:100%}
+.tutdots{display:flex;justify-content:center;gap:7px;margin-bottom:18px}
+.tutdots i{display:block;width:7px;height:7px;border-radius:99px;background:rgba(255,255,255,.2);transition:all .2s}
+.tutdots i.on{background:var(--brand);width:22px}
 .sheet h3{margin:0 0 14px;font-size:17px;font-weight:700}
 .field{margin-bottom:11px}
 .field label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;letter-spacing:.04em}
@@ -388,7 +413,8 @@ nav button.active{color:var(--brandlight)}
 .stackrow .ssub{color:var(--muted);font-size:11.5px;margin-left:6px}
 
 /* ---------- coach & account ---------- */
-.coachcard{display:flex;flex-direction:column;min-height:calc(100vh - 240px)}
+.coachcard{display:flex;flex-direction:column;height:calc(100vh - 210px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  height:calc(100dvh - 210px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:300px}
 .coachmsgs{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:8px;padding:2px;min-height:220px}
 .accthead{display:flex;align-items:center;justify-content:space-between;margin:2px 4px 12px}
 .accthead button{background:var(--surface);border:1px solid var(--line);color:var(--ink2);width:38px;height:38px;
@@ -530,6 +556,7 @@ nav button.active{color:var(--brandlight)}
 
 <!-- settings sheet (gear on Account) -->
 <div class="sheet" id="settingsSheet">
+  <button class="sheetx" id="settingsX" title="Close">✕</button>
   <h3>Settings</h3>
   <div class="settingcard" style="box-shadow:none;background:var(--field)">
     <h3 style="margin:0;font-size:15px">My stack</h3>
@@ -672,6 +699,25 @@ nav button.active{color:var(--brandlight)}
       <div class="landfeat"><span class="lfi">📈</span><span><b>Proof you're on track</b><small>Weight trend vs plan, a color-graded calendar, and weekly progress photos.</small></span></div>
     </div>
     <div class="landlegal"><a href="terms.html">Terms</a> &nbsp;·&nbsp; <a href="privacy.html">Privacy</a></div>
+  </div>
+</div>
+
+<!-- first-run tutorial -->
+<div id="tutScreen">
+  <div class="tutslides" id="tutSlides">
+    <div class="tut"><div class="tuticon">📷</div><h2>Log what you eat</h2>
+      <p>Tap <b>+</b> on Home. Snap a photo, scan a barcode, or just type it — the macros fill in for you.</p></div>
+    <div class="tut"><div class="tuticon">🎯</div><h2>Hit your numbers</h2>
+      <p>The rings show what's left today. Check off your day, and the calendar turns <b>green</b> when you're on plan.</p></div>
+    <div class="tut"><div class="tuticon">⚖️</div><h2>Weigh in every morning</h2>
+      <p>Log weight and sleep on Home. The chart shows you against your plan line — that's the whole game.</p></div>
+    <div class="tut"><div class="tuticon">🧠</div><h2>Ask the coach</h2>
+      <p>"What can I eat right now?" — it already knows your remaining macros and your goal.</p></div>
+  </div>
+  <div class="tutfoot">
+    <div class="tutdots" id="tutDots"></div>
+    <button class="btn primary" id="tutNext">Next</button>
+    <button class="authlink" id="tutSkip">Skip</button>
   </div>
 </div>
 
@@ -898,6 +944,64 @@ function closeSheets(){ $('overlay').classList.remove('show');
   document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('show'));
   stopBarcode(); }
 $('overlay').addEventListener('click', closeSheets);
+// swipe down on any sheet (from the top of its content) to dismiss it
+(function(){
+  let active = null, startY = 0, dy = 0;
+  document.querySelectorAll('.sheet').forEach(s=>{
+    s.addEventListener('touchstart', e=>{
+      if(s.scrollTop > 2){ active = null; return; }
+      active = s; startY = e.touches[0].clientY; dy = 0;
+    }, {passive:true});
+    s.addEventListener('touchmove', e=>{
+      if(active !== s) return;
+      dy = e.touches[0].clientY - startY;
+      if(dy > 0){ s.classList.add('dragging'); s.style.transform = 'translateY(' + dy + 'px)'; }
+    }, {passive:true});
+    const end = ()=>{
+      if(active !== s) return;
+      s.classList.remove('dragging'); s.style.transform = '';
+      if(dy > 90) closeSheets();
+      active = null; dy = 0;
+    };
+    s.addEventListener('touchend', end); s.addEventListener('touchcancel', end);
+  });
+})();
+// portrait lock: phones stay upright even when the device is turned sideways
+function lockPortrait(){
+  const cls = document.documentElement.classList;
+  cls.remove('lock-l','lock-r');
+  const isPhone = Math.min(screen.width, screen.height) < 700;
+  if(!isPhone || window.innerWidth <= window.innerHeight) return;
+  let ang = (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle
+          : (typeof window.orientation === 'number' ? window.orientation : 0);
+  if(ang < 0) ang += 360;
+  cls.add(ang === 90 ? 'lock-l' : 'lock-r');
+}
+window.addEventListener('resize', lockPortrait);
+window.addEventListener('orientationchange', ()=>setTimeout(lockPortrait, 120));
+lockPortrait();
+try{ if(screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(()=>{}); }catch(e){}
+// first-run tutorial
+const TUT_N = 4;
+function tutIndex(){ const s = $('tutSlides'); return Math.max(0, Math.min(TUT_N-1, Math.round(s.scrollLeft / Math.max(1, s.clientWidth)))); }
+function tutDots(){
+  const i = tutIndex();
+  $('tutDots').innerHTML = [...Array(TUT_N)].map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('');
+  $('tutNext').textContent = i >= TUT_N-1 ? "Let's go" : 'Next';
+}
+function showTutorial(){ $('tutScreen').classList.add('show'); $('tutSlides').scrollLeft = 0; tutDots(); }
+async function finishTutorial(){
+  $('tutScreen').classList.remove('show');
+  if(profile) profile.tutorial_seen = true;
+  try{ await rest('profiles?id=eq.'+session.user.id, {method:'PATCH', headers:{'Prefer':'return=minimal'}, body:{tutorial_seen:true}}); }catch(e){}
+}
+$('tutSlides').addEventListener('scroll', ()=>{ clearTimeout(tutDots._t); tutDots._t = setTimeout(tutDots, 60); });
+$('tutNext').addEventListener('click', ()=>{
+  const s = $('tutSlides'), i = tutIndex();
+  if(i >= TUT_N-1) finishTutorial();
+  else s.scrollTo({left:(i+1)*s.clientWidth, behavior:'smooth'});
+});
+$('tutSkip').addEventListener('click', finishTutorial);
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // ---------- tabs ----------
@@ -2203,6 +2307,10 @@ function coachOpen(){
     coach.loaded = true;
   }
   coachRender();
+  // land on the newest message, not the top of the history
+  const toBottom = ()=>{ const b = $('coachMsgs'); b.scrollTop = b.scrollHeight; };
+  window.scrollTo(0, 0);
+  requestAnimationFrame(toBottom); setTimeout(toBottom, 80); setTimeout(toBottom, 300);
 }
 function coachSave(){
   try{ localStorage.setItem(coachStorageKey(), JSON.stringify(coach.messages.slice(-30))); }catch(e){}
@@ -2237,6 +2345,7 @@ $('settingsBtn').addEventListener('click', ()=>{
   if(profile && profile.is_admin) checkKey();
 });
 $('settingsClose').addEventListener('click', closeSheets);
+$('settingsX').addEventListener('click', closeSheets);
 
 // ---------- init ----------
 async function startApp(){
@@ -2259,6 +2368,7 @@ async function startApp(){
     renderWeightChart(); renderSleepCard();
   }catch(e){ toast('Could not load data: ' + e.message); }
   clearShownNotifs();
+  if(profile && !profile.tutorial_seen) showTutorial();
 }
 async function loadApp(){
   try{
