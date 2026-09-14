@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Lucky Numbers</title><!-- build 28 -->
+<title>Lucky Numbers</title><!-- build 29 -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -13,8 +13,7 @@
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 :root{
   color-scheme:dark;
@@ -26,20 +25,25 @@
   --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
   --low:#26c08d; --moderate:#5aa2f0; --high:#e66767;
   --ph-cut1:#3987e5; --ph-reverse:#898781; --ph-bulk:#d95926; --ph-prep:#199e70; --ph-show:#c98500;
-  --shadow:0 8px 28px rgba(0,0,0,.38);
+  --shadow:0 4px 16px rgba(0,0,0,.26);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
 html,body{margin:0;padding:0;background:var(--page);color:var(--ink);
-  font-family:'Inter',system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:-.01em}
-body{padding-bottom:calc(84px + env(safe-area-inset-bottom));min-height:100vh;
-  background:radial-gradient(130% 55% at 50% 0%, #151b32 0%, #0c1020 52%, #080a13 100%) fixed;
-  overscroll-behavior-y:none}
-button{font-family:inherit;letter-spacing:inherit}
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter',system-ui,"Segoe UI",sans-serif;letter-spacing:-.01em;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom));min-height:100vh;overscroll-behavior-y:none}
+/* one static gradient layer instead of background-attachment:fixed (which repaints on every scroll frame on iOS) */
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(130% 55% at 50% 0%, #151b32 0%, #0c1020 52%, #080a13 100%)}
+button{font-family:inherit;letter-spacing:inherit;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
 button:active{opacity:.85}
+/* icon system: every glyph in the app is a stroked 24-grid SVG that inherits currentColor */
+.i{display:inline-flex;width:1em;height:1em;vertical-align:-.15em;flex-shrink:0}
+.i svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
 /* ---------- header ---------- */
-header{position:sticky;top:0;z-index:20;background:rgba(9,11,20,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+header{position:sticky;top:0;z-index:20;background:rgba(9,11,20,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transform:translateZ(0);
   padding:calc(12px + env(safe-area-inset-top)) 20px 10px;display:flex;align-items:center;justify-content:space-between}
 header h1{font-size:17px;margin:0;font-weight:800;letter-spacing:.06em;
   font-family:'Playfair Display',serif;text-transform:uppercase}
@@ -50,8 +54,8 @@ header h1 .lucky{color:var(--brand)}
 .daychip.low{color:var(--low)} .daychip.moderate{color:var(--moderate)} .daychip.high{color:var(--high)}
 
 main{padding:14px 16px 8px;max-width:520px;margin:0 auto}
-.page{display:none} .page.active{display:block;animation:pagein .22s ease}
-@keyframes pagein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.page{display:none} .page.active{display:block;animation:pagein .18s ease-out}
+@keyframes pagein{from{opacity:0}to{opacity:1}}
 .cols{display:block}
 @media(min-width:960px){
   main{max-width:1100px}
@@ -60,21 +64,21 @@ main{padding:14px 16px 8px;max-width:520px;margin:0 auto}
 }
 
 /* ---------- cards ---------- */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;
-  padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
-.card h2, h2.sect{margin:0 0 12px;font-size:11px;color:var(--muted);font-weight:700;
-  letter-spacing:.14em;text-transform:uppercase}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;
+  padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card h2, h2.sect{margin:0 0 12px;font-size:12px;color:var(--muted);font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase}
+.pagetitle{font-size:30px;font-weight:800;letter-spacing:-.025em;margin:6px 4px 14px}
 h2.sect{margin:20px 4px 10px}
 
 /* ---------- hero ---------- */
-.hero{background:linear-gradient(160deg, #16204a 0%, #121732 55%, #131829 100%);
-  border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
-.herotitle{font-size:17px;font-weight:800;font-family:'Playfair Display',serif;letter-spacing:.02em}
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.herotitle{font-size:19px;font-weight:800;letter-spacing:-.02em}
 .phname{font-size:12px;font-weight:800;letter-spacing:.09em;margin-top:8px}
 .herorow{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .herocount{text-align:center;flex-shrink:0}
 .herocount{margin-top:-6px}
-.hcnum{font-family:'Playfair Display',serif;font-size:48px;font-weight:800;line-height:1.08;color:var(--brandlight)}
+.hcnum{font-size:46px;font-weight:800;line-height:1.05;color:var(--brandlight);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
 .hclbl{font-size:10px;color:var(--muted);letter-spacing:.22em;text-transform:uppercase;margin-top:7px}
 .planbar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin-top:14px;gap:2px}
 .planbar .seg{position:relative;background:rgba(255,255,255,.08)}
@@ -84,7 +88,11 @@ h2.sect{margin:20px 4px 10px}
 .chk{display:flex;align-items:flex-start;gap:13px;padding:12px 2px;border-bottom:1px solid var(--line)}
 .chk:last-child{border-bottom:none;padding-bottom:6px}
 .chkbox{width:27px;height:27px;border-radius:99px;border:1.7px solid var(--muted);background:none;cursor:pointer;
-  flex-shrink:0;font-size:14px;line-height:1;color:#fff;margin-top:1px;transition:background .15s,border-color .15s,transform .12s}
+  flex-shrink:0;color:#fff;margin-top:1px;display:flex;align-items:center;justify-content:center;
+  transition:background .15s,border-color .15s,transform .12s}
+.chkbox .i,.msbox .i{width:15px;height:15px}
+.chklabel .i{width:16px;height:16px;margin-right:7px;vertical-align:-3px;color:var(--muted)}
+.chk.done .chklabel .i{color:var(--good)}
 .chkbox:active{transform:scale(.9)}
 .chk.done .chkbox{background:var(--good);border-color:var(--good)}
 .chkmain{flex:1;min-width:0}
@@ -99,7 +107,7 @@ h2.sect{margin:20px 4px 10px}
 .ms{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .ms:last-child{border-bottom:none}
 .msbox{width:26px;height:26px;border-radius:9px;border:1.6px solid var(--muted);background:none;color:#fff;
-  font-size:14px;font-weight:800;flex-shrink:0;cursor:pointer;margin-top:1px;line-height:1}
+  flex-shrink:0;cursor:pointer;margin-top:1px;display:flex;align-items:center;justify-content:center}
 .ms.done .msbox{background:var(--good);border-color:var(--good)}
 .ms.done .mstitle{color:var(--muted);text-decoration:line-through}
 .mstitle{font-size:13.5px;font-weight:600;line-height:1.35}
@@ -109,7 +117,12 @@ h2.sect{margin:20px 4px 10px}
 .chkphotobtn{background:var(--surface2);border:none;color:var(--ink);border-radius:11px;
   padding:9px 13px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
 .daydone{background:rgba(12,163,12,.14);border-radius:13px;
-  padding:10px 12px;font-size:13px;font-weight:700;color:var(--good);text-align:center;margin-top:12px;display:none}
+  padding:10px 12px;font-size:13px;font-weight:700;color:var(--good);text-align:center;margin-top:12px;display:none;
+  align-items:center;justify-content:center;gap:7px}
+.daydone.on{display:flex}
+.btn .i{width:18px;height:18px;vertical-align:-4px;margin-right:6px}
+.chkphotobtn .i{width:15px;height:15px;vertical-align:-3px;margin-right:5px}
+.ddline .i{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
 .weekline{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5}
 .weekline b{font-weight:700}
 
@@ -121,14 +134,15 @@ h2.sect{margin:20px 4px 10px}
 .metric input{width:100%;background:var(--field);border:1px solid var(--line);color:var(--ink);
   border-radius:10px;padding:8px 10px;font-size:16px;min-width:0;font-weight:600}
 .metric input:focus{outline:none;border-color:var(--brand)}
-.metric button{background:var(--brand);color:#001018;border:none;border-radius:10px;padding:8px 13px;font-weight:800;cursor:pointer;font-size:14px}
+.metric button{background:var(--brand);color:#001018;border:none;border-radius:10px;padding:0 12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.metric button .i{width:17px;height:17px}
 #wchart{width:100%;height:140px;margin-top:12px}
 .wtrend{font-size:12px;margin-top:6px;font-weight:600}
 .wtrend.ok{color:var(--good)} .wtrend.warn{color:var(--serious)}
 
 /* ---------- sleep ---------- */
 #sleepAvgRow{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
-#sleepAvgNum{font-family:'Playfair Display',serif;font-size:34px;font-weight:800;color:var(--brandlight)}
+#sleepAvgNum{font-size:32px;font-weight:800;color:var(--brandlight);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 #sleepAvgLbl{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.03em}
 .sleepbars{display:flex;gap:8px;align-items:flex-end;height:64px}
 .sleepbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
@@ -155,10 +169,10 @@ h2.sect{margin:20px 4px 10px}
 /* ---------- add row & meals ---------- */
 .addrow{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:16px 0 4px}
 .addbtn{background:var(--surface2);border:none;color:var(--ink2);
-  border-radius:14px;padding:12px 2px 10px;font-size:11px;font-weight:600;cursor:pointer;
+  border-radius:14px;padding:12px 2px 10px;font-size:11.5px;font-weight:600;cursor:pointer;letter-spacing:-.01em;
   display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .12s}
 .addbtn:active{transform:scale(.94);background:var(--grid)}
-.addbtn .ic{font-size:20px;line-height:1}
+.addbtn .i{width:22px;height:22px;color:var(--brandlight)}
 .meal{padding:9px 2px;margin:0;display:flex;align-items:center;gap:10px;cursor:pointer;
   border-bottom:1px solid var(--line)}
 .meal:last-child{border-bottom:none}
@@ -166,13 +180,15 @@ h2.sect{margin:20px 4px 10px}
 .meal .mname{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .meal .mmac{font-size:11px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums;display:none}
 .meal.open .mmac{display:block}
-.meal .msrc{font-size:13px;flex-shrink:0}
-.meal .mdel{background:none;border:none;color:var(--muted);font-size:14px;padding:5px;cursor:pointer;flex-shrink:0}
+.meal .msrc{flex-shrink:0;color:var(--muted);display:flex}
+.meal .msrc .i{width:16px;height:16px}
+.meal .mdel,.stackrow .mdel{background:none;border:none;color:var(--muted);padding:6px;cursor:pointer;flex-shrink:0;display:flex}
+.meal .mdel .i,.stackrow .mdel .i{width:15px;height:15px}
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:16px 10px}
 
 /* ---------- tab bar ---------- */
 nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:rgba(10,13,24,.78);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--line);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);transform:translateZ(0);
   display:flex;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
 nav button{flex:1;background:none;border:none;color:var(--muted);font-size:10px;font-weight:600;
   padding:5px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;
@@ -182,20 +198,31 @@ nav button:active{transform:scale(.92)}
 nav button.active{color:var(--brandlight)}
 
 /* ---------- sheets ---------- */
-.overlay{position:fixed;inset:0;background:rgba(4,6,12,.6);z-index:40;display:none;
-  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.overlay{position:fixed;inset:0;background:rgba(4,6,12,.62);z-index:40;display:none}
 .overlay.show{display:block}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface2);
   border-radius:26px 26px 0 0;
   padding:10px 18px calc(22px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;
-  transform:translateY(105%);transition:transform .28s cubic-bezier(.32,.72,.25,1);max-height:88vh;overflow-y:auto;
+  transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);max-height:88vh;overflow-y:auto;will-change:transform;
   -webkit-overflow-scrolling:touch;box-shadow:0 -12px 44px rgba(0,0,0,.5)}
 .sheet::before{content:'';display:block;width:38px;height:4px;border-radius:99px;
   background:rgba(255,255,255,.18);margin:2px auto 16px}
 .sheet.show{transform:translateY(0)}
 .sheet.dragging{transition:none}
 .sheetx{position:absolute;top:12px;right:14px;width:32px;height:32px;border-radius:99px;border:none;
-  background:rgba(255,255,255,.08);color:var(--ink2);font-size:14px;font-weight:700;cursor:pointer;line-height:1}
+  background:rgba(255,255,255,.08);color:var(--ink2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.sheetx .i{width:16px;height:16px}
+.chips.units{margin:8px 0 0}
+.chip.sm{padding:6px 13px;font-size:12.5px}
+/* photo lightbox */
+#lightbox{position:fixed;inset:0;background:#000;z-index:95;display:none;align-items:center;justify-content:center}
+#lightbox.show{display:flex;animation:pagein .18s ease-out}
+#lightbox img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+#lightbox .lbdate{position:absolute;top:calc(18px + env(safe-area-inset-top));left:0;right:0;text-align:center;
+  color:#fff;font-size:13px;font-weight:600;opacity:.85;pointer-events:none}
+#lightbox .lbx{position:absolute;top:calc(12px + env(safe-area-inset-top));right:14px;width:36px;height:36px;border-radius:99px;
+  border:none;background:rgba(255,255,255,.14);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#lightbox .lbx .i{width:18px;height:18px}
 /* portrait lock: when a phone is turned sideways, counter-rotate the whole app so it stays put */
 html.lock-l body,html.lock-r body{position:fixed;top:0;left:0;width:100vh;height:100vw;overflow-y:auto;overflow-x:hidden;
   transform-origin:top left;-webkit-overflow-scrolling:touch}
@@ -210,26 +237,28 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
 .tutslides::-webkit-scrollbar{display:none}
 .tut{flex:0 0 100%;width:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;
   justify-content:center;text-align:center;padding:calc(30px + env(safe-area-inset-top)) 34px 20px}
-.tuticon{font-size:66px;margin-bottom:22px;line-height:1}
-.tut h2{font-family:'Playfair Display',serif;font-size:27px;font-weight:800;margin:0 0 12px}
+.tuticon{width:96px;height:96px;border-radius:30px;background:rgba(0,191,255,.12);display:flex;align-items:center;
+  justify-content:center;margin-bottom:26px}
+.tuticon .i{width:44px;height:44px;color:var(--brandlight)}
+.tut h2{font-size:28px;font-weight:800;margin:0 0 12px;letter-spacing:-.02em}
 .tut p{font-size:15.5px;color:var(--ink2);line-height:1.55;margin:0;max-width:320px}
 .tut p b{color:var(--brand)}
 .tutfoot{padding:0 28px calc(28px + env(safe-area-inset-bottom));max-width:380px;margin:0 auto;width:100%}
 .tutdots{display:flex;justify-content:center;gap:7px;margin-bottom:18px}
 .tutdots i{display:block;width:7px;height:7px;border-radius:99px;background:rgba(255,255,255,.2);transition:all .2s}
 .tutdots i.on{background:var(--brand);width:22px}
-.sheet h3{margin:0 0 14px;font-size:17px;font-weight:700}
+.sheet h3{margin:0 0 14px;font-size:18px;font-weight:700;letter-spacing:-.01em}
 .field{margin-bottom:11px}
 .field label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;letter-spacing:.04em}
 .field input,.field select{width:100%;background:var(--field);border:1px solid var(--line);
   color:var(--ink);border-radius:12px;padding:12px;font-size:16px}
 .field input:focus{outline:none;border-color:var(--brand)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.btn{width:100%;border:none;border-radius:15px;padding:15px;font-size:16px;font-weight:700;
-  cursor:pointer;margin-top:6px;transition:transform .12s}
+.grid2 .field label{min-height:22px;display:flex;align-items:center}
+.btn{width:100%;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:600;
+  cursor:pointer;margin-top:6px;transition:transform .12s,opacity .12s;letter-spacing:-.01em}
 .btn:active{transform:scale(.97)}
-.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#001018;
-  box-shadow:0 4px 18px rgba(0,191,255,.25)}
+.btn.primary{background:var(--brand);color:#001018}
 .btn.ghost{background:rgba(255,255,255,.06);color:var(--ink2)}
 .btn:disabled{opacity:.5}
 .notes{font-size:12.5px;color:var(--muted);background:var(--field);border-radius:11px;
@@ -257,7 +286,7 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
 .statcard{background:var(--surface);border:1px solid var(--line);border-radius:20px;
   padding:16px 12px;margin-bottom:14px;display:flex;gap:8px;text-align:center;box-shadow:var(--shadow)}
 .statcard>div{flex:1}
-.statcard .big{font-family:'Playfair Display',serif;font-size:28px;font-weight:800;color:var(--brandlight)}
+.statcard .big{font-size:28px;font-weight:800;color:var(--brandlight);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .statcard .lbl{font-size:10px;color:var(--muted);margin-top:4px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.06)}
 .badge.done{color:var(--good)} .badge.miss{color:var(--critical)}
@@ -265,7 +294,8 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
 .calhead{display:flex;align-items:center;justify-content:space-between;margin:6px 2px 12px}
 .calhead .mname{font-size:16px;font-weight:700}
 .calhead button{background:var(--surface);border:1px solid var(--line);color:var(--ink2);border-radius:12px;
-  width:38px;height:34px;font-size:16px;cursor:pointer}
+  width:38px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.calhead button .i{width:18px;height:18px}
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px}
 .caldow{text-align:center;font-size:10px;color:var(--muted);font-weight:700;padding:2px 0;letter-spacing:.05em}
 .callegend{display:flex;align-items:center;gap:8px;margin:12px 4px 4px;font-size:10.5px;color:var(--muted);font-weight:600}
@@ -293,10 +323,9 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
 .photocell{position:relative;border-radius:14px;overflow:hidden;background:var(--surface2);aspect-ratio:3/4;cursor:pointer}
 .photocell img{width:100%;height:100%;object-fit:cover;display:block}
 .photocell .pdate{position:absolute;bottom:0;left:0;right:0;font-size:10px;font-weight:700;
-  background:rgba(0,0,0,.55);padding:4px 7px;backdrop-filter:blur(4px)}
+  background:rgba(0,0,0,.55);padding:4px 7px}
 
 /* ---------- AI chat ---------- */
-#micBtn.rec{background:var(--critical);color:#fff}
 #chatMsgs{max-height:38vh;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;padding:2px}
 .cm{max-width:85%;padding:10px 13px;border-radius:16px;font-size:14px;line-height:1.4;white-space:pre-wrap}
 .cm.user{align-self:flex-end;background:var(--brand);color:#001018;border-bottom-right-radius:5px;font-weight:600}
@@ -317,23 +346,23 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
 .chatrow input{flex:1;background:var(--field);border:1px solid var(--line);color:var(--ink);
   border-radius:14px;padding:12px 13px;font-size:16px;min-width:0}
 .chatrow input:focus{outline:none;border-color:var(--brand)}
-.chatrow button{background:var(--surface);border:none;color:var(--ink);
-  border-radius:14px;padding:11px 13px;font-size:16px;cursor:pointer;flex-shrink:0}
-.chatrow button#chatSend{background:var(--brand);color:#001018;font-weight:800}
+.chatrow button{background:var(--brand);border:none;color:#001018;width:44px;height:44px;
+  border-radius:14px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.chatrow button .i{width:20px;height:20px}
+.chatrow button:disabled{opacity:.45}
 
 /* ---------- toast & loading ---------- */
 /* hidden state must clear the screen no matter how tall the toast or the notch is:
    -100% removes its own height, the extra 160px covers top offset + any safe-area inset */
 #toast{position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;
   transform:translateX(-50%) translateY(calc(-100% - 160px));opacity:0;pointer-events:none;
-  background:rgba(27,33,56,.95);backdrop-filter:blur(12px);color:var(--ink);padding:12px 20px;
+  background:rgba(27,33,56,.97);color:var(--ink);padding:12px 20px;
   border-radius:22px;font-size:13.5px;font-weight:600;z-index:100;
   transition:transform .3s cubic-bezier(.32,.72,.25,1), opacity .25s ease;
   max-width:86vw;text-align:center;box-shadow:0 10px 32px rgba(0,0,0,.45)}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
-#loading{position:fixed;inset:0;background:rgba(6,8,14,.85);z-index:90;display:none;
-  flex-direction:column;align-items:center;justify-content:center;gap:14px;
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#loading{position:fixed;inset:0;background:rgba(6,8,14,.88);z-index:90;display:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:14px}
 #loading.show{display:flex}
 .spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.12);border-top-color:var(--brand);
   border-radius:99px;animation:spin .8s linear infinite}
@@ -349,7 +378,9 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
   margin:14px auto 0;cursor:pointer;padding:8px}
 .landfeats{margin:26px 0 0}
 .landfeat{display:flex;align-items:flex-start;gap:12px;padding:9px 2px}
-.landfeat .lfi{font-size:20px;flex-shrink:0;line-height:1.3}
+.landfeat .lfi{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.06);display:flex;align-items:center;
+  justify-content:center;flex-shrink:0}
+.landfeat .lfi .i{width:18px;height:18px;color:var(--brandlight)}
 .landfeat b{font-size:13.5px;display:block}
 .landfeat small{font-size:11.5px;color:var(--muted);display:block;margin-top:2px;line-height:1.4}
 .landinstall{background:linear-gradient(135deg, rgba(0,191,255,.16), rgba(0,153,204,.05));
@@ -379,14 +410,17 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
 @keyframes stepin{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
 @keyframes stepout{to{opacity:0;transform:translateX(-26px)}}
 .wback{background:var(--surface);border:1px solid var(--line);color:var(--ink2);width:38px;height:38px;
-  border-radius:12px;font-size:20px;line-height:1;cursor:pointer;margin-bottom:22px;display:block}
-.wtitle{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;margin-bottom:6px}
+  border-radius:12px;cursor:pointer;margin-bottom:22px;display:flex;align-items:center;justify-content:center}
+.wback .i{width:20px;height:20px}
+.wtitle{font-size:28px;font-weight:800;margin-bottom:6px;letter-spacing:-.02em}
 .wsub{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.5}
 .wopt{display:flex;align-items:center;gap:14px;width:100%;background:var(--surface);border:1px solid var(--line);
   border-radius:18px;padding:16px;margin-bottom:11px;cursor:pointer;text-align:left;color:var(--ink);
   box-shadow:var(--shadow);transition:transform .12s}
 .wopt:active{transform:scale(.97);border-color:var(--brand)}
-.wopt .wic{font-size:26px;flex-shrink:0}
+.wopt .wic{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.06);display:flex;align-items:center;
+  justify-content:center;flex-shrink:0}
+.wopt .wic .i{width:22px;height:22px;color:var(--brandlight)}
 .wopt b{font-size:15.5px;display:block}
 .wopt small{font-size:12px;color:var(--muted);display:block;margin-top:2px}
 .wrow{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--ink2);flex-wrap:wrap}
@@ -403,7 +437,7 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
   -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 8px));
   mask:radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 8px));
   animation:spin 1.05s linear infinite;filter:drop-shadow(0 0 18px rgba(0,191,255,.45))}
-.buildtitle{font-family:'Playfair Display',serif;font-size:24px;font-weight:800;margin-bottom:10px}
+.buildtitle{font-size:24px;font-weight:800;margin-bottom:10px;letter-spacing:-.02em}
 .buildsub{font-size:13px;color:var(--muted);min-height:18px;transition:opacity .3s}
 .field select{width:100%;background:var(--field);border:1px solid var(--line);color:var(--ink);
   border-radius:12px;padding:12px;font-size:16px;-webkit-appearance:none;appearance:none}
@@ -413,8 +447,8 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
 .stackrow .ssub{color:var(--muted);font-size:11.5px;margin-left:6px}
 
 /* ---------- coach & account ---------- */
-.coachcard{display:flex;flex-direction:column;height:calc(100vh - 210px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  height:calc(100dvh - 210px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:300px}
+.coachcard{display:flex;flex-direction:column;height:calc(100vh - 250px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  height:calc(100dvh - 250px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:300px}
 .coachmsgs{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:8px;padding:2px;min-height:220px}
 .accthead{display:flex;align-items:center;justify-content:space-between;margin:2px 4px 12px}
 .accthead button{background:var(--surface);border:1px solid var(--line);color:var(--ink2);width:38px;height:38px;
@@ -442,10 +476,10 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
         <div class="card">
           <div class="minirings" id="rings"></div>
           <div class="addrow" style="margin:16px 0 2px">
-            <button class="addbtn" id="btnPhoto"><span class="ic">📷</span>Scan</button>
-            <button class="addbtn" id="btnBarcode"><span class="ic"><svg width="22" height="20" viewBox="0 0 24 20" fill="currentColor"><rect x="1" y="2" width="2" height="16"/><rect x="5" y="2" width="1" height="16"/><rect x="8" y="2" width="3" height="16"/><rect x="13" y="2" width="1" height="16"/><rect x="16" y="2" width="2" height="16"/><rect x="20" y="2" width="1" height="16"/><rect x="22.5" y="2" width="1.5" height="16"/></svg></span>Barcode</button>
-            <button class="addbtn" id="btnDescribe"><span class="ic">💬</span>Describe</button>
-            <button class="addbtn" id="btnManual"><span class="ic">✎</span>Manual</button>
+            <button class="addbtn" id="btnPhoto"><span class="i" data-ic="camera"></span>Scan</button>
+            <button class="addbtn" id="btnBarcode"><span class="i" data-ic="barcode"></span>Barcode</button>
+            <button class="addbtn" id="btnDescribe"><span class="i" data-ic="text"></span>Describe</button>
+            <button class="addbtn" id="btnManual"><span class="i" data-ic="pencil"></span>Manual</button>
           </div>
           <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
         </div>
@@ -456,10 +490,10 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
           <div class="metrics">
             <div class="metric"><label>Weight lb</label>
               <div class="mrow"><input id="wInput" type="number" step="0.1" inputmode="decimal" placeholder="—">
-              <button id="wSave">✓</button></div></div>
+              <button id="wSave" aria-label="Save weight"><span class="i" data-ic="check"></span></button></div></div>
             <div class="metric"><label>Sleep hrs</label>
               <div class="mrow"><input id="sInput" type="number" step="0.5" inputmode="decimal" placeholder="—">
-              <button id="sSave">✓</button></div></div>
+              <button id="sSave" aria-label="Save sleep"><span class="i" data-ic="check"></span></button></div></div>
           </div>
           <svg id="wchart" viewBox="0 0 340 140" preserveAspectRatio="none"></svg>
           <div class="wtrend" id="wTrend"></div>
@@ -467,7 +501,7 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
         <div class="card">
           <h2>Checklist</h2>
           <div id="checklist"></div>
-          <div class="daydone" id="dayDone">Day complete 💪</div>
+          <div class="daydone" id="dayDone"><span class="i" data-ic="check"></span>Day complete</div>
         </div>
         <div class="card">
           <h2>Sleep</h2>
@@ -490,15 +524,16 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
 
   <!-- PLAN -->
   <section class="page" id="page-plan">
+    <div class="pagetitle">Plan</div>
     <div class="statcard">
       <div><div class="big" id="statDone">–</div><div class="lbl">complete</div></div>
       <div><div class="big" id="statTotal">–</div><div class="lbl">tracked</div></div>
       <div><div class="big" id="statPct">–</div><div class="lbl">on plan</div></div>
     </div>
     <div class="calhead">
-      <button id="calPrev">‹</button>
+      <button id="calPrev" aria-label="Previous month"><span class="i" data-ic="chevl"></span></button>
       <div class="mname" id="calMonth"></div>
-      <button id="calNext">›</button>
+      <button id="calNext" aria-label="Next month"><span class="i" data-ic="chevr"></span></button>
     </div>
     <div class="calgrid" id="calGrid"></div>
     <div class="callegend">
@@ -511,19 +546,19 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
     </div>
     <div class="card" style="margin-top:8px">
       <h2>Progress photos</h2>
-      <button class="btn primary" id="addPhotoBtn">📸 Take photo</button>
+      <button class="btn primary" id="addPhotoBtn"><span class="i" data-ic="camera"></span>Take photo</button>
       <div class="photogrid" id="photoGrid"></div>
     </div>
   </section>
 
   <!-- AI COACH -->
   <section class="page" id="page-coach">
+    <div class="pagetitle">Coach</div>
     <div class="card coachcard">
-      <h2>AI Coach</h2>
       <div id="coachMsgs" class="coachmsgs"></div>
       <div class="chatrow" style="margin-top:12px">
         <input id="coachInput" placeholder="What can I eat right now?" autocomplete="off">
-        <button id="coachSend" title="Send">➤</button>
+        <button id="coachSend" aria-label="Send"><span class="i" data-ic="send"></span></button>
       </div>
     </div>
   </section>
@@ -531,7 +566,7 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
   <!-- ACCOUNT -->
   <section class="page" id="page-account">
     <div class="accthead">
-      <h2 class="sect" style="margin:0">Account</h2>
+      <div class="pagetitle" style="margin:0">Account</div>
       <button id="settingsBtn" title="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
     <div class="settingcard">
@@ -556,8 +591,8 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
 
 <!-- settings sheet (gear on Account) -->
 <div class="sheet" id="settingsSheet">
-  <button class="sheetx" id="settingsX" title="Close">✕</button>
-  <h3>Settings</h3>
+  <button class="sheetx" id="settingsX" aria-label="Close"><span class="i" data-ic="x"></span></button>
+  <h3 style="font-size:20px;font-weight:800;letter-spacing:-.02em">Settings</h3>
   <div class="settingcard" style="box-shadow:none;background:var(--field)">
     <h3 style="margin:0;font-size:15px">My stack</h3>
     <p>Compounds &amp; ancillaries you check off daily. Yours only — nothing here is a recommendation.</p>
@@ -598,6 +633,7 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
   <div class="field"><label>Meal name</label><input id="fName" placeholder="e.g. Chicken and rice"></div>
   <div class="field" id="portionField" style="display:none">
     <label id="portionLabel">Amount (g)</label><input id="fAmount" type="number" inputmode="decimal">
+    <div class="chips units" id="unitChips" style="display:none"></div>
   </div>
   <div class="grid2">
     <div class="field"><label>Calories <button class="autocal" id="autoCalBtn">auto</button></label><input id="fCal" type="number" inputmode="numeric"></div>
@@ -626,8 +662,7 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
   </div>
   <div class="chatrow">
     <input id="chatInput" placeholder="e.g. Chipotle chicken bowl with guac" autocomplete="off">
-    <button id="micBtn" title="Dictate">🎤</button>
-    <button id="chatSend" title="Send">➤</button>
+    <button id="chatSend" aria-label="Send"><span class="i" data-ic="send"></span></button>
   </div>
   <button class="btn ghost" id="chatCancel">Close</button>
 </div>
@@ -638,7 +673,7 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
   <div id="bcreader"></div>
   <div class="bchint">Point your camera at the barcode</div>
   <input type="file" id="bcPhotoInput" accept="image/*" capture="environment" style="display:none">
-  <button class="btn ghost" id="bcPhotoBtn" style="margin-top:10px">📸 Photo mode</button>
+  <button class="btn ghost" id="bcPhotoBtn" style="margin-top:10px"><span class="i" data-ic="camera"></span>Use a photo instead</button>
   <button class="btn ghost" id="bcCancel">Cancel</button>
 </div>
 
@@ -684,7 +719,7 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
       <button class="authlink" type="button" id="forgotLink">Forgot password?</button>
     </form>
     <div class="landinstall" id="landInstall">
-      <div class="lititle"><span style="margin-right:7px">📲</span>Get the app on your phone</div>
+      <div class="lititle"><span class="i" data-ic="phone" style="margin-right:8px;color:var(--brandlight)"></span>Get the app on your phone</div>
       <div id="instSteps">
         <div class="listep"><span class="lin">1</span><span>Open this page in <b>Safari</b></span></div>
         <div class="listep"><span class="lin">2</span><span>Tap the <b>Share</b> button&nbsp;<svg class="lishare" width="16" height="19" viewBox="0 0 16 19" fill="none"><path d="M8 1v11M8 1L4.5 4.5M8 1l3.5 3.5" stroke="#00bfff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7H1.8v10.2h12.4V7H13" stroke="#00bfff" stroke-width="1.7" stroke-linecap="round"/></svg>&nbsp;at the bottom of Safari</span></div>
@@ -693,10 +728,10 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
       <div class="liother" id="instOther">On Android: open in Chrome → menu ⋮ → <b>Add to Home screen</b></div>
     </div>
     <div class="landfeats">
-      <div class="landfeat"><span class="lfi">📷</span><span><b>Snap it, logged</b><small>Photo, barcode, or a sentence — AI works out the macros, restaurant menus included.</small></span></div>
-      <div class="landfeat"><span class="lfi">🎯</span><span><b>A plan built for your goal</b><small>Cut, build, recomp, or full contest prep — daily targets generated from your stats and paced to your date.</small></span></div>
-      <div class="landfeat"><span class="lfi">🧠</span><span><b>A coach that knows your day</b><small>Ask "what can I eat right now?" — it answers from your live remaining macros.</small></span></div>
-      <div class="landfeat"><span class="lfi">📈</span><span><b>Proof you're on track</b><small>Weight trend vs plan, a color-graded calendar, and weekly progress photos.</small></span></div>
+      <div class="landfeat"><span class="lfi"><span class="i" data-ic="camera"></span></span><span><b>Snap it, logged</b><small>Photo, barcode, or a sentence — AI works out the macros, restaurant menus included.</small></span></div>
+      <div class="landfeat"><span class="lfi"><span class="i" data-ic="target"></span></span><span><b>A plan built for your goal</b><small>Cut, build, recomp, or full contest prep — daily targets generated from your stats and paced to your date.</small></span></div>
+      <div class="landfeat"><span class="lfi"><span class="i" data-ic="sparkle"></span></span><span><b>A coach that knows your day</b><small>Ask "what can I eat right now?" — it answers from your live remaining macros.</small></span></div>
+      <div class="landfeat"><span class="lfi"><span class="i" data-ic="chart"></span></span><span><b>Proof you're on track</b><small>Weight trend vs plan, a color-graded calendar, and weekly progress photos.</small></span></div>
     </div>
     <div class="landlegal"><a href="terms.html">Terms</a> &nbsp;·&nbsp; <a href="privacy.html">Privacy</a></div>
   </div>
@@ -705,13 +740,13 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
 <!-- first-run tutorial -->
 <div id="tutScreen">
   <div class="tutslides" id="tutSlides">
-    <div class="tut"><div class="tuticon">📷</div><h2>Log what you eat</h2>
+    <div class="tut"><div class="tuticon"><span class="i" data-ic="camera"></span></div><h2>Log what you eat</h2>
       <p>Snap a photo, scan a barcode, or just type it — the macros fill in for you.</p></div>
-    <div class="tut"><div class="tuticon">🎯</div><h2>Hit your numbers</h2>
+    <div class="tut"><div class="tuticon"><span class="i" data-ic="target"></span></div><h2>Hit your numbers</h2>
       <p>The rings show what's left today. Check off your day, and the calendar turns <b>green</b> when you're on plan.</p></div>
-    <div class="tut"><div class="tuticon">⚖️</div><h2>Weigh in every morning</h2>
+    <div class="tut"><div class="tuticon"><span class="i" data-ic="scale"></span></div><h2>Weigh in every morning</h2>
       <p>Log weight and sleep on Home. The chart shows you against your plan line — that's the whole game.</p></div>
-    <div class="tut"><div class="tuticon">🧠</div><h2>Ask the coach</h2>
+    <div class="tut"><div class="tuticon"><span class="i" data-ic="sparkle"></span></div><h2>Ask the coach</h2>
       <p>"What can I eat right now?" — it already knows your remaining macros and your goal.</p></div>
   </div>
   <div class="tutfoot">
@@ -736,17 +771,17 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
   <div class="wizinner">
 
     <div class="wstep" data-step="goal">
-      <button class="wback" data-back="signout">‹</button>
+      <button class="wback" data-back="signout" aria-label="Back"><span class="i" data-ic="chevl"></span></button>
       <div class="wtitle">What's your goal?</div>
       <div class="wsub">This shapes your whole plan. You can change it anytime.</div>
-      <button class="wopt" data-goal="lose"><span class="wic">🔥</span><span><b>Lose Fat</b><small>A steady cut that protects your muscle</small></span></button>
-      <button class="wopt" data-goal="build"><span class="wic">💪</span><span><b>Build Muscle</b><small>A lean surplus with controlled gain</small></span></button>
-      <button class="wopt" data-goal="recomp"><span class="wic">⚖️</span><span><b>Body Recomp</b><small>Drop fat and build at the same weight</small></span></button>
-      <button class="wopt" data-goal="compete"><span class="wic">🏆</span><span><b>Compete</b><small>Full prep — growth, cut, and peak week</small></span></button>
+      <button class="wopt" data-goal="lose"><span class="wic"><span class="i" data-ic="flame"></span></span><span><b>Lose Fat</b><small>A steady cut that protects your muscle</small></span></button>
+      <button class="wopt" data-goal="build"><span class="wic"><span class="i" data-ic="dumbbell"></span></span><span><b>Build Muscle</b><small>A lean surplus with controlled gain</small></span></button>
+      <button class="wopt" data-goal="recomp"><span class="wic"><span class="i" data-ic="balance"></span></span><span><b>Body Recomp</b><small>Drop fat and build at the same weight</small></span></button>
+      <button class="wopt" data-goal="compete"><span class="wic"><span class="i" data-ic="trophy"></span></span><span><b>Compete</b><small>Full prep — growth, cut, and peak week</small></span></button>
     </div>
 
     <div class="wstep" data-step="stats">
-      <button class="wback" data-back="goal">‹</button>
+      <button class="wback" data-back="goal" aria-label="Back"><span class="i" data-ic="chevl"></span></button>
       <div class="wtitle">Current stats</div>
       <div class="wsub">We use these to find your maintenance calories.</div>
       <div class="chips" id="wizSexChips">
@@ -762,7 +797,7 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
     </div>
 
     <div class="wstep" data-step="target">
-      <button class="wback" data-back="stats">‹</button>
+      <button class="wback" data-back="stats" aria-label="Back"><span class="i" data-ic="chevl"></span></button>
       <div class="wtitle">Where are you headed?</div>
       <div class="wsub">We'll pace your calories to land there.</div>
       <div class="wrow">Weigh
@@ -774,7 +809,7 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
     </div>
 
     <div class="wstep" data-step="show">
-      <button class="wback" data-back="stats">‹</button>
+      <button class="wback" data-back="stats" aria-label="Back"><span class="i" data-ic="chevl"></span></button>
       <div class="wtitle">When's your show?</div>
       <div class="wsub">We'll build your growth phase, contest prep, and peak week backwards from stage day.</div>
       <div class="field"><label>Show date</label><input id="wizShowDate" type="date"></div>
@@ -782,12 +817,12 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
     </div>
 
     <div class="wstep" data-step="activity">
-      <button class="wback" data-back="target">‹</button>
+      <button class="wback" data-back="target" aria-label="Back"><span class="i" data-ic="chevl"></span></button>
       <div class="wtitle">How often do you train?</div>
       <div class="wsub">Sessions per week — lifting, cardio, sport.</div>
-      <button class="wopt" data-act="light"><span class="wic">🚶</span><span><b>1–2 days a week</b><small>Getting started or maintaining</small></span></button>
-      <button class="wopt" data-act="moderate"><span class="wic">🏃</span><span><b>3–5 days a week</b><small>Consistent training</small></span></button>
-      <button class="wopt" data-act="high"><span class="wic">🏋️</span><span><b>6+ days a week</b><small>Living in the gym</small></span></button>
+      <button class="wopt" data-act="light"><span class="wic"><span class="i" data-ic="bars1"></span></span><span><b>1–2 days a week</b><small>Getting started or maintaining</small></span></button>
+      <button class="wopt" data-act="moderate"><span class="wic"><span class="i" data-ic="bars2"></span></span><span><b>3–5 days a week</b><small>Consistent training</small></span></button>
+      <button class="wopt" data-act="high"><span class="wic"><span class="i" data-ic="bars3"></span></span><span><b>6+ days a week</b><small>Living in the gym</small></span></button>
     </div>
 
   </div>
@@ -802,14 +837,53 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
   </div>
 </div>
 
+<div id="lightbox"><div class="lbdate" id="lbDate"></div><button class="lbx" id="lbClose" aria-label="Close"><span class="i" data-ic="x"></span></button><img id="lbImg" alt=""></div>
 <div id="toast"></div>
-<div id="loading"><div class="spinner"></div><div class="lt" id="loadingText">Working…</div></div>
+<div id="loading"><div class="spinner"></div><div class="lt" id="loadingText">Working</div></div>
 
 <script>
 const SB = 'https://rvbyxvwifzcnfrjsdgkh.supabase.co';
 const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2Ynl4dndpZnpjbmZyanNkZ2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MjA4NzIsImV4cCI6MjA5MTA5Njg3Mn0.3lEbeX3UXN9eooaiQ0ks8qRwPq6qjRNizOQWOis7BB0';
 const VAPID_PUB = 'BJTMVMdr4qb1Chxc7JiZbTbmoOuvf3DtySl39OqcsFvdzNACNqC7TFdYWUa-qBmp2bjGhtsuYEywY9s01Sx3uuQ';
 const $ = id => document.getElementById(id);
+// ---------- icons (stroked, 24-grid, currentColor) ----------
+const ICONS = {
+  camera:'<path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.3-2h5.4L16 6h1.5A2.5 2.5 0 0 1 20 8.5V17a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17z"/><circle cx="12" cy="13" r="3.4"/>',
+  barcode:'<path d="M4 5v14M8 5v14M11 5v14M15 5v14M18 5v14M20.5 5v14"/><path d="M4 5h16.5M4 19h16.5" stroke-width="1"/>',
+  text:'<path d="M4 6.5h16M4 12h11M4 17.5h14"/>',
+  pencil:'<path d="M4 20l4.3-1 10-10a2.1 2.1 0 0 0-3-3l-10 10z"/><path d="M13.5 7.5l3 3"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  send:'<path d="M12 19V5M6 11l6-6 6 6"/>',
+  target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
+  dumbbell:'<path d="M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12"/>',
+  activity:'<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',
+  capsule:'<g transform="rotate(-45 12 12)"><rect x="3.5" y="8.5" width="17" height="7" rx="3.5"/><path d="M12 8.5v7"/></g>',
+  trophy:'<path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 4M17 6h2.5a2.5 2.5 0 0 1-2.5 4M12 14v3M8 20h8"/>',
+  image:'<rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.5"/><path d="M20.5 16l-4.5-4.5-6 6"/>',
+  flame:'<path d="M12 2.5c.7 4 5.5 5.8 5.5 10.7a5.5 5.5 0 0 1-11 0c0-2.4 1.3-4.3 2.8-5.6.2 1.7 1 2.8 2.2 3.4C10.8 8 11.3 5.2 12 2.5z"/>',
+  balance:'<path d="M12 4.5v15M8 19.5h8M4 7.5h16"/><path d="M6.5 7.5L3.5 14M6.5 7.5l3 6.5M17.5 7.5l-3 6.5M17.5 7.5l3 6.5"/><path d="M3.5 14a3 3 0 0 0 6 0M14.5 14a3 3 0 0 0 6 0"/>',
+  scale:'<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 11.5a3.5 3.5 0 0 1 7 0"/><path d="M12 11.5l1.6-1.8"/>',
+  sparkle:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
+  chart:'<path d="M4 19h16"/><path d="M5 15l4-5 3.5 3 6-7"/>',
+  phone:'<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>',
+  moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  chevl:'<path d="M14.5 6l-6 6 6 6"/>',
+  chevr:'<path d="M9.5 6l6 6-6 6"/>',
+  bars1:'<path d="M5 19v-5M12 19V9M19 19V4" stroke-opacity=".25"/><path d="M5 19v-5"/>',
+  bars2:'<path d="M5 19v-5M12 19V9M19 19V4" stroke-opacity=".25"/><path d="M5 19v-5M12 19V9"/>',
+  bars3:'<path d="M5 19v-5M12 19V9M19 19V4"/>',
+  utensils:'<path d="M7 3v18M5 3v5a2 2 0 0 0 4 0V3M17 3c-2 0-3 2-3 5v3h3v10"/>',
+  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+};
+const ic = (name, extra='') => `<span class="i ${extra}"><svg viewBox="0 0 24 24">${ICONS[name]||''}</svg></span>`;
+function hydrateIcons(root){
+  (root||document).querySelectorAll('[data-ic]').forEach(el=>{
+    el.innerHTML = `<svg viewBox="0 0 24 24">${ICONS[el.dataset.ic]||''}</svg>`; el.removeAttribute('data-ic');
+  });
+}
+hydrateIcons();
 
 // ---------- auth session ----------
 let session = null;   // {access_token, refresh_token, expires_at, user:{id,email}}
@@ -937,7 +1011,7 @@ $('toast').addEventListener('click', hideToast);
 setInterval(()=>{ if($('toast').classList.contains('show') && Date.now() - toastShownAt > 3500) hideToast(); }, 1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') hideToast(); });
 window.addEventListener('pageshow', hideToast);
-function loading(on, text){ $('loadingText').textContent = text||'Working…';
+function loading(on, text){ $('loadingText').textContent = text||'Working';
   $('loading').classList.toggle('show', !!on); }
 function openSheet(el){ $('overlay').classList.add('show'); el.classList.add('show'); }
 function closeSheets(){ $('overlay').classList.remove('show');
@@ -1005,16 +1079,23 @@ $('tutSkip').addEventListener('click', finishTutorial);
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // ---------- tabs ----------
+// Re-fetch a tab's data only when something changed or it's been a while; switching tabs
+// is otherwise instant and purely local.
+let dashDirty = false, planDirty = false, dashAt = 0, planAt = 0;
+const STALE = 90 * 1000;
 document.querySelectorAll('nav button').forEach(b=>{
   b.addEventListener('click', ()=>{
+    if(b.classList.contains('active')) { window.scrollTo({top:0, behavior:'smooth'}); return; }
     document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     $('page-' + b.dataset.page).classList.add('active');
-    if(b.dataset.page==='plan') renderPlan();
+    window.scrollTo(0, 0);
+    const now = Date.now();
+    if(b.dataset.page==='plan'){ if(planDirty || now - planAt > STALE){ planDirty = false; planAt = now; renderPlan(); } }
     if(b.dataset.page==='account'){ renderAccount(); renderGoals(); }
     if(b.dataset.page==='coach') coachOpen();
-    if(b.dataset.page==='dash'){ renderHero(); refreshToday(); renderWeightChart(); renderSleepCard(); }
+    if(b.dataset.page==='dash'){ renderHero(); if(dashDirty || now - dashAt > STALE){ dashDirty = false; dashAt = now; refreshToday(); renderWeightChart(); renderSleepCard(); } }
   });
 });
 
@@ -1072,16 +1153,16 @@ function compoundsToday(){ return compoundsForDate(todayStr()); }
 function checkDefsFor(ds){
   const dw = dowOf(ds);
   const defs = [
-    {key:'macros', icon:'🎯', label:'Macros', required:true},
-    {key:'workout', icon:'🏋️', label:'Workout', required:dw!==0, note:true},
-    {key:'cardio', icon:'🏃', label:'Cardio', required:dw!==0},
+    {key:'macros', icon:'target', label:'Macros', required:true},
+    {key:'workout', icon:'dumbbell', label:'Workout', required:dw!==0, note:true},
+    {key:'cardio', icon:'activity', label:'Cardio', required:dw!==0},
   ];
   // only people who configured a stack (Settings → My stack) see this item
-  if(compounds.length) defs.push({key:'compounds', icon:'💉', label:'Compounds and Ancillaries', required:true});
+  if(compounds.length) defs.push({key:'compounds', icon:'capsule', label:'Compounds and Ancillaries', required:true});
   // competitors: posing practice Mon / Wed / Fri (prejudging is 100% of the score)
   if(profile && profile.event_date && [1,3,5].includes(dw))
-    defs.push({key:'posing', icon:'🏆', label:'Posing practice', required: ds >= '2026-09-07'});
-  if(dw===5) defs.push({key:'photo', icon:'📸', label:'Progress photo', required:true, photo:true});
+    defs.push({key:'posing', icon:'trophy', label:'Posing practice', required: ds >= '2026-09-07'});
+  if(dw===5) defs.push({key:'photo', icon:'image', label:'Progress photo', required:true, photo:true});
   return defs;
 }
 function isDayComplete(checks, ds, photoDone){
@@ -1105,16 +1186,16 @@ function renderChecklist(){
     const sub = '';
     let extra = '';
     if(d.note) extra = `<input class="chknote" id="workoutNote" placeholder="What did you hit?" value="${escapeHtml(st.note||'')}">`;
-    if(d.photo && !done) extra = `<button class="chkphotobtn" id="chkPhotoBtn">📸 Take photo</button>`;
+    if(d.photo && !done) extra = `<button class="chkphotobtn" id="chkPhotoBtn">${ic('camera')}Take photo</button>`;
     const opt = d.required ? '' : '<span class="chkopt">optional</span>';
     return `<div class="chk ${done?'done':''}" data-key="${d.key}">
-      <button class="chkbox" data-key="${d.key}" ${d.photo?'data-photo="1"':''}>${done?'✓':''}</button>
-      <div class="chkmain"><div class="chklabel">${d.icon} ${d.label}${opt}</div>${sub}${extra}</div>
+      <button class="chkbox" data-key="${d.key}" ${d.photo?'data-photo="1"':''}>${done?ic('check'):''}</button>
+      <div class="chkmain"><div class="chklabel">${ic(d.icon)}${d.label}${opt}</div>${sub}${extra}</div>
     </div>`;
   };
   const pending = ordered.filter(x=>!x.done), doneItems = ordered.filter(x=>x.done);
   $('checklist').innerHTML = pending.map(itemHtml).join('') ||
-    '<div class="empty" style="padding:10px 0">All done 💪</div>';
+    '<div class="empty" style="padding:10px 0">All done</div>';
   $('doneList').innerHTML = doneItems.map(itemHtml).join('');
   $('doneCard').style.display = doneItems.length ? 'block' : 'none';
   document.querySelectorAll('.chkbox').forEach(b=>b.addEventListener('click', async ()=>{
@@ -1142,7 +1223,7 @@ function renderChecklist(){
   }); }
   const pb = $('chkPhotoBtn');
   if(pb) pb.addEventListener('click', ()=>$('progressPhotoInput').click());
-  $('dayDone').style.display = isDayComplete(todayChecks, ds, todayPhotoDone) ? 'block' : 'none';
+  $('dayDone').classList.toggle('on', isDayComplete(todayChecks, ds, todayPhotoDone));
 }
 
 // ---------- weight & sleep ----------
@@ -1160,11 +1241,11 @@ async function saveMetric(field, val){
 }
 $('wSave').addEventListener('click', async ()=>{
   const v = Number($('wInput').value); if(!v){ toast('Enter a weight'); return; }
-  try{ await saveMetric('weight', v); $('wInput').value=''; toast('Weight logged'); renderWeightChart(); }catch(e){ toast(e.message); }
+  try{ await saveMetric('weight', v); $('wInput').value=''; toast('Weight logged'); planDirty = true; renderWeightChart(); }catch(e){ toast(e.message); }
 });
 $('sSave').addEventListener('click', async ()=>{
   const v = Number($('sInput').value); if(!v){ toast('Enter hours'); return; }
-  try{ await saveMetric('sleep', v); $('sInput').value=''; toast('Sleep logged'); renderSleepCard(); }catch(e){ toast(e.message); }
+  try{ await saveMetric('sleep', v); $('sInput').value=''; toast('Sleep logged'); planDirty = true; renderSleepCard(); }catch(e){ toast(e.message); }
 });
 async function renderWeightChart(){
   try{
@@ -1223,7 +1304,7 @@ async function renderWeightChart(){
       const ahead = mode==='cut' ? diff <= 0.5 : diff >= -0.5;
       el.className = 'wtrend ' + (ahead ? 'ok':'warn');
       el.textContent = `Avg: ${avg.toFixed(1)} · Plan: ${projWeight(last.day).toFixed(1)} · ` +
-        (Math.abs(diff) <= 0.7 ? 'On plan ✓' :
+        (Math.abs(diff) <= 0.7 ? 'On plan' :
           diff > 0 ? `+${diff.toFixed(1)} lb` : `−${(-diff).toFixed(1)} lb ahead`);
     }
   }catch(e){}
@@ -1277,7 +1358,7 @@ function resizeToBlob(file, maxDim){
 }
 $('progressPhotoInput').addEventListener('change', async e=>{
   const file = e.target.files[0]; e.target.value=''; if(!file) return;
-  loading(true, 'Saving progress photo…');
+  loading(true, 'Saving progress photo');
   try{
     const blob = await resizeToBlob(file, 1400);
     await ensureFreshToken();
@@ -1288,7 +1369,7 @@ $('progressPhotoInput').addEventListener('change', async e=>{
     await rest('prep_photos', {method:'POST', headers:{'Prefer':'return=minimal'},
       body:{day: todayStr(), path: name}});
     todayPhotoDone = true;
-    loading(false); toast('Progress photo saved 📸');
+    loading(false); toast('Progress photo saved'); dashDirty = true; planDirty = true;
     renderChecklist();
   }catch(err){ loading(false); toast(err.message); }
 });
@@ -1305,14 +1386,26 @@ async function renderPhotos(){
     if(!rows || !rows.length){ $('photoGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">No photos yet</div>'; return; }
     $('photoGrid').innerHTML = rows.map(p=>{
       const url = SB + '/storage/v1/object/public/photos/' + p.path.split('/').map(encodeURIComponent).join('/');
-      return `<div class="photocell" data-url="${url}">
+      return `<div class="photocell" data-url="${url}" data-day="${p.day}">
         <img loading="lazy" src="${url}" alt="">
         <div class="pdate">${fmtDay(p.day)}</div>
       </div>`;
     }).join('');
-    document.querySelectorAll('.photocell').forEach(c=>c.addEventListener('click', ()=>window.open(c.dataset.url, '_blank')));
+    document.querySelectorAll('.photocell').forEach(c=>c.addEventListener('click', ()=>openLightbox(c.dataset.url, c.dataset.day)));
   }catch(e){}
 }
+
+function openLightbox(url, day){
+  $('lbImg').src = url; $('lbDate').textContent = day ? fmtDay(day) : '';
+  $('lightbox').classList.add('show');
+}
+function closeLightbox(){ $('lightbox').classList.remove('show'); setTimeout(()=>{ $('lbImg').src=''; }, 200); }
+$('lightbox').addEventListener('click', closeLightbox);
+(function(){ // swipe down to dismiss
+  let y0 = null;
+  $('lightbox').addEventListener('touchstart', e=>{ y0 = e.touches[0].clientY; }, {passive:true});
+  $('lightbox').addEventListener('touchend', e=>{ if(y0!==null && e.changedTouches[0].clientY - y0 > 80) closeLightbox(); y0 = null; });
+})();
 
 // ---------- rings & meals ----------
 function renderRings(){
@@ -1343,18 +1436,18 @@ function renderRings(){
   chip.textContent = lbl.toUpperCase();
   chip.className = 'daychip ' + lbl;
 }
-const SRC_ICON = {photo:'📷', barcode:'🏷', manual:'✎', ai:'💬', feed:'🍽'};
+const SRC_ICON = {photo:'camera', barcode:'barcode', manual:'pencil', ai:'text', feed:'utensils'};
 function renderMeals(){
   if(!todayMeals.length){ $('mealList').innerHTML = '<div class="empty">Nothing logged yet</div>'; return; }
   $('mealList').innerHTML = todayMeals.map(m=>{
     const t = new Date(m.created_at).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
     return `<div class="meal">
-      <span class="msrc">${SRC_ICON[m.source]||'✎'}</span>
+      <span class="msrc">${ic(SRC_ICON[m.source]||'pencil')}</span>
       <div class="mmain">
         <div class="mname">${escapeHtml(m.name)}</div>
         <div class="mmac">${t} · ${Math.round(m.calories)} cal · C ${Math.round(m.carbs)}g · P ${Math.round(m.protein)}g · F ${Math.round(m.fat)}g</div>
       </div>
-      <button class="mdel" data-id="${m.id}">✕</button>
+      <button class="mdel" data-id="${m.id}" aria-label="Delete">${ic('x')}</button>
     </div>`;
   }).join('');
   // details stay hidden until the card is tapped
@@ -1371,6 +1464,7 @@ function renderMeals(){
 async function refreshToday(){
   todayMeals = await rest(`meals?day=eq.${todayStr()}&order=created_at.asc`) || [];
   renderRings(); renderMeals(); renderChecklist();
+  planDirty = true;
 }
 
 // ---------- meal sheet ----------
@@ -1382,13 +1476,29 @@ function openMealSheet({title, name='', calories='', carbs='', protein='', fat='
   const n = $('sheetNotes'); n.style.display = notes ? 'block':'none'; n.textContent = notes;
   const pf = $('portionField');
   if(portion){ pf.style.display='block'; $('portionLabel').textContent = portion.label;
-    $('fAmount').value = portion.amount; applyPortion(); }
-  else pf.style.display='none';
+    $('fAmount').value = portion.amount; renderUnitChips(); applyPortion(); }
+  else { pf.style.display='none'; $('unitChips').style.display='none'; }
   openSheet($('mealSheet'));
+}
+const unitFactor = (u, liquid) => u === 'oz' ? (liquid ? 29.5735 : 28.3495) : 1;
+function renderUnitChips(){
+  const p = sheetCtx && sheetCtx.portion; const box = $('unitChips');
+  if(!p || !p.units){ box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'flex';
+  box.innerHTML = p.units.map(u=>`<button type="button" class="chip sm ${u===p.unit?'sel':''}" data-u="${u}">${u}</button>`).join('');
+  box.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{
+    const from = p.unit, to = b.dataset.u; if(from === to) return;
+    // convert the typed amount so the meal itself doesn't change, only the unit it's shown in
+    const amt = Number($('fAmount').value)||0;
+    const baseAmt = amt * unitFactor(from, p.liquid);
+    $('fAmount').value = Math.round((baseAmt / unitFactor(to, p.liquid)) * 10) / 10;
+    p.unit = to; $('portionLabel').textContent = 'Amount (' + to + ')';
+    renderUnitChips(); applyPortion();
+  }));
 }
 function applyPortion(){
   const p = sheetCtx && sheetCtx.portion; if(!p) return;
-  const amt = Number($('fAmount').value)||0; const s = amt * p.scalePerUnit;
+  const amt = Number($('fAmount').value)||0; const s = amt * unitFactor(p.unit||'g', p.liquid) * p.scalePerUnit;
   $('fCal').value = Math.round(p.base.calories*s);
   $('fCarbs').value = Math.round(p.base.carbs*s*10)/10;
   $('fProtein').value = Math.round(p.base.protein*s*10)/10;
@@ -1439,7 +1549,8 @@ function showEstimate(est){
   $('estBar').style.display = 'block';
   $('eName').value = est.name; $('eCal').value = est.calories;
   $('eCarbs').value = est.carbs; $('eProtein').value = est.protein; $('eFat').value = est.fat;
-  $('estConf').textContent = (est.confidence||'medium') + ' confidence · reply below to adjust';
+  const items = (est.items||[]).map(i=>[i.item, i.amount].filter(Boolean).join(' ')).filter(Boolean).join(' · ');
+  $('estConf').textContent = (items ? items + '  —  ' : '') + (est.confidence||'medium') + ' confidence · reply below to adjust';
 }
 function readEstimateCard(){
   return {
@@ -1455,7 +1566,7 @@ async function chatCall(userContent, userBubbleHtml){
   chat.busy = true;
   if(userBubbleHtml) bubble('user', userBubbleHtml);
   chat.messages.push({role:'user', content:userContent});
-  const t = bubble('ai typing', 'thinking…');
+  const t = bubble('ai typing', 'Thinking');
   try{
     const d = await fn({action:'chat', messages:chat.messages});
     t.remove();
@@ -1496,30 +1607,13 @@ $('estAdd').addEventListener('click', async ()=>{
   }catch(e){ toast(e.message); }
   $('estAdd').disabled = false;
 });
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec = null;
-$('micBtn').addEventListener('click', ()=>{
-  if(!SR){ $('chatInput').focus(); toast('Tap the mic on your keyboard to dictate'); return; }
-  if(rec){ rec.stop(); return; }
-  try{
-    rec = new SR();
-    rec.lang = 'en-US'; rec.interimResults = true;
-    $('micBtn').classList.add('rec');
-    rec.onresult = e=>{ $('chatInput').value = Array.from(e.results).map(r=>r[0].transcript).join(''); };
-    rec.onend = ()=>{ $('micBtn').classList.remove('rec'); rec = null;
-      if($('chatInput').value.trim()) sendChatText(); };
-    rec.onerror = ()=>{ $('micBtn').classList.remove('rec'); rec = null;
-      $('chatInput').focus(); toast('Mic unavailable — use the keyboard mic to dictate'); };
-    rec.start();
-  }catch(e){ $('micBtn').classList.remove('rec'); rec = null; $('chatInput').focus(); }
-});
 $('btnPhoto').addEventListener('click', ()=> $('photoInput').click());
 $('photoInput').addEventListener('change', async e=>{
   const file = e.target.files[0]; e.target.value=''; if(!file) return;
   chatReset('photo', 'Scanned meal');
   openSheet($('chatSheet'));
   try{
-    const b64 = await resizeToB64(file, 1200);
+    const b64 = await resizeToB64(file, 1500);
     chatCall(
       [{type:'image', source:{type:'base64', media_type:'image/jpeg', data:b64}},
        {type:'text', text:'Estimate the macros for this food photo.'}],
@@ -1535,7 +1629,7 @@ function resizeToB64(file, maxDim){
       const cv = document.createElement('canvas');
       cv.width = Math.round(img.width*scale); cv.height = Math.round(img.height*scale);
       cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-      resolve(cv.toDataURL('image/jpeg', 0.82).split(',')[1]);
+      resolve(cv.toDataURL('image/jpeg', 0.86).split(',')[1]);
       URL.revokeObjectURL(img.src);
     };
     img.onerror = ()=>reject(new Error('Could not read image'));
@@ -1544,8 +1638,21 @@ function resizeToB64(file, maxDim){
 }
 
 // ---------- barcode ----------
+let qrLibP = null;
+function loadQrLib(){
+  if(window.Html5Qrcode) return Promise.resolve();
+  if(qrLibP) return qrLibP;
+  qrLibP = new Promise((res, rej)=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js';
+    s.onload = res; s.onerror = ()=>{ qrLibP = null; rej(new Error('Scanner failed to load. Check your connection.')); };
+    document.head.appendChild(s);
+  });
+  return qrLibP;
+}
 $('btnBarcode').addEventListener('click', async ()=>{
-  if(typeof Html5Qrcode === 'undefined'){ toast('Barcode scanner failed to load — check connection'); return; }
+  try{ loading(true, 'Opening camera'); await loadQrLib(); loading(false); }
+  catch(e){ loading(false); toast(e.message); return; }
   openSheet($('bcSheet'));
   try{
     bcScanner = new Html5Qrcode('bcreader');
@@ -1560,8 +1667,9 @@ $('bcCancel').addEventListener('click', closeSheets);
 $('bcPhotoBtn').addEventListener('click', ()=>{ stopBarcode(); $('bcPhotoInput').click(); });
 $('bcPhotoInput').addEventListener('change', async e=>{
   const file = e.target.files[0]; e.target.value=''; if(!file) return;
-  loading(true, 'Reading barcode…');
+  loading(true, 'Reading barcode');
   try{
+    await loadQrLib();
     const fmts = [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8,
       Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E, Html5QrcodeSupportedFormats.CODE_128];
     const h = new Html5Qrcode('bcreader', {formatsToSupport:fmts, verbose:false});
@@ -1579,9 +1687,9 @@ function stopBarcode(){ if(bcScanner){ bcScanner.stop().catch(()=>{}); bcScanner
 let bcBusy = false;
 async function onBarcode(code){
   if(bcBusy) return; bcBusy = true;
-  stopBarcode(); closeSheets(); loading(true, 'Looking up product…');
+  stopBarcode(); closeSheets(); loading(true, 'Looking up product');
   try{
-    const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}?fields=product_name,brands,nutriments,serving_quantity,serving_size`);
+    const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}?fields=product_name,brands,nutriments,serving_quantity,serving_size,serving_quantity_unit,product_quantity_unit,quantity,categories_tags`);
     const d = await r.json();
     loading(false);
     if(d.status !== 1 || !d.product){ toast('Product not found — try photo scan or manual entry'); bcBusy=false; return; }
@@ -1592,11 +1700,18 @@ async function onBarcode(code){
     const perServ = {calories:Number(n['energy-kcal_serving']), carbs:Number(n.carbohydrates_serving),
       protein:Number(n.proteins_serving), fat:Number(n.fat_serving)};
     if(!isNaN(per100.calories)){
-      const defaultG = Number(p.serving_quantity) || 100;
+      // Drinks get mL as the default unit (Open Food Facts lists liquids per 100 mL); everything else gets grams.
+      const unitStr = String(p.serving_quantity_unit || p.product_quantity_unit || p.quantity || p.serving_size || '').toLowerCase();
+      const cats = (p.categories_tags || []).join(' ');
+      const liquid = /(^|[^a-z])(ml|cl|l|fl ?oz|litre|liter)([^a-z]|$)/.test(unitStr) ||
+        /beverage|drink|water|juice|soda|milk|coffee|tea|energy|smoothie|shake|beer|wine|kombucha/.test(cats);
+      const unit = liquid ? 'mL' : 'g';
+      const defaultAmt = Number(p.serving_quantity) || (liquid ? 250 : 100);
       Object.keys(per100).forEach(k=>{ if(isNaN(per100[k])) per100[k]=0; });
       openMealSheet({title:'Scanned product', name, source:'barcode',
-        notes: p.serving_size ? ('Serving size: ' + p.serving_size + '. Adjust grams to what you ate.') : 'Adjust grams to what you ate.',
-        portion:{label:'Amount eaten (g)', amount:defaultG, scalePerUnit:1/100, base:per100}});
+        notes: p.serving_size ? ('Serving size: ' + p.serving_size + '. Adjust the amount to what you had.') : 'Adjust the amount to what you had.',
+        portion:{label:'Amount (' + unit + ')', amount:defaultAmt, scalePerUnit:1/100, base:per100,
+          liquid, unit, units: liquid ? ['mL','oz'] : ['g','oz']}});
     } else if(!isNaN(perServ.calories)){
       Object.keys(perServ).forEach(k=>{ if(isNaN(perServ[k])) perServ[k]=0; });
       openMealSheet({title:'Scanned product', name, source:'barcode',
@@ -1870,7 +1985,7 @@ function renderMilestones(){
     else when = fmtDay(m.due);
     const dateBit = (m.done || when===fmtDay(m.due)) ? '' : ' · ' + fmtDay(m.due);
     return `<div class="ms ${m.done?'done':''} ${cls}">
-      <button class="msbox" data-id="${escapeHtml(m.id)}">${m.done?'✓':''}</button>
+      <button class="msbox" data-id="${escapeHtml(m.id)}">${m.done?ic('check'):''}</button>
       <div><div class="mstitle">${escapeHtml(m.title)}</div><div class="msdue">${when}${dateBit}</div></div>
     </div>`;
   }).join('');
@@ -1912,19 +2027,19 @@ function openDayDetail(ds){
   const ok = st.includes('done');
   $('ddTitle').innerHTML = (isToday?'Today':fmtDay(ds)) + ' · <span class="glabel ' + (goal.label||'custom') + '">' +
     (goal.label||'custom').toUpperCase() + '</span> ' +
-    (isToday ? '<span class="badge progress">In progress</span>' : (ok?'<span class="badge done">✓ Complete</span>':'<span class="badge miss">✗ Incomplete</span>'));
+    (isToday ? '<span class="badge progress">In progress</span>' : (ok?'<span class="badge done">Complete</span>':'<span class="badge miss">Incomplete</span>'));
   const c = histData.checksByDay[ds] || {};
   $('ddChecklist').innerHTML = ds >= planStart() ? checkDefsFor(ds).map(d=>{
     const done = d.photo ? histData.photoDays.has(ds) : (c[d.key] && c[d.key].done);
     const note = c[d.key] && c[d.key].note ? ' — ' + escapeHtml(c[d.key].note) : '';
-    return `<div style="font-size:13px;padding:3px 0"><span class="${done?'':''}" style="color:${done?'var(--good)':'var(--critical)'}">${done?'✓':'✗'}</span> ${d.icon} ${d.label}${note}${d.required?'':' <span class="chkopt">optional</span>'}</div>`;
+    return `<div class="ddline" style="font-size:13px;padding:3px 0"><span style="color:${done?'var(--good)':'var(--critical)'}">${ic(done?'check':'x')}</span>${d.label}${note}${d.required?'':' <span class="chkopt">optional</span>'}</div>`;
   }).join('') : '';
   $('ddChecks').innerHTML = checks.map(x=>
     `<div class="ddmac"><span>${x.label} <span style="color:var(--muted);font-size:11px">(${x.rule})</span></span>
-     <span>${Math.round(x.val)} / ${x.goal}${x.unit} <span class="${x.ok?'ok':'bad'}">${x.ok?'✓':'✗'}</span></span></div>`).join('');
+     <span>${Math.round(x.val)} / ${x.goal}${x.unit} <span class="${x.ok?'ok':'bad'}">${ic(x.ok?'check':'x')}</span></span></div>`).join('');
   const ms = histData.mealsByDay[ds]||[];
   $('ddMeals').innerHTML = ms.length ? ms.map(m=>
-    `<div class="ddmeal"><b>${SRC_ICON[m.source]||'✎'} ${escapeHtml(m.name)}</b><br>${Math.round(m.calories)} cal · C ${Math.round(m.carbs)}g · P ${Math.round(m.protein)}g · F ${Math.round(m.fat)}g</div>`).join('')
+    `<div class="ddmeal"><b>${escapeHtml(m.name)}</b><br>${Math.round(m.calories)} cal · C ${Math.round(m.carbs)}g · P ${Math.round(m.protein)}g · F ${Math.round(m.fat)}g</div>`).join('')
     : '<div class="empty">No meals logged.</div>';
   openSheet($('dayDetailSheet'));
 }
@@ -1948,7 +2063,7 @@ async function refreshNotifStatus(){
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.getSubscription();
     if(sub && Notification.permission==='granted'){
-      el.className='keystatus ok'; el.textContent='✓ Notifications are on';
+      el.className='keystatus ok'; el.textContent='Notifications are on';
       btn.style.display='none'; test.style.display='block';
     } else {
       el.className='keystatus no'; el.textContent='Notifications are off';
@@ -1972,7 +2087,7 @@ $('notifBtn').addEventListener('click', async ()=>{
       sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:urlB64ToU8(VAPID_PUB)});
       await store();
     }
-    toast('Notifications enabled 🎉');
+    toast('Notifications enabled');
     refreshNotifStatus();
   }catch(e){ toast('Could not enable: ' + e.message); }
 });
@@ -1992,7 +2107,7 @@ async function checkKey(){
   const el = $('keyStatus');
   try{ const d = await fn({action:'has_api_key'});
     el.className = 'keystatus ' + (d.has_key?'ok':'no');
-    el.textContent = d.has_key ? '✓ Enabled' : 'No API key yet';
+    el.textContent = d.has_key ? 'Enabled' : 'No API key yet';
   }catch(e){ el.className='keystatus no'; el.textContent='Could not check key status'; }
 }
 $('saveKeyBtn').addEventListener('click', async ()=>{
@@ -2032,7 +2147,7 @@ async function renderStack(){
         : (c.dows === '0,1,2,3,4,5,6' || !c.dows) ? 'daily' : 'custom days';
       return `<div class="stackrow"><div class="smain"><b>${escapeHtml(c.name)}</b>${c.dose?' · '+escapeHtml(c.dose):''}
         <span class="ssub">${sched}</span></div>
-        <button class="mdel" data-sid="${c.id}">✕</button></div>`;
+        <button class="mdel" data-sid="${c.id}" aria-label="Remove">${ic('x')}</button></div>`;
     }).join('') : '<div class="empty" style="padding:12px 0">Nothing yet — add what you take below.</div>';
     document.querySelectorAll('[data-sid]').forEach(b=>b.addEventListener('click', async ()=>{
       if(!confirm('Remove this item?')) return;
@@ -2298,14 +2413,23 @@ function coachRender(){
   const box = $('coachMsgs');
   box.innerHTML = coach.messages.length
     ? coach.messages.map(m=>`<div class="cm ${m.role==='user'?'user':'ai'}">${escapeHtml(m.text)}</div>`).join('')
-    : '<div class="empty" style="margin:auto">Ask me anything about your day.<br><br>"What can I eat right now?"<br>"Can I afford a burrito tonight?"<br>"How am I tracking this week?"</div>';
+    : '<div class="empty" style="margin:auto">Ask about today.<br><br>"What can I eat right now?"<br>"Can I fit a burrito tonight?"<br>"How am I tracking this week?"</div>';
   box.scrollTop = box.scrollHeight;
+}
+// The coach starts fresh every day: only today's messages are kept or sent, so an answer
+// from last week can never leak into today's numbers.
+function coachPruneToToday(){
+  const today = todayStr();
+  const before = coach.messages.length;
+  coach.messages = coach.messages.filter(m => m.day === today);
+  if(coach.messages.length !== before) coachSave();
 }
 function coachOpen(){
   if(!coach.loaded){
     try{ coach.messages = JSON.parse(localStorage.getItem(coachStorageKey())||'[]'); }catch(e){ coach.messages = []; }
     coach.loaded = true;
   }
+  coachPruneToToday();
   coachRender();
   // land on the newest message, not the top of the history
   const toBottom = ()=>{ const b = $('coachMsgs'); b.scrollTop = b.scrollHeight; };
@@ -2320,17 +2444,18 @@ async function coachAsk(){
   if(!txt || coach.busy) return;
   coach.busy = true;
   $('coachInput').value = '';
-  coach.messages.push({role:'user', text: txt});
+  coachPruneToToday();
+  coach.messages.push({role:'user', text: txt, day: todayStr()});
   coachRender(); coachSave();
   const box = $('coachMsgs');
-  const t = document.createElement('div'); t.className = 'cm ai typing'; t.textContent = 'thinking…';
+  const t = document.createElement('div'); t.className = 'cm ai typing'; t.textContent = 'Thinking';
   box.appendChild(t); box.scrollTop = box.scrollHeight;
   try{
     const d = await fn({action:'coach',
       messages: coach.messages.slice(-12).map(m=>({role: m.role==='user'?'user':'assistant', content: m.text}))});
-    coach.messages.push({role:'ai', text: d.reply || '…'});
+    coach.messages.push({role:'ai', text: d.reply || '…', day: todayStr()});
   }catch(e){
-    coach.messages.push({role:'ai', text: 'Hit a snag: ' + e.message});
+    coach.messages.push({role:'ai', text: 'Hit a snag: ' + e.message, day: todayStr()});
   }
   coach.busy = false;
   coachRender(); coachSave();
