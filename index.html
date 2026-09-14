@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Lucky Numbers</title><!-- build 29 -->
+<title>Lucky Numbers</title><!-- build 30 -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1480,25 +1480,33 @@ function openMealSheet({title, name='', calories='', carbs='', protein='', fat='
   else { pf.style.display='none'; $('unitChips').style.display='none'; }
   openSheet($('mealSheet'));
 }
-const unitFactor = (u, liquid) => u === 'oz' ? (liquid ? 29.5735 : 28.3495) : 1;
+// grams (or mL) in one unit of the given kind, for this product
+function unitFactor(u, p){
+  if(u === 'oz') return (p && p.liquid) ? 29.5735 : 28.3495;
+  if(u === 'serving') return (p && p.servingQty) || 1;
+  return 1;
+}
+const unitLabel = (u, p) => u === 'oz' ? ((p && p.liquid) ? 'fl oz' : 'oz')
+  : u === 'serving' ? ((p && p.servingLabel) || 'serving') : u;
 function renderUnitChips(){
   const p = sheetCtx && sheetCtx.portion; const box = $('unitChips');
   if(!p || !p.units){ box.style.display = 'none'; box.innerHTML = ''; return; }
   box.style.display = 'flex';
-  box.innerHTML = p.units.map(u=>`<button type="button" class="chip sm ${u===p.unit?'sel':''}" data-u="${u}">${u}</button>`).join('');
+  box.innerHTML = p.units.map(u=>`<button type="button" class="chip sm ${u===p.unit?'sel':''}" data-u="${u}">${unitLabel(u, p)}</button>`).join('');
   box.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{
     const from = p.unit, to = b.dataset.u; if(from === to) return;
     // convert the typed amount so the meal itself doesn't change, only the unit it's shown in
     const amt = Number($('fAmount').value)||0;
-    const baseAmt = amt * unitFactor(from, p.liquid);
-    $('fAmount').value = Math.round((baseAmt / unitFactor(to, p.liquid)) * 10) / 10;
-    p.unit = to; $('portionLabel').textContent = 'Amount (' + to + ')';
+    const baseAmt = amt * unitFactor(from, p);
+    const conv = baseAmt / unitFactor(to, p);
+    $('fAmount').value = to === 'serving' ? Math.round(conv * 100) / 100 : Math.round(conv * 10) / 10;
+    p.unit = to; $('portionLabel').textContent = 'Amount (' + unitLabel(to, p) + ')';
     renderUnitChips(); applyPortion();
   }));
 }
 function applyPortion(){
   const p = sheetCtx && sheetCtx.portion; if(!p) return;
-  const amt = Number($('fAmount').value)||0; const s = amt * unitFactor(p.unit||'g', p.liquid) * p.scalePerUnit;
+  const amt = Number($('fAmount').value)||0; const s = amt * unitFactor(p.unit||'g', p) * p.scalePerUnit;
   $('fCal').value = Math.round(p.base.calories*s);
   $('fCarbs').value = Math.round(p.base.carbs*s*10)/10;
   $('fProtein').value = Math.round(p.base.protein*s*10)/10;
@@ -1685,9 +1693,39 @@ $('bcPhotoInput').addEventListener('change', async e=>{
 });
 function stopBarcode(){ if(bcScanner){ bcScanner.stop().catch(()=>{}); bcScanner=null; } }
 let bcBusy = false;
+// "1 Bar" -> bar, "1 bottle (591 mL)" -> bottle; anything that isn't exactly one of something stays "serving"
+function servingWord(text){
+  const m = /^\s*1(?:\.0+)?\s+([a-z][a-z ]{1,14}?)\s*(?:\(|$)/i.exec(String(text||''));
+  return m ? m[1].trim().toLowerCase() : 'serving';
+}
+function openBarcodeHit(h){
+  const qty = (h.serving && h.serving.qty) || 0;
+  const unit = h.liquid ? 'mL' : 'g';
+  const servingOnly = !qty && h.per_serving && JSON.stringify(h.per_serving) === JSON.stringify(h.per100);
+  const src = h.source === 'usda' ? 'USDA label data' : 'Open Food Facts';
+  if(servingOnly){
+    openMealSheet({title:'Scanned product', name:h.name, source:'barcode',
+      notes: src + (h.serving.text ? ' · One serving = ' + h.serving.text : ''),
+      portion:{label:'Servings eaten', amount:1, scalePerUnit:1, base:h.per_serving}});
+    return;
+  }
+  const units = [unit, 'oz']; if(qty) units.push('serving');
+  const servTxt = qty ? ((h.serving.text ? h.serving.text + ' = ' : 'Serving ') + qty + ' ' + unit) : 'Adjust the amount to what you had';
+  openMealSheet({title:'Scanned product', name:h.name, source:'barcode',
+    notes: src + ' · ' + servTxt,
+    portion:{label:'Amount (' + unit + ')', amount: qty || (h.liquid ? 250 : 100), scalePerUnit:1/100, base:h.per100,
+      liquid:h.liquid, unit, units, servingQty:qty, servingLabel:servingWord(h.serving && h.serving.text)}});
+}
 async function onBarcode(code){
   if(bcBusy) return; bcBusy = true;
   stopBarcode(); closeSheets(); loading(true, 'Looking up product');
+  try{
+    const h = await fn({action:'barcode', code});
+    loading(false);
+    if(h && h.found) openBarcodeHit(h);
+    else toast('Product not found — try photo scan or manual entry');
+    bcBusy = false; return;
+  }catch(e){ /* server lookup unavailable: fall back to a direct Open Food Facts call below */ }
   try{
     const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}?fields=product_name,brands,nutriments,serving_quantity,serving_size,serving_quantity_unit,product_quantity_unit,quantity,categories_tags`);
     const d = await r.json();
@@ -1711,7 +1749,7 @@ async function onBarcode(code){
       openMealSheet({title:'Scanned product', name, source:'barcode',
         notes: p.serving_size ? ('Serving size: ' + p.serving_size + '. Adjust the amount to what you had.') : 'Adjust the amount to what you had.',
         portion:{label:'Amount (' + unit + ')', amount:defaultAmt, scalePerUnit:1/100, base:per100,
-          liquid, unit, units: liquid ? ['mL','oz'] : ['g','oz']}});
+          liquid, unit, units: liquid ? ['mL','oz'] : ['g','oz'], servingQty:Number(p.serving_quantity)||0}});
     } else if(!isNaN(perServ.calories)){
       Object.keys(perServ).forEach(k=>{ if(isNaN(perServ[k])) perServ[k]=0; });
       openMealSheet({title:'Scanned product', name, source:'barcode',

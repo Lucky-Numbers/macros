@@ -121,6 +121,17 @@ a{color:var(--brand);text-decoration:none}
     </div>
 
     <div class="card">
+      <div class="sect">Barcode data <span class="pill off" id="usdaPill">shared demo key</span></div>
+      <p class="note" style="margin:0 0 14px">Scans look up USDA FoodData Central label data first and fall back to Open Food Facts.
+      The shared demo key allows only a few dozen lookups an hour, so get a free key at
+      <a href="https://fdc.nal.usda.gov/api-key-signup" target="_blank" rel="noopener">fdc.nal.usda.gov/api-key-signup</a>
+      (name and email, arrives instantly) and paste it here.</p>
+      <label>USDA API key</label>
+      <input id="usdaKey" type="password" placeholder="paste key" autocomplete="off">
+      <button class="btn ghost" id="usdaSave">Save key</button>
+    </div>
+
+    <div class="card">
       <div class="sect">AI limit</div>
       <label>Requests per user per day</label>
       <input id="aiLimit" placeholder="40" inputmode="numeric" autocomplete="off">
@@ -204,6 +215,9 @@ async function loadDash(){
     if(st.table) $('atTable').value = st.table;
     if(st.url) $('atUrl').value = st.url;
     $('atToken').placeholder = st.token_set ? '•••••• saved — paste to replace' : 'pat… (needs data.records:write on the base)';
+    $('usdaKey').placeholder = st.usda_key_set ? '•••••• saved — paste to replace' : 'paste key';
+    const up=$('usdaPill'); up.textContent = st.usda_key_set ? 'your key' : 'shared demo key';
+    up.className = 'pill ' + (st.usda_key_set ? 'on' : 'off');
   }catch(e){}
 }
 
@@ -255,6 +269,15 @@ $('atBackfill').addEventListener('click', async ()=>{
     toast(r.ok ? ('Backfilled '+r.sent+' users') : ('Sent '+r.sent+', failed '+r.failed+': '+(r.error||'')));
   }catch(e){ toast(e.message); }
   $('atBackfill').disabled=false;
+});
+
+$('usdaSave').addEventListener('click', async ()=>{
+  const k=$('usdaKey').value.trim();
+  if(!k){ toast('Paste the key first'); return; }
+  $('usdaSave').disabled=true;
+  try{ await saveSetting('usda_api_key', k); $('usdaKey').value=''; toast('USDA key saved'); loadDash(); }
+  catch(e){ toast(e.message); }
+  $('usdaSave').disabled=false;
 });
 
 $('aiLimitSave').addEventListener('click', async ()=>{
