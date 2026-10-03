@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Lucky Numbers</title><!-- build 30 -->
+<title>Lucky Numbers</title><!-- build 31 -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -223,11 +223,15 @@ nav button.active{color:var(--brandlight)}
 #lightbox .lbx{position:absolute;top:calc(12px + env(safe-area-inset-top));right:14px;width:36px;height:36px;border-radius:99px;
   border:none;background:rgba(255,255,255,.14);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
 #lightbox .lbx .i{width:18px;height:18px}
-/* portrait lock: when a phone is turned sideways, counter-rotate the whole app so it stays put */
-html.lock-l body,html.lock-r body{position:fixed;top:0;left:0;width:100vh;height:100vw;overflow-y:auto;overflow-x:hidden;
-  transform-origin:top left;-webkit-overflow-scrolling:touch}
-html.lock-l body{transform:rotate(-90deg) translateX(-100%)}
-html.lock-r body{transform:rotate(90deg) translateY(-100%)}
+/* On a phone held sideways we ASK for portrait rather than rotating the UI. Counter-rotating
+   a focused input is what flipped the keyboard/app sideways while typing on iOS. */
+#rotate{position:fixed;inset:0;z-index:300;display:none;flex-direction:column;align-items:center;
+  justify-content:center;gap:16px;text-align:center;padding:40px;background:var(--bg);color:var(--ink)}
+#rotate svg{width:48px;height:48px;stroke:var(--brand);fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+#rotate h2{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:0}
+#rotate p{color:var(--muted);font-size:14px;max-width:270px;margin:0;line-height:1.5}
+@media (orientation:landscape) and (max-height:500px){ #rotate{display:flex} }
 /* first-run tutorial */
 #tutScreen{position:fixed;inset:0;z-index:85;display:none;flex-direction:column;
   background:radial-gradient(130% 55% at 50% 0%, #151b32 0%, #0c1020 52%, #080a13 100%)}
@@ -281,6 +285,14 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
 .goalrow .gmac{flex:1;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .goalrow .glabel{font-size:10px;font-weight:800;letter-spacing:.08em}
 .glabel.low{color:var(--low)} .glabel.moderate{color:var(--moderate)} .glabel.high{color:var(--high)} .glabel.custom{color:var(--ink2)}
+.plabel{font-size:14px;font-weight:700;color:var(--ink)}
+.psub{font-size:12px;color:var(--muted);margin-top:2px}
+.cycrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px}
+.switch{width:50px;height:30px;flex:none;border:none;border-radius:999px;background:var(--field);
+  position:relative;cursor:pointer;padding:0;transition:background .18s}
+.switch .knob{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;
+  background:#fff;transition:transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.switch.on{background:var(--brand)} .switch.on .knob{transform:translateX(20px)}
 
 /* ---------- plan / calendar ---------- */
 .statcard{background:var(--surface);border:1px solid var(--line);border-radius:20px;
@@ -576,6 +588,17 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
       <button class="btn ghost" id="signOutBtn" style="color:var(--serious)">Sign out</button>
       <div class="landlegal" style="margin-top:14px"><a href="terms.html">Terms</a> &nbsp;·&nbsp; <a href="privacy.html">Privacy</a></div>
     </div>
+    <h2 class="sect">Plan</h2>
+    <div class="settingcard" id="planCard" style="display:none">
+      <div class="plabel">Goal date</div>
+      <div class="psub" id="goalDateSub" style="margin-bottom:10px">&mdash;</div>
+      <div class="field"><input type="date" id="goalDateInput"></div>
+      <button class="btn ghost" id="goalDateSave">Update goal date</button>
+      <div class="cycrow">
+        <div style="min-width:0"><div class="plabel">Carb cycling</div><div class="psub" id="cycSub">&mdash;</div></div>
+        <button class="switch" id="cycToggle" role="switch" aria-checked="false" aria-label="Toggle carb cycling"><span class="knob"></span></button>
+      </div>
+    </div>
     <h2 class="sect">Weekly targets</h2>
     <p style="font-size:12.5px;color:var(--muted);margin:2px 2px 12px" id="goalsIntro"></p>
     <div id="goalList"></div>
@@ -623,6 +646,13 @@ html.lock-r body{transform:rotate(90deg) translateY(-100%)}
     <div class="keystatus" id="keyStatus"></div>
   </div>
   <button class="btn ghost" id="settingsClose">Close</button>
+</div>
+
+<!-- turn phone upright (phones in landscape) -->
+<div id="rotate">
+  <svg viewBox="0 0 24 24"><rect x="7.5" y="2" width="9" height="20" rx="2"></rect><line x1="10.5" y1="18.6" x2="13.5" y2="18.6"></line></svg>
+  <h2>Turn your phone upright</h2>
+  <p>Lucky Numbers is built for portrait. Rotate back to keep typing, scanning, and logging.</p>
 </div>
 
 <!-- meal sheet -->
@@ -1040,20 +1070,9 @@ $('overlay').addEventListener('click', closeSheets);
     s.addEventListener('touchend', end); s.addEventListener('touchcancel', end);
   });
 })();
-// portrait lock: phones stay upright even when the device is turned sideways
-function lockPortrait(){
-  const cls = document.documentElement.classList;
-  cls.remove('lock-l','lock-r');
-  const isPhone = Math.min(screen.width, screen.height) < 700;
-  if(!isPhone || window.innerWidth <= window.innerHeight) return;
-  let ang = (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle
-          : (typeof window.orientation === 'number' ? window.orientation : 0);
-  if(ang < 0) ang += 360;
-  cls.add(ang === 90 ? 'lock-l' : 'lock-r');
-}
-window.addEventListener('resize', lockPortrait);
-window.addEventListener('orientationchange', ()=>setTimeout(lockPortrait, 120));
-lockPortrait();
+// Installed PWAs lock to portrait via the manifest + this call. In a plain browser tab the
+// browser won't honor it, so the #rotate CSS overlay asks the user to turn back to portrait
+// instead of rotating the app (which broke text inputs on iOS).
 try{ if(screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(()=>{}); }catch(e){}
 // first-run tutorial
 const TUT_N = 4;
@@ -1778,7 +1797,124 @@ function renderGoals(){
     </div>`;
   }).join('');
   document.querySelectorAll('.goalrow').forEach(r=>r.addEventListener('click', ()=>openGoalSheet(Number(r.dataset.dow))));
+  renderPlanCard();
 }
+
+// ---------- plan card: goal date + carb cycling (Account page) ----------
+function goalDateInfo(){
+  const compete = phases.some(p=>p.id==='peak');
+  const last = phases.length ? phases.slice().sort((a,b)=>(a.sort||0)-(b.sort||0))[phases.length-1] : null;
+  const date = (profile && profile.event_date) || (last && last.end_date) || null;
+  return {date, compete, last};
+}
+function renderPlanCard(){
+  const card = $('planCard'); if(!card) return;
+  if(!phases.length){ card.style.display='none'; return; }
+  card.style.display='block';
+  const {date, compete} = goalDateInfo();
+  if(date){
+    const dleft = daysBetween(todayStr(), date);
+    $('goalDateInput').value = date;
+    $('goalDateSub').textContent = (compete?'Show day · ':'Target · ') + fmtDay(date) +
+      (dleft>=0 ? ' · ' + dleft + ' day' + (dleft===1?'':'s') + ' out' : ' · passed');
+  } else { $('goalDateInput').value=''; $('goalDateSub').textContent = 'No date set'; }
+  const ph = currentPhase();
+  const tog = $('cycToggle');
+  if(!ph){ tog.classList.remove('on'); tog.setAttribute('aria-checked','false');
+    tog.disabled=true; tog.style.opacity=.4; $('cycSub').textContent='No active phase right now'; return; }
+  tog.disabled=false; tog.style.opacity=1;
+  const on = isCyclingOn(ph.id);
+  tog.classList.toggle('on', on); tog.setAttribute('aria-checked', on?'true':'false');
+  $('cycSub').textContent = (on?'On':'Off') + ' · ' + ph.name + (on?' · carbs vary by day':' · same every day');
+}
+function phaseDays(pid){ const pm = phaseMacros[pid]||{}; return [0,1,2,3,4,5,6].map(d=>pm[d]).filter(Boolean); }
+function isCyclingOn(pid){
+  const ds = phaseDays(pid); if(ds.length<2) return false;
+  const c0 = ds[0].carbs||0; return ds.some(d=>Math.abs((d.carbs||0)-c0) > 2);
+}
+function avgDay(pid){
+  const ds = phaseDays(pid); const n = ds.length||1;
+  const s = ds.reduce((a,d)=>({c:a.c+(d.carbs||0),p:a.p+(d.protein||0),f:a.f+(d.fat||0)}),{c:0,p:0,f:0});
+  const carbs=Math.round(s.c/n), protein=Math.round(s.p/n), fat=Math.round(s.f/n);
+  return {carbs, protein, fat, calories:kcal(carbs,protein,fat)};
+}
+async function writePhaseWeek(pid, rows){
+  const body = rows.map(r=>({phase_id:pid, ...r}));
+  await rest('phase_macros?on_conflict=user_id,phase_id,day_of_week', {method:'POST',
+    headers:{'Prefer':'resolution=merge-duplicates'}, body});
+  phaseMacros[pid] = phaseMacros[pid] || {};
+  body.forEach(r=>{ phaseMacros[pid][r.day_of_week] = r; });
+}
+async function setCycling(pid, on){
+  const base = avgDay(pid);
+  let rows;
+  if(!on){
+    rows = [0,1,2,3,4,5,6].map(d=>({day_of_week:d, label:'moderate', ...base}));
+  } else {
+    // 2 high / 3 moderate / 2 low keeps the weekly carb total the same; protein and fat hold steady.
+    const delta = Math.max(10, Math.round(base.carbs*0.30/5)*5);
+    const mk = c => ({carbs:c, protein:base.protein, fat:base.fat, calories:kcal(c,base.protein,base.fat)});
+    const high = mk(base.carbs+delta), low = mk(Math.max(40, base.carbs-delta)), mod = mk(base.carbs);
+    const plan = {1:['high',high],4:['high',high],0:['low',low],6:['low',low],
+                  2:['moderate',mod],3:['moderate',mod],5:['moderate',mod]};
+    rows = [0,1,2,3,4,5,6].map(d=>({day_of_week:d, label:plan[d][0], ...plan[d][1]}));
+  }
+  await writePhaseWeek(pid, rows);
+}
+$('cycToggle').addEventListener('click', async ()=>{
+  const ph = currentPhase(); if(!ph) return;
+  const turnOn = !isCyclingOn(ph.id);
+  if(!turnOn && !confirm('Turn off carb cycling? Every day in ' + ph.name + ' will use the same macros (your current weekly average).')) return;
+  $('cycToggle').disabled = true;
+  try{
+    await setCycling(ph.id, turnOn);
+    renderGoals(); renderHero(); renderRings(); renderChecklist();
+    dashDirty = true; planDirty = true;
+    toast(turnOn ? 'Carb cycling on — fine-tune any day below' : 'Carb cycling off — every day set to the average');
+  }catch(e){ toast(e.message); }
+  $('cycToggle').disabled = false;
+  renderPlanCard();
+});
+$('goalDateSave').addEventListener('click', async ()=>{
+  const nd = $('goalDateInput').value;
+  if(!nd){ toast('Pick a date'); return; }
+  const today = todayStr();
+  if(nd <= today){ toast('Pick a future date'); return; }
+  const {date:od, compete, last} = goalDateInfo();
+  $('goalDateSave').disabled = true;
+  try{
+    const peak = phases.find(p=>p.id==='peak');
+    if(peak){
+      const peakStart = addDays(nd,-6);
+      const prep = phases.filter(p=>p.id!=='peak').sort((a,b)=>(a.sort||0)-(b.sort||0)).pop();
+      if(prep && peakStart <= prep.start_date){ toast('That date is too soon for your prep timeline'); $('goalDateSave').disabled=false; return; }
+      if(prep){ await rest('phases?id=eq.'+encodeURIComponent(prep.id), {method:'PATCH',
+        headers:{'Prefer':'return=minimal'}, body:{end_date:addDays(peakStart,-1)}}); prep.end_date=addDays(peakStart,-1); }
+      await rest('phases?id=eq.peak', {method:'PATCH', headers:{'Prefer':'return=minimal'},
+        body:{start_date:peakStart, end_date:nd}}); peak.start_date=peakStart; peak.end_date=nd;
+    } else if(last){
+      if(nd <= last.start_date){ toast('That date is before this plan starts'); $('goalDateSave').disabled=false; return; }
+      await rest('phases?id=eq.'+encodeURIComponent(last.id), {method:'PATCH',
+        headers:{'Prefer':'return=minimal'}, body:{end_date:nd}}); last.end_date=nd;
+    }
+    await rest('profiles?id=eq.'+session.user.id, {method:'PATCH',
+      headers:{'Prefer':'return=minimal'}, body:{event_date:nd}}); profile.event_date = nd;
+    // competitors: slide the milestone timeline with the show so each stays the same lead time out
+    if(compete && od && od!==nd){
+      const delta = daysBetween(od, nd);
+      try{
+        const ms = await rest('milestones?select=id,due') || [];
+        for(const m of ms){ const ndue = addDays(m.due, delta);
+          await rest('milestones?id=eq.'+encodeURIComponent(m.id), {method:'PATCH',
+            headers:{'Prefer':'return=minimal'}, body:{due:ndue}}).catch(()=>{}); }
+        if(milestones && milestones.length) milestones.forEach(m=>{ m.due = addDays(m.due, delta); });
+      }catch(e){}
+    }
+    renderPlanCard(); renderHero(); dashDirty=true; planDirty=true;
+    toast('Goal date updated');
+  }catch(e){ toast(e.message); }
+  $('goalDateSave').disabled = false;
+});
 let goalDow = null;
 function openGoalSheet(dow){
   goalDow = dow;
